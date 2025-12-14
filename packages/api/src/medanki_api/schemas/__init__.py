@@ -1,5 +1,7 @@
 """API request and response schemas."""
 
+from __future__ import annotations
+
 from medanki_api.schemas.requests import (
     CardTypeOption,
     ExamType,
@@ -15,10 +17,18 @@ from medanki_api.schemas.responses import (
     MultiUploadResponse,
     UploadResponse,
 )
+from medanki_api.schemas.websocket import (
+    CompleteMessage,
+    ErrorMessage,
+    ProgressMessage,
+    WebSocketMessage,
+)
 
 __all__ = [
     "CardTypeOption",
     "CancelJobResponse",
+    "CompleteMessage",
+    "ErrorMessage",
     "ErrorResponse",
     "ExamType",
     "JobListParams",
@@ -26,6 +36,8 @@ __all__ = [
     "JobResponse",
     "JobStatus",
     "MultiUploadResponse",
+    "ProgressMessage",
     "UploadRequest",
     "UploadResponse",
+    "WebSocketMessage",
 ]

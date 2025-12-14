@@ -1741,6 +1741,7 @@ dependencies = [
     { name = "aiofiles" },
     { name = "aiosqlite" },
     { name = "anthropic" },
+    { name = "fastapi" },
     { name = "genanki" },
     { name = "instructor" },
     { name = "numpy" },
@@ -1753,11 +1754,16 @@ dependencies = [
     { name = "tenacity" },
     { name = "tiktoken" },
     { name = "typer" },
+    { name = "uvicorn" },
+    { name = "websockets" },
 ]
 
 [package.optional-dependencies]
 dev = [
+    { name = "httpx" },
     { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-vcr" },
     { name = "respx" },
     { name = "ruff" },
@@ -1768,14 +1774,18 @@ requires-dist = [
     { name = "aiofiles", specifier = ">=25.1.0" },
     { name = "aiosqlite", specifier = ">=0.19.0" },
     { name = "anthropic", specifier = ">=0.40.0" },
+    { name = "fastapi", specifier = ">=0.109.0" },
     { name = "genanki", specifier = ">=0.13.0" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.26.0" },
     { name = "instructor", specifier = ">=1.4.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "pytest", specifier = ">=8.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.23.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
     { name = "pytest-vcr", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "respx", marker = "extra == 'dev'", specifier = ">=0.21.0" },
     { name = "rich", specifier = ">=13.0.0" },
@@ -1784,6 +1794,8 @@ requires-dist = [
     { name = "tenacity", specifier = ">=8.2.0" },
     { name = "tiktoken", specifier = ">=0.5.0" },
     { name = "typer", specifier = ">=0.9.0" },
+    { name = "uvicorn", specifier = ">=0.27.0" },
+    { name = "websockets", specifier = ">=12.0" },
 ]
 provides-extras = ["dev"]
 
