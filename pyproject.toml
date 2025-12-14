@@ -11,11 +11,13 @@ dependencies = [
     "aiofiles>=25.1.0",
     "aiosqlite>=0.19.0",
     "anthropic>=0.40.0",
+    "datasets>=3.0.0",
     "fastapi>=0.109.0",
     "genanki>=0.13.0",
     "httpx>=0.26.0",
     "instructor>=1.4.0",
     "numpy>=1.26.0",
+    "pyarrow>=18.0.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.0.0",
     "python-multipart>=0.0.6",
@@ -83,7 +85,7 @@ ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src"]
+pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src", "."]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
