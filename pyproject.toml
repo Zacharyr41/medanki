@@ -17,5 +17,5 @@ dependencies = [
 where = ["packages/core/src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["packages/core/src", "packages/cli/src"]
+pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src"]
 asyncio_mode = "auto"
