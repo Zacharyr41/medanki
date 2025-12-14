@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-
-
-
 from medanki.processing.classifier import ClassificationService, TopicMatch
 
 

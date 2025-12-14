@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
 
 import pytest
 
@@ -409,7 +408,7 @@ class TestKeywordOperations:
 
     def test_insert_keyword_with_weight(self, repo):
         """Creates keyword with weight."""
-        kw_id = asyncio.run(repo.insert_keyword({
+        asyncio.run(repo.insert_keyword({
             "node_id": "FC1",
             "keyword": "ATP",
             "keyword_type": "abbreviation",
