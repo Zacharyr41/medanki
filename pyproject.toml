@@ -17,8 +17,10 @@ dependencies = [
     "numpy>=1.26.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
+    "pymupdf4llm>=0.2.7",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "reportlab>=4.4.6",
     "rich>=13.0.0",
     "sentence-transformers>=3.0.0",
     "tenacity>=8.2.0",
@@ -47,6 +49,9 @@ medanki = { workspace = true }
 medanki-cli = { workspace = true }
 medanki-api = { workspace = true }
 
+[tool.setuptools.packages.find]
+where = ["packages/core/src"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -74,6 +79,7 @@ disallow_untyped_defs = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
+pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]

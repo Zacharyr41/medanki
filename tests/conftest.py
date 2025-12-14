@@ -9,7 +9,8 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from uuid import uuid4
 
 import numpy as np
 import pytest
@@ -124,6 +125,16 @@ class VignetteCard:
     tags: list[str] = field(default_factory=list)
 
 
+@dataclass
+class MedicalChunk:
+    id: str
+    content: str
+    embedding: list[float]
+    document_id: str
+    exam_type: str | None = None
+    metadata: dict | None = None
+
+
 @pytest.fixture
 def sample_pdf_path() -> Path:
     return TEST_DATA_DIR / "sample_lecture.pdf"
@@ -195,6 +206,18 @@ def sample_chunk_text() -> str:
 def mock_llm_client() -> AsyncMock:
     client = AsyncMock()
     client.generate.return_value = "Generated response"
+    return client
+
+
+@pytest.fixture
+def mock_weaviate_client():
+    client = MagicMock()
+    client.is_ready.return_value = True
+    client.collections.exists.return_value = True
+
+    collection = MagicMock()
+    client.collections.get.return_value = collection
+
     return client
 
 
@@ -639,6 +662,18 @@ def sample_cardiology_chunk() -> Chunk:
 
 
 @pytest.fixture
+def sample_medical_chunk():
+    return MedicalChunk(
+        id=str(uuid4()),
+        content="Congestive heart failure (CHF) is a chronic condition where the heart cannot pump blood effectively.",
+        embedding=[0.1] * 384,
+        document_id="doc_001",
+        exam_type="USMLE",
+        metadata={"page": 1, "source": "cardiology_textbook.pdf"}
+    )
+
+
+@pytest.fixture
 def sample_biochemistry_chunk() -> Chunk:
     return Chunk(
         id="chunk_biochem_001",
@@ -695,3 +730,49 @@ def sample_dvt_chunk() -> Chunk:
         page_number=1,
         section_path=["Hematology", "Coagulation"]
     )
+
+
+@pytest.fixture
+def sample_chunks_with_embeddings():
+    return [
+        MedicalChunk(
+            id=str(uuid4()),
+            content="Congestive heart failure (CHF) is a chronic condition where the heart cannot pump blood effectively.",
+            embedding=[0.1] * 384,
+            document_id="doc_001",
+            exam_type="USMLE",
+            metadata={"page": 1}
+        ),
+        MedicalChunk(
+            id=str(uuid4()),
+            content="Treatment of CHF includes ACE inhibitors, beta blockers, and diuretics.",
+            embedding=[0.2] * 384,
+            document_id="doc_001",
+            exam_type="USMLE",
+            metadata={"page": 2}
+        ),
+        MedicalChunk(
+            id=str(uuid4()),
+            content="Diabetes mellitus type 2 is characterized by insulin resistance and relative insulin deficiency.",
+            embedding=[0.3] * 384,
+            document_id="doc_002",
+            exam_type="COMLEX",
+            metadata={"page": 1}
+        ),
+        MedicalChunk(
+            id=str(uuid4()),
+            content="Hypertension is defined as systolic BP >= 130 mmHg or diastolic BP >= 80 mmHg.",
+            embedding=[0.4] * 384,
+            document_id="doc_003",
+            exam_type="USMLE",
+            metadata={"page": 1}
+        ),
+        MedicalChunk(
+            id=str(uuid4()),
+            content="Acute myocardial infarction presents with chest pain, diaphoresis, and ECG changes.",
+            embedding=[0.5] * 384,
+            document_id="doc_001",
+            exam_type="USMLE",
+            metadata={"page": 5}
+        ),
+    ]
