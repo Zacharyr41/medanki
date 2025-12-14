@@ -83,7 +83,7 @@ ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src"]
+pythonpath = ["packages/core/src", "packages/cli/src", "packages/api/src", "."]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
