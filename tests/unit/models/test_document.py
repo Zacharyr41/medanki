@@ -1,0 +1,152 @@
+"""Tests for Document and related models."""
+
+import pytest
+from datetime import datetime
+
+from tests.conftest import (
+    ContentType,
+    Document,
+    MedicalEntity,
+    Section,
+)
+
+
+class TestDocument:
+    def test_document_creation_with_required_fields(self):
+        doc = Document(
+            id="doc_001",
+            source_path="/path/to/file.pdf",
+            content_type=ContentType.PDF_TEXTBOOK,
+            raw_text="Medical content here"
+        )
+        assert doc.id == "doc_001"
+        assert doc.source_path == "/path/to/file.pdf"
+        assert doc.content_type == ContentType.PDF_TEXTBOOK
+        assert doc.raw_text == "Medical content here"
+
+    def test_document_default_sections(self):
+        doc = Document(
+            id="doc_001",
+            source_path="/path/to/file.pdf",
+            content_type=ContentType.PDF_TEXTBOOK,
+            raw_text="Content"
+        )
+        assert doc.sections == []
+
+    def test_document_default_metadata(self):
+        doc = Document(
+            id="doc_001",
+            source_path="/path/to/file.pdf",
+            content_type=ContentType.PDF_TEXTBOOK,
+            raw_text="Content"
+        )
+        assert doc.metadata == {}
+
+    def test_document_extracted_at_default(self):
+        before = datetime.utcnow()
+        doc = Document(
+            id="doc_001",
+            source_path="/path/to/file.pdf",
+            content_type=ContentType.PDF_TEXTBOOK,
+            raw_text="Content"
+        )
+        after = datetime.utcnow()
+        assert before <= doc.extracted_at <= after
+
+    def test_document_with_sections(self, sample_document):
+        assert len(sample_document.sections) == 1
+        assert sample_document.sections[0].title == "Introduction"
+
+    def test_document_with_metadata(self, sample_document):
+        assert sample_document.metadata.get("page_count") == 10
+
+
+class TestSection:
+    def test_section_creation(self):
+        section = Section(
+            title="Chapter 1: Introduction",
+            level=1,
+            start_char=0,
+            end_char=500
+        )
+        assert section.title == "Chapter 1: Introduction"
+        assert section.level == 1
+        assert section.start_char == 0
+        assert section.end_char == 500
+        assert section.page_number is None
+
+    def test_section_with_page_number(self):
+        section = Section(
+            title="Subsection",
+            level=2,
+            start_char=100,
+            end_char=200,
+            page_number=5
+        )
+        assert section.page_number == 5
+
+    def test_section_levels(self):
+        chapter = Section(title="Chapter", level=1, start_char=0, end_char=100)
+        section = Section(title="Section", level=2, start_char=0, end_char=50)
+        subsection = Section(title="Subsection", level=3, start_char=0, end_char=25)
+        assert chapter.level == 1
+        assert section.level == 2
+        assert subsection.level == 3
+
+
+class TestMedicalEntity:
+    def test_medical_entity_creation(self):
+        entity = MedicalEntity(
+            text="congestive heart failure",
+            label="DISEASE",
+            start=10,
+            end=34
+        )
+        assert entity.text == "congestive heart failure"
+        assert entity.label == "DISEASE"
+        assert entity.start == 10
+        assert entity.end == 34
+
+    def test_medical_entity_with_umls_cui(self):
+        entity = MedicalEntity(
+            text="metformin",
+            label="DRUG",
+            start=0,
+            end=9,
+            cui="C0025598"
+        )
+        assert entity.cui == "C0025598"
+
+    def test_medical_entity_default_cui(self):
+        entity = MedicalEntity(
+            text="hypertension",
+            label="DISEASE",
+            start=0,
+            end=12
+        )
+        assert entity.cui is None
+
+    def test_medical_entity_default_confidence(self):
+        entity = MedicalEntity(
+            text="aspirin",
+            label="DRUG",
+            start=0,
+            end=7
+        )
+        assert entity.confidence == 1.0
+
+    def test_medical_entity_custom_confidence(self):
+        entity = MedicalEntity(
+            text="possible cardiomyopathy",
+            label="DISEASE",
+            start=0,
+            end=23,
+            confidence=0.75
+        )
+        assert entity.confidence == 0.75
+
+    def test_valid_entity_labels(self):
+        valid_labels = ["DISEASE", "DRUG", "ANATOMY", "PROCEDURE", "GENE", "SYMPTOM"]
+        for label in valid_labels:
+            entity = MedicalEntity(text="test", label=label, start=0, end=4)
+            assert entity.label == label

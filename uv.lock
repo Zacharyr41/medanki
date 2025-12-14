@@ -1726,6 +1726,16 @@ requires-dist = [
 name = "medanki-workspace"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pytest", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", specifier = ">=0.23.0" },
+]
 
 [[package]]
 name = "more-itertools"
