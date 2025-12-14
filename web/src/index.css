@@ -1,3 +1,160 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.upload-page {
+  @apply max-w-2xl mx-auto space-y-6;
+}
+
+.upload-page h1 {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.file-upload {
+  @apply w-full;
+}
+
+.dropzone {
+  @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer transition-colors;
+}
+
+.dropzone:hover {
+  @apply border-gray-400 bg-gray-50;
+}
+
+.dropzone.drag-active {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.dropzone.has-file {
+  @apply border-green-500 bg-green-50;
+}
+
+.dropzone-content {
+  @apply text-gray-600;
+}
+
+.dropzone-content p:first-child {
+  @apply text-lg font-medium;
+}
+
+.supported-formats {
+  @apply text-sm text-gray-500 mt-2;
+}
+
+.file-preview {
+  @apply flex items-center justify-between;
+}
+
+.file-info {
+  @apply flex flex-col;
+}
+
+.file-name {
+  @apply font-medium text-gray-900;
+}
+
+.file-size {
+  @apply text-sm text-gray-500;
+}
+
+.remove-button {
+  @apply px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-100 rounded;
+}
+
+.error-message {
+  @apply mt-2 text-sm text-red-600;
+}
+
+.options-panel {
+  @apply bg-gray-50 rounded-lg p-4 space-y-4;
+}
+
+.option-group {
+  @apply flex flex-col gap-2;
+}
+
+.option-group label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.option-group select,
+.option-group input[type="number"] {
+  @apply px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.option-label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.checkbox-group {
+  @apply flex gap-4;
+}
+
+.checkbox-group label {
+  @apply flex items-center gap-2 text-sm text-gray-600 cursor-pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.error-banner {
+  @apply flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg;
+}
+
+.error-banner p {
+  @apply text-red-700;
+}
+
+.error-banner button {
+  @apply text-red-500 hover:text-red-700;
+}
+
+.button {
+  @apply w-full px-4 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2;
+}
+
+.button-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.button-primary:disabled {
+  @apply bg-gray-300 cursor-not-allowed;
+}
+
+.button-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.button-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+.button.loading {
+  @apply relative;
+}
+
+.button-text-hidden {
+  @apply invisible;
+}
+
+.spinner {
+  @apply absolute w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin;
+}
+
+.dismiss-button {
+  @apply text-xl font-bold text-red-400 hover:text-red-600 ml-4;
+}
