@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for API image
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+
+      - name: Extract metadata for Web image
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.web
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Cloud Run (API)
+        uses: google-github-actions/deploy-cloudrun@v2
+        if: ${{ vars.DEPLOY_PLATFORM == 'cloudrun' }}
+        with:
+          service: medanki-api
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ github.ref_name }}
+          region: ${{ vars.GCP_REGION }}
+
+      - name: Deploy to Cloud Run (Web)
+        uses: google-github-actions/deploy-cloudrun@v2
+        if: ${{ vars.DEPLOY_PLATFORM == 'cloudrun' }}
+        with:
+          service: medanki-web
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ github.ref_name }}
+          region: ${{ vars.GCP_REGION }}
