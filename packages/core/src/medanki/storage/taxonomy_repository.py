@@ -236,7 +236,7 @@ class TaxonomyRepository:
         await conn.commit()
         cursor = await conn.execute("SELECT COUNT(*) FROM taxonomy_edges")
         row = await cursor.fetchone()
-        return row[0]
+        return row[0] if row else 0
 
     async def get_ancestors(self, node_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
@@ -291,7 +291,7 @@ class TaxonomyRepository:
             ),
         )
         await conn.commit()
-        return cursor.lastrowid
+        return cursor.lastrowid or 0
 
     async def get_keywords_for_node(self, node_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
@@ -346,7 +346,7 @@ class TaxonomyRepository:
             ),
         )
         await conn.commit()
-        return cursor.lastrowid
+        return cursor.lastrowid or 0
 
     async def get_cross_classifications(self, node_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
@@ -411,7 +411,7 @@ class TaxonomyRepository:
             ),
         )
         await conn.commit()
-        return cursor.lastrowid
+        return cursor.lastrowid or 0
 
     async def get_resources_for_node(self, node_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
