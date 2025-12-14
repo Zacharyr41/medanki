@@ -1,0 +1,17 @@
+[project]
+name = "medanki-core"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pymupdf4llm>=0.2.7",
+    "pytest>=9.0.2",
+    "reportlab>=4.4.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["packages/core/src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["packages/core/src"]
