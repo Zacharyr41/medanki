@@ -1,4 +1,4 @@
-.PHONY: install install-dev sync test test-unit test-integration lint format typecheck clean dev dev-api dev-web docker-up docker-down docker-build docker-push docker-run-prod setup-hooks help
+.PHONY: install install-dev sync test test-unit test-integration lint format typecheck clean dev dev-api dev-web docker-up docker-down docker-build docker-push docker-run-prod setup-hooks help taxonomy-build taxonomy-enrich taxonomy-stats
 
 # Installation
 install:
@@ -93,6 +93,19 @@ setup-hooks:
 setup-scispacy:
 	uv run pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_lg-0.5.4.tar.gz
 
+# Taxonomy Database
+taxonomy-build:
+	uv run python scripts/build_taxonomy_db.py build
+
+taxonomy-enrich: taxonomy-build
+	uv run python scripts/build_taxonomy_db.py enrich
+
+taxonomy-stats:
+	uv run python scripts/build_taxonomy_db.py stats
+
+taxonomy-clean:
+	rm -f data/taxonomy.db
+
 # Help
 help:
 	@echo "Available targets:"
@@ -112,4 +125,7 @@ help:
 	@echo "  docker-build   - Build all Docker images"
 	@echo "  docker-push    - Push images to registry"
 	@echo "  docker-run-prod - Run production compose"
+	@echo "  taxonomy-build - Build taxonomy database"
+	@echo "  taxonomy-enrich - Enrich with additional sources"
+	@echo "  taxonomy-stats - Show database statistics"
 	@echo "  clean          - Clean build artifacts"
