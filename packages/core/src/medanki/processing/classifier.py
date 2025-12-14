@@ -1,3 +1,5 @@
+"""Classification service for categorizing chunks into medical topics."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

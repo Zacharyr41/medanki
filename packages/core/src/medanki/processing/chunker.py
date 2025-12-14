@@ -1,3 +1,5 @@
+"""Chunking service for splitting documents into manageable chunks."""
+
 from __future__ import annotations
 
 import re

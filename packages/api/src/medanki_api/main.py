@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from medanki_api.routes import jobs_router, upload_router
+from medanki_api.routes.download import router as download_router
+from medanki_api.routes.preview import router as preview_router
 from medanki_api.schemas.responses import ErrorResponse
 
 
@@ -25,10 +27,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     Yields:
         None during the application's active lifetime.
     """
-    # Startup: Initialize job storage
     app.state.job_storage = {}
     yield
-    # Shutdown: Clean up resources
     app.state.job_storage.clear()
 
 
@@ -39,31 +39,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(upload_router)
 app.include_router(jobs_router)
+app.include_router(preview_router, prefix="/api", tags=["preview"])
+app.include_router(download_router, prefix="/api", tags=["download"])
 
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle uncaught exceptions globally.
-
-    Args:
-        request: The FastAPI request object.
-        exc: The exception that was raised.
-
-    Returns:
-        A JSON error response.
-    """
+    """Handle uncaught exceptions globally."""
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=ErrorResponse(
@@ -75,19 +67,11 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 @app.get("/health", tags=["health"])
 async def health_check() -> dict[str, str]:
-    """Check API health status.
-
-    Returns:
-        A dictionary with the health status.
-    """
+    """Check API health status."""
     return {"status": "healthy"}
 
 
 @app.get("/api/health", tags=["health"])
 async def api_health_check() -> dict[str, str]:
-    """Check API health status (with /api prefix).
-
-    Returns:
-        A dictionary with the health status.
-    """
+    """Check API health status (with /api prefix)."""
     return {"status": "healthy"}

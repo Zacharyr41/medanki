@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from uuid import uuid4
 
@@ -345,6 +345,7 @@ def sample_infectious_disease_vignette() -> dict:
 
 @pytest.fixture
 def sample_long_document() -> Document:
+    """A document with 2000+ tokens for chunking tests."""
     long_text = """
 # Cardiovascular System Overview
 
@@ -458,6 +459,7 @@ reduce morbidity and mortality associated with these diseases.
 
 @pytest.fixture
 def empty_document() -> Document:
+    """An empty document for edge case testing."""
     return Document(
         id="doc_empty",
         source_path="/data/empty.pdf",
@@ -470,6 +472,7 @@ def empty_document() -> Document:
 
 @pytest.fixture
 def document_with_sections() -> Document:
+    """A document with clear section boundaries."""
     text = """# Introduction
 
 This is the introduction section with some basic content about the topic.
@@ -519,6 +522,7 @@ Final conclusions and recommendations are presented here.
 
 @pytest.fixture
 def medical_text_with_lab_values() -> Document:
+    """Document containing lab values that should not be split."""
     text = """
 Patient presents with the following lab results:
 
@@ -555,6 +559,7 @@ at 3.5 mg/dL. Liver function tests show AST at 25 U/L and ALT at 30 U/L.
 
 @pytest.fixture
 def medical_text_with_drugs() -> Document:
+    """Document containing drug doses that should not be split."""
     text = """
 Current Medications:
 
@@ -588,6 +593,7 @@ tolerated labetalol 100mg well but switched to metoprolol for convenience.
 
 @pytest.fixture
 def medical_text_with_anatomy() -> Document:
+    """Document containing anatomical terms that should not be split."""
     text = """
 Cardiac Catheterization Report:
 
@@ -621,6 +627,7 @@ no residual stenosis.
 
 @pytest.fixture
 def mock_taxonomy_service() -> MagicMock:
+    """Mock taxonomy service for classification tests."""
     service = MagicMock()
     service.get_taxonomy.return_value = {
         "exam_type": "mcat",
@@ -638,6 +645,7 @@ def mock_taxonomy_service() -> MagicMock:
 
 @pytest.fixture
 def mock_vector_store() -> MagicMock:
+    """Mock vector store for classification tests."""
     store = MagicMock()
     store.hybrid_search.return_value = [
         {"topic_id": "cardio_001", "score": 0.88},
@@ -648,6 +656,7 @@ def mock_vector_store() -> MagicMock:
 
 @pytest.fixture
 def sample_cardiology_chunk() -> Chunk:
+    """Sample chunk with cardiology content."""
     return Chunk(
         id="chunk_cardio_001",
         document_id="doc_001",
@@ -675,6 +684,7 @@ def sample_medical_chunk():
 
 @pytest.fixture
 def sample_biochemistry_chunk() -> Chunk:
+    """Sample chunk with biochemistry content."""
     return Chunk(
         id="chunk_biochem_001",
         document_id="doc_002",
@@ -690,6 +700,7 @@ def sample_biochemistry_chunk() -> Chunk:
 
 @pytest.fixture
 def empty_chunk() -> Chunk:
+    """Empty chunk for edge case testing."""
     return Chunk(
         id="chunk_empty",
         document_id="doc_empty",
@@ -704,6 +715,7 @@ def empty_chunk() -> Chunk:
 
 @pytest.fixture
 def sample_chf_chunk() -> Chunk:
+    """Sample chunk with CHF abbreviation."""
     return Chunk(
         id="chunk_chf_001",
         document_id="doc_003",
@@ -719,6 +731,7 @@ def sample_chf_chunk() -> Chunk:
 
 @pytest.fixture
 def sample_dvt_chunk() -> Chunk:
+    """Sample chunk with DVT abbreviation."""
     return Chunk(
         id="chunk_dvt_001",
         document_id="doc_004",

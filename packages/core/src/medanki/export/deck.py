@@ -1,5 +1,5 @@
 import hashlib
-from typing import List
+from typing import List, Union
 
 import genanki
 
