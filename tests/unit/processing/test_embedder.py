@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from medanki.processing.embedder import EmbeddingService
 
 
@@ -78,3 +79,16 @@ class TestCaching:
         keys = list(mock_cache["data"].keys())
         assert len(keys) == 1
         assert len(keys[0]) == 64  # SHA-256 hex digest
+
+
+class TestLongTextHandling:
+    """Tests for handling long text input."""
+
+    @pytest.mark.asyncio
+    async def test_embed_handles_long_text(self, mock_embedder: EmbeddingService) -> None:
+        """Long texts are handled (truncated or chunked internally)."""
+        long_text = " ".join(["medical term"] * 1000)
+        result = await mock_embedder.embed(long_text)
+
+        assert len(result) == 768
+        assert any(v != 0 for v in result)

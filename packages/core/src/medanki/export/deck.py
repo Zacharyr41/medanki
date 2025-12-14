@@ -1,5 +1,4 @@
 import hashlib
-from typing import List, Union
 
 import genanki
 
@@ -10,12 +9,12 @@ class DeckBuilder:
     def __init__(self, name: str):
         self.name = name
         self.deck_id = self._generate_deck_id(name)
-        self._notes: List[genanki.Note] = []
+        self._notes: list[genanki.Note] = []
         self._cloze_model = get_cloze_model()
         self._vignette_model = get_vignette_model()
 
     @classmethod
-    def from_hierarchy(cls, parts: List[str]) -> "DeckBuilder":
+    def from_hierarchy(cls, parts: list[str]) -> "DeckBuilder":
         name = "::".join(parts)
         return cls(name)
 

@@ -1,6 +1,3 @@
-import os
-import tempfile
-from typing import List, Optional
 
 import genanki
 
@@ -10,7 +7,7 @@ class APKGExporter:
         self,
         deck: genanki.Deck,
         output_path: str,
-        media_files: Optional[List[str]] = None,
+        media_files: list[str] | None = None,
     ) -> None:
         package = genanki.Package(deck)
         if media_files:
@@ -19,9 +16,9 @@ class APKGExporter:
 
     def export_multiple(
         self,
-        decks: List[genanki.Deck],
+        decks: list[genanki.Deck],
         output_path: str,
-        media_files: Optional[List[str]] = None,
+        media_files: list[str] | None = None,
     ) -> None:
         package = genanki.Package(decks)
         if media_files:

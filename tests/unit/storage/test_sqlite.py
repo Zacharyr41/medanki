@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
 
 import asyncio
-import hashlib
-import tempfile
-from pathlib import Path
 
 import pytest
 
+from medanki.storage.models import JobStatus
 from medanki.storage.sqlite import SQLiteStore
-from medanki.storage.models import JobStatus, Job
 
 
 class TestSchemaCreation:

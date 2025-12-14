@@ -1,13 +1,13 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import Mock, MagicMock, AsyncMock
-from dataclasses import dataclass
 
 from medanki.generation.deduplicator import (
-    Deduplicator,
     DeduplicationResult,
+    Deduplicator,
     DuplicateStatus,
 )
-from medanki.generation.validator import ClozeCard, VignetteCard
+from medanki.generation.validator import ClozeCard
 
 
 class TestExactDuplicateDetection:

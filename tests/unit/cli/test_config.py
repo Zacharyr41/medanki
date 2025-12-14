@@ -1,10 +1,9 @@
-import pytest
-from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
 from pathlib import Path
+from unittest.mock import patch
+
+from typer.testing import CliRunner
 
 from medanki_cli.main import app
-
 
 runner = CliRunner()
 

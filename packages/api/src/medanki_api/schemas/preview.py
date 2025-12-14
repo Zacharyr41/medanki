@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-
 from pydantic import BaseModel
 
 
@@ -9,18 +7,18 @@ class CardPreview(BaseModel):
     id: str
     type: str
     text: str
-    tags: List[str]
-    topics: List[str]
+    tags: list[str]
+    topics: list[str]
     status: str
-    source: Optional[str] = None
-    front: Optional[str] = None
-    answer: Optional[str] = None
-    explanation: Optional[str] = None
-    distinguishing_feature: Optional[str] = None
+    source: str | None = None
+    front: str | None = None
+    answer: str | None = None
+    explanation: str | None = None
+    distinguishing_feature: str | None = None
 
 
 class PreviewResponse(BaseModel):
-    cards: List[CardPreview]
+    cards: list[CardPreview]
     total: int
     limit: int
     offset: int
@@ -41,14 +39,14 @@ class TimingInfo(BaseModel):
 
 class StatsResponse(BaseModel):
     counts: CardCounts
-    topics: Dict[str, int]
+    topics: dict[str, int]
     timing: TimingInfo
 
 
 class RegenerateRequest(BaseModel):
-    deck_name: Optional[str] = None
-    include_tags: Optional[List[str]] = None
-    exclude_tags: Optional[List[str]] = None
+    deck_name: str | None = None
+    include_tags: list[str] | None = None
+    exclude_tags: list[str] | None = None
 
 
 class RegenerateResponse(BaseModel):

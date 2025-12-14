@@ -4,8 +4,8 @@ from medanki.generation.cloze import (
     GeneratedClozeCard,
 )
 from medanki.generation.deduplicator import (
-    Deduplicator,
     DeduplicationResult,
+    Deduplicator,
     DuplicateHandleResult,
     DuplicateStatus,
 )

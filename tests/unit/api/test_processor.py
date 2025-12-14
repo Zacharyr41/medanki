@@ -1,8 +1,9 @@
-import pytest
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
-from uuid import uuid4
 import tempfile
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
+
+import pytest
 
 from medanki_api.workers.processor import BackgroundProcessor
 from medanki_api.workers.queue import JobQueue

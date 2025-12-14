@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Protocol, Any
+from typing import Any, Protocol
 
 
 class ValidationStatus(Enum):

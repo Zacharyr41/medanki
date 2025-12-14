@@ -1,6 +1,5 @@
 """Tests for Anki deck building."""
 
-import pytest
 import genanki
 
 from packages.core.src.medanki.export.deck import DeckBuilder

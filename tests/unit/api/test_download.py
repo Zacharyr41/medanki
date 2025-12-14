@@ -3,21 +3,18 @@
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/api/src")
 sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
 
-import asyncio
 import json
-import tempfile
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from medanki_api.routes.download import router as download_router
-from medanki_api.schemas.preview import StatsResponse
 
 
 @pytest.fixture

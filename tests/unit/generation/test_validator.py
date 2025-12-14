@@ -1,13 +1,16 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import Mock, MagicMock, AsyncMock
-from dataclasses import dataclass
 
 from medanki.generation.validator import (
     CardValidator,
-    ValidationResult,
     ValidationStatus,
-    ClozeCard,
-    VignetteCard,
+)
+from medanki.generation.validator import (
+    ClozeCardInput as ClozeCard,
+)
+from medanki.generation.validator import (
+    VignetteCardInput as VignetteCard,
 )
 
 
@@ -59,6 +62,27 @@ class TestClozeSchemaValidation:
 
         assert result.status == ValidationStatus.INVALID
         assert any("long" in issue.lower() or "word" in issue.lower() for issue in result.issues)
+
+
+class TestVignetteAgeValidation:
+    """Tests for vignette age validation."""
+
+    def test_validate_vignette_without_age_fails(self):
+        """Vignette without patient age fails validation."""
+        validator = CardValidator()
+        card = VignetteCard(
+            stem="A male patient presents with chest pain. Which is the most likely diagnosis?",
+            options=["A. MI", "B. PE", "C. Pneumonia", "D. GERD", "E. Costochondritis"],
+            correct_answer="A",
+            source_chunk="Chest pain is often MI."
+        )
+
+        result = validator.validate_schema(card)
+
+        assert result.status == ValidationStatus.INVALID or any(
+            "age" in issue.lower() or "demographic" in issue.lower()
+            for issue in result.issues
+        )
 
 
 class TestVignetteSchemaValidation:

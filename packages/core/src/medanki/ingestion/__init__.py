@@ -1,6 +1,6 @@
 """Ingestion module for MedAnki."""
 
-from medanki.ingestion.base import Document, Section, IngestionError, BaseExtractor, BaseLoader
+from medanki.ingestion.base import BaseExtractor, BaseLoader, Document, Section
 from medanki.ingestion.errors import IngestionError
 from medanki.ingestion.pdf import PDFExtractor
 from medanki.ingestion.service import (
@@ -8,7 +8,7 @@ from medanki.ingestion.service import (
     IPDFExtractor,
     ITextLoader,
 )
-from medanki.ingestion.text import TextLoader, MarkdownLoader
+from medanki.ingestion.text import MarkdownLoader, TextLoader
 
 __all__ = [
     "BaseExtractor",

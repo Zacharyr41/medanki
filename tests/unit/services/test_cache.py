@@ -89,3 +89,32 @@ class TestCacheKeyGeneration:
 
         expected_key = hashlib.sha256(content1.encode()).hexdigest()[:16]
         assert key1 == expected_key
+
+
+class TestCacheClear:
+    """Tests for cache clearing functionality."""
+
+    @pytest.mark.asyncio
+    async def test_cache_clear(self) -> None:
+        """Clearing cache via delete removes entries."""
+        from medanki.services.cache import MemoryCache
+
+        cache = MemoryCache()
+        await cache.set("key1", "value1")
+        await cache.set("key2", "value2")
+        await cache.set("key3", "value3")
+
+        result1_before = await cache.get("key1")
+        assert result1_before == "value1"
+
+        await cache.delete("key1")
+        await cache.delete("key2")
+        await cache.delete("key3")
+
+        result1_after = await cache.get("key1")
+        result2_after = await cache.get("key2")
+        result3_after = await cache.get("key3")
+
+        assert result1_after is None
+        assert result2_after is None
+        assert result3_after is None

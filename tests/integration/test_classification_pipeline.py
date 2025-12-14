@@ -6,12 +6,10 @@ Tests chunk embedding, storage in vector store, and classification against taxon
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from uuid import uuid4
 
 import pytest
 
 from medanki.processing.classifier import ClassificationService
-
 
 # ============================================================================
 # Embedding and Storage Tests
@@ -98,7 +96,7 @@ class TestEmbeddingAndStorage:
                 embedding=e,
                 document_id=c.document_id,
             )
-            for c, e in zip(chunks, embeddings)
+            for c, e in zip(chunks, embeddings, strict=False)
         ]
 
         # Batch store

@@ -457,3 +457,45 @@ class TestClozeGeneratorValidation:
             await cloze_generator.generate(sample_classified_chunk)
 
         assert "LLM" in str(exc_info.value) or "error" in str(exc_info.value).lower()
+
+
+class TestClozeCardUniqueness:
+    """Tests for cloze card uniqueness and atomic fact validation."""
+
+    @pytest.mark.asyncio
+    async def test_cloze_tests_single_fact(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Each card tests a single atomic fact."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "The {{c1::mitochondria}} is the powerhouse of the cell.", "tags": []},
+        ]
+
+        cards = await cloze_generator.generate(sample_classified_chunk)
+
+        for card in cards:
+            cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
+            matches = cloze_pattern.findall(card.text)
+            assert len(matches) <= 3, "Card should test a limited number of facts"
+
+    @pytest.mark.asyncio
+    async def test_cloze_cards_are_unique(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generated cards have unique content."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "The {{c1::mitochondria}} produces ATP.", "tags": []},
+            {"text": "{{c1::ATP}} is the energy currency of the cell.", "tags": []},
+            {"text": "The {{c1::Krebs cycle}} generates electron carriers.", "tags": []},
+        ]
+
+        cards = await cloze_generator.generate(sample_classified_chunk)
+
+        card_texts = [card.text for card in cards]
+        assert len(card_texts) == len(set(card_texts)), "All cards should be unique"

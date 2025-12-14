@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 
 class TagBuilder:
@@ -21,7 +20,7 @@ class TagBuilder:
         sanitized = self.sanitize(source_name)
         return f"#Source::MedAnki::{sanitized}"
 
-    def build_hierarchical_tag(self, parts: List[str]) -> str:
+    def build_hierarchical_tag(self, parts: list[str]) -> str:
         if not parts:
             return ""
         return "#" + "::".join(parts)

@@ -1,10 +1,8 @@
-from functools import lru_cache
 from typing import Any
 
 from .workers.processor import BackgroundProcessor
 from .workers.queue import JobQueue
 from .workers.runner import BackgroundRunner
-
 
 _queue: JobQueue | None = None
 _processor: BackgroundProcessor | None = None

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Optional, Protocol
+from typing import Protocol
 
 import tiktoken
 
@@ -24,8 +24,8 @@ class Chunk:
     start_char: int
     end_char: int
     token_count: int
-    page_number: Optional[int] = None
-    section_path: List[str] = field(default_factory=list)
+    page_number: int | None = None
+    section_path: list[str] = field(default_factory=list)
 
 
 class TokenCounter:
@@ -50,9 +50,9 @@ class MedicalTermProtector:
     )
 
     def __init__(self):
-        self._protected_ranges: List[tuple[int, int]] = []
+        self._protected_ranges: list[tuple[int, int]] = []
 
-    def find_protected_ranges(self, text: str) -> List[tuple[int, int]]:
+    def find_protected_ranges(self, text: str) -> list[tuple[int, int]]:
         ranges = []
         for pattern in [self.LAB_VALUE_PATTERN, self.DRUG_DOSE_PATTERN, self.ANATOMICAL_PATTERN]:
             for match in pattern.finditer(text):
@@ -60,7 +60,7 @@ class MedicalTermProtector:
         ranges.sort(key=lambda x: x[0])
         return self._merge_overlapping(ranges)
 
-    def _merge_overlapping(self, ranges: List[tuple[int, int]]) -> List[tuple[int, int]]:
+    def _merge_overlapping(self, ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
         if not ranges:
             return []
         merged = [ranges[0]]
@@ -71,25 +71,22 @@ class MedicalTermProtector:
                 merged.append((start, end))
         return merged
 
-    def is_safe_split_point(self, text: str, position: int, protected_ranges: List[tuple[int, int]]) -> bool:
-        for start, end in protected_ranges:
-            if start < position < end:
-                return False
-        return True
+    def is_safe_split_point(self, text: str, position: int, protected_ranges: list[tuple[int, int]]) -> bool:
+        return all(not start < position < end for start, end in protected_ranges)
 
 
 class SectionAwareChunker:
     def __init__(self, token_counter: TokenCounter):
         self._token_counter = token_counter
 
-    def find_section_boundaries(self, text: str) -> List[int]:
+    def find_section_boundaries(self, text: str) -> list[int]:
         boundaries = [0]
         header_pattern = re.compile(r"^#{1,6}\s+.+$", re.MULTILINE)
         for match in header_pattern.finditer(text):
             boundaries.append(match.start())
         return boundaries
 
-    def get_section_path(self, text: str, position: int, sections: list) -> List[str]:
+    def get_section_path(self, text: str, position: int, sections: list) -> list[str]:
         path = []
         for section in sections:
             if hasattr(section, 'start_char') and hasattr(section, 'end_char'):
@@ -113,7 +110,7 @@ class ChunkingService:
         self._term_protector = MedicalTermProtector()
         self._section_chunker = SectionAwareChunker(self._token_counter)
 
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         text = document.raw_text
         if not text or not text.strip():
             return []
@@ -167,8 +164,8 @@ class ChunkingService:
         text: str,
         start: int,
         target_end: int,
-        protected_ranges: List[tuple[int, int]],
-        section_boundaries: List[int]
+        protected_ranges: list[tuple[int, int]],
+        section_boundaries: list[int]
     ) -> int:
         if target_end >= len(text):
             return len(text)

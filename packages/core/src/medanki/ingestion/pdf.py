@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pymupdf4llm
 
-from .base import Document, Section, IngestionError
+from .base import Document, IngestionError, Section
 
 
 class PDFExtractor:

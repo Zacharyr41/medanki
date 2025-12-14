@@ -63,3 +63,19 @@ class TestSettings:
             settings1 = get_settings()
             settings2 = get_settings()
             assert settings1 is settings2
+
+    def test_settings_validates_thresholds(self) -> None:
+        """Settings threshold values can be set via environment."""
+        from medanki.services.config import Settings
+
+        with patch.dict(
+            os.environ,
+            {
+                "ANTHROPIC_API_KEY": "test-key",
+                "MEDANKI_BASE_THRESHOLD": "0.75",
+                "MEDANKI_RELATIVE_THRESHOLD": "0.85",
+            },
+        ):
+            settings = Settings()
+            assert settings.base_threshold == 0.75
+            assert settings.relative_threshold == 0.85

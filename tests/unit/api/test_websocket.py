@@ -15,6 +15,7 @@ class TestWebSocketConnection:
     async def test_websocket_connects(self) -> None:
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
+
         from medanki_api.websocket.routes import router
 
         app = FastAPI()
@@ -31,8 +32,9 @@ class TestWebSocketConnection:
     async def test_websocket_invalid_job_closes(self) -> None:
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
-        from medanki_api.websocket.routes import router
         from starlette.websockets import WebSocketDisconnect
+
+        from medanki_api.websocket.routes import router
 
         app = FastAPI()
         app.include_router(router)
@@ -48,6 +50,7 @@ class TestWebSocketConnection:
     async def test_websocket_sends_initial_status(self) -> None:
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
+
         from medanki_api.websocket.routes import router
 
         app = FastAPI()
@@ -136,8 +139,9 @@ class TestMessageFormat:
         assert error.type == "error"
 
     def test_progress_message_schema(self) -> None:
-        from medanki_api.schemas.websocket import ProgressMessage
         from pydantic import ValidationError
+
+        from medanki_api.schemas.websocket import ProgressMessage
 
         message = ProgressMessage(
             type="progress", progress=50, stage="ingesting", details={"file": "doc.pdf"}
@@ -177,6 +181,7 @@ class TestErrorHandling:
     async def test_connection_closes_on_complete(self) -> None:
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
+
         from medanki_api.websocket.manager import ConnectionManager
         from medanki_api.websocket.routes import get_manager, router
 

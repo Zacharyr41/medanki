@@ -6,7 +6,7 @@ Tests card generation from chunks using LLM, validation, and deduplication.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
@@ -14,7 +14,6 @@ from medanki.generation.cloze import ClozeGenerator, GeneratedClozeCard
 from medanki.generation.deduplicator import Deduplicator
 from medanki.generation.validator import CardValidator, ClozeCardInput, VignetteCardInput
 from medanki.models.cards import ClozeCard, VignetteCard, VignetteOption
-
 
 # ============================================================================
 # Cloze Card Generation Tests

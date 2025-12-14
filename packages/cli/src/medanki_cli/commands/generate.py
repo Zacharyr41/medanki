@@ -1,16 +1,14 @@
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-
 app = typer.Typer(help="Generate Anki flashcards from medical documents")
 console = Console()
 
 
-def process_input(input_path: Path, exam: Optional[str] = None) -> dict:
+def process_input(input_path: Path, exam: str | None = None) -> dict:
     return {"cards": [], "stats": {"total": 0}}
 
 
@@ -28,13 +26,13 @@ def generate(
         "-i",
         help="Input file or directory path",
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output",
         "-o",
         help="Output .apkg file path",
     ),
-    exam: Optional[str] = typer.Option(
+    exam: str | None = typer.Option(
         None,
         "--exam",
         "-e",
@@ -76,7 +74,7 @@ def generate(
 
         result = process_input(input_path, exam)
         cards = result.get("cards", [])
-        stats = result.get("stats", {})
+        result.get("stats", {})
 
         progress.update(task, completed=True)
 

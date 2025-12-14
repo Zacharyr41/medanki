@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from medanki_api.schemas.preview import CardPreview, PreviewResponse, StatsResponse
 from medanki_api.schemas.requests import (
     CardTypeOption,
     ExamType,
@@ -23,7 +24,6 @@ from medanki_api.schemas.websocket import (
     ProgressMessage,
     WebSocketMessage,
 )
-from medanki_api.schemas.preview import CardPreview, PreviewResponse, StatsResponse
 
 __all__ = [
     "CardPreview",

@@ -20,29 +20,20 @@ Organization:
 
 from __future__ import annotations
 
-import pytest
-from abc import ABC, abstractmethod
+import hashlib
+import json
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import (
     Any,
-    AsyncIterator,
-    Callable,
-    Dict,
-    List,
-    Optional,
     Protocol,
-    Tuple,
-    Union,
     runtime_checkable,
 )
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
-import re
-import json
-import hashlib
 
+import pytest
 
 # =============================================================================
 # SECTION 1: DOMAIN MODELS & INTERFACES
@@ -98,7 +89,7 @@ class Section:
     level: int  # 1=chapter, 2=section, 3=subsection
     start_char: int
     end_char: int
-    page_number: Optional[int] = None
+    page_number: int | None = None
 
 
 @dataclass
@@ -108,7 +99,7 @@ class MedicalEntity:
     label: str  # DISEASE, DRUG, ANATOMY, PROCEDURE, etc.
     start: int
     end: int
-    cui: Optional[str] = None  # UMLS Concept Unique Identifier
+    cui: str | None = None  # UMLS Concept Unique Identifier
     confidence: float = 1.0
 
 
@@ -119,8 +110,8 @@ class Document:
     source_path: str
     content_type: ContentType
     raw_text: str
-    sections: List[Section] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    sections: list[Section] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     extracted_at: datetime = field(default_factory=datetime.utcnow)
 
 
@@ -133,10 +124,10 @@ class Chunk:
     start_char: int
     end_char: int
     token_count: int
-    page_number: Optional[int] = None
-    section_path: List[str] = field(default_factory=list)
-    entities: List[MedicalEntity] = field(default_factory=list)
-    embedding: Optional[List[float]] = None
+    page_number: int | None = None
+    section_path: list[str] = field(default_factory=list)
+    entities: list[MedicalEntity] = field(default_factory=list)
+    embedding: list[float] | None = None
 
 
 @dataclass
@@ -144,7 +135,7 @@ class TopicMatch:
     """A taxonomy topic classification result."""
     topic_id: str
     topic_name: str
-    path: List[str]  # Hierarchical path: ["Cardiology", "Pathology", "Heart_Failure"]
+    path: list[str]  # Hierarchical path: ["Cardiology", "Pathology", "Heart_Failure"]
     confidence: float
     exam_type: ExamType
     
@@ -157,9 +148,9 @@ class TopicMatch:
 class ClassifiedChunk:
     """A chunk with its taxonomy classifications."""
     chunk: Chunk
-    mcat_topics: List[TopicMatch] = field(default_factory=list)
-    usmle_topics: List[TopicMatch] = field(default_factory=list)
-    primary_exam: Optional[ExamType] = None
+    mcat_topics: list[TopicMatch] = field(default_factory=list)
+    usmle_topics: list[TopicMatch] = field(default_factory=list)
+    primary_exam: ExamType | None = None
 
 
 @dataclass
@@ -169,7 +160,7 @@ class ClozeCard:
     text: str  # Contains {{c1::...}} syntax
     extra: str = ""
     source_chunk_id: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     difficulty: str = "medium"
 
 
@@ -180,9 +171,9 @@ class VignetteCard:
     front: str  # Clinical stem
     answer: str  # 1-3 word answer
     explanation: str
-    distinguishing_feature: Optional[str] = None
+    distinguishing_feature: str | None = None
     source_chunk_id: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -193,19 +184,19 @@ class ValidationResult:
     accuracy_score: float = 1.0
     hallucination_risk: float = 0.0
     quality_score: float = 1.0
-    issues: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
 
 
 @dataclass
 class GenerationResult:
     """Result of the full generation pipeline."""
-    cards: List[Union[ClozeCard, VignetteCard]]
+    cards: list[ClozeCard | VignetteCard]
     document_count: int
     chunk_count: int
     topics_matched: int
     validation_failures: int
     duplicates_removed: int
-    output_path: Optional[str] = None
+    output_path: str | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -220,7 +211,7 @@ class IIngestionService(Protocol):
         """Ingest a file and return a normalized Document."""
         ...
     
-    def supported_formats(self) -> List[str]:
+    def supported_formats(self) -> list[str]:
         """Return list of supported file extensions."""
         ...
     
@@ -233,7 +224,7 @@ class IIngestionService(Protocol):
 class IChunkingService(Protocol):
     """Contract for text chunking services."""
     
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         """Split document into processable chunks."""
         ...
     
@@ -246,11 +237,11 @@ class IChunkingService(Protocol):
 class IEmbeddingService(Protocol):
     """Contract for embedding generation services."""
     
-    async def embed(self, texts: List[str]) -> List[List[float]]:
+    async def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         ...
     
-    async def embed_single(self, text: str) -> List[float]:
+    async def embed_single(self, text: str) -> list[float]:
         """Generate embedding for a single text."""
         ...
     
@@ -268,14 +259,14 @@ class IClassificationService(Protocol):
         self,
         chunk: Chunk,
         exam_type: ExamType
-    ) -> List[TopicMatch]:
+    ) -> list[TopicMatch]:
         """Classify a chunk against the specified taxonomy."""
         ...
     
     async def classify_dual(
         self,
         chunk: Chunk
-    ) -> Dict[ExamType, List[TopicMatch]]:
+    ) -> dict[ExamType, list[TopicMatch]]:
         """Classify against both MCAT and USMLE taxonomies."""
         ...
 
@@ -288,14 +279,14 @@ class IGenerationService(Protocol):
         self,
         chunk: ClassifiedChunk,
         count: int
-    ) -> List[ClozeCard]:
+    ) -> list[ClozeCard]:
         """Generate cloze deletion cards from a chunk."""
         ...
     
     async def generate_vignette(
         self,
         chunk: ClassifiedChunk
-    ) -> Optional[VignetteCard]:
+    ) -> VignetteCard | None:
         """Generate a clinical vignette card from a chunk."""
         ...
 
@@ -306,15 +297,15 @@ class IValidationService(Protocol):
     
     async def validate(
         self,
-        card: Union[ClozeCard, VignetteCard]
+        card: ClozeCard | VignetteCard
     ) -> ValidationResult:
         """Validate a generated card."""
         ...
     
     async def check_duplicate(
         self,
-        card: Union[ClozeCard, VignetteCard],
-        existing_cards: List[Union[ClozeCard, VignetteCard]]
+        card: ClozeCard | VignetteCard,
+        existing_cards: list[ClozeCard | VignetteCard]
     ) -> bool:
         """Check if card is a duplicate of existing cards."""
         ...
@@ -326,7 +317,7 @@ class IExportService(Protocol):
     
     def build_deck(
         self,
-        cards: List[Union[ClozeCard, VignetteCard]],
+        cards: list[ClozeCard | VignetteCard],
         exam_type: ExamType,
         deck_name: str
     ) -> Path:
@@ -335,9 +326,9 @@ class IExportService(Protocol):
     
     def build_tags(
         self,
-        topics: List[TopicMatch],
-        source: Optional[str]
-    ) -> List[str]:
+        topics: list[TopicMatch],
+        source: str | None
+    ) -> list[str]:
         """Build hierarchical tags from topic matches."""
         ...
 
@@ -349,9 +340,9 @@ class IVectorStore(Protocol):
     async def upsert(
         self,
         collection: str,
-        vectors: List[List[float]],
-        metadata: List[Dict[str, Any]],
-        ids: List[str]
+        vectors: list[list[float]],
+        metadata: list[dict[str, Any]],
+        ids: list[str]
     ) -> None:
         """Insert or update vectors with metadata."""
         ...
@@ -360,10 +351,10 @@ class IVectorStore(Protocol):
         self,
         collection: str,
         query_text: str,
-        query_vector: List[float],
+        query_vector: list[float],
         alpha: float,
         limit: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Perform hybrid BM25 + vector search."""
         ...
 
@@ -372,18 +363,18 @@ class IVectorStore(Protocol):
 class ITaxonomyService(Protocol):
     """Contract for taxonomy management."""
     
-    def get_topics(self, exam_type: ExamType) -> List[TopicMatch]:
+    def get_topics(self, exam_type: ExamType) -> list[TopicMatch]:
         """Get all topics for an exam type."""
         ...
     
-    def get_topic_by_id(self, topic_id: str) -> Optional[TopicMatch]:
+    def get_topic_by_id(self, topic_id: str) -> TopicMatch | None:
         """Get a specific topic by ID."""
         ...
     
     async def get_topic_embeddings(
         self,
         exam_type: ExamType
-    ) -> Dict[str, List[float]]:
+    ) -> dict[str, list[float]]:
         """Get pre-computed embeddings for all topics."""
         ...
 
@@ -421,7 +412,7 @@ class TestPDFIngestion:
     def test_ingest_pdf_extracts_text_content(
         self,
         pdf_ingestor: IIngestionService,
-        pdf_with_known_content: Tuple[Path, str]
+        pdf_with_known_content: tuple[Path, str]
     ):
         """PDF extraction captures expected text content."""
         pdf_path, expected_substring = pdf_with_known_content
@@ -529,7 +520,7 @@ class TestPDFIngestion:
     def test_drug_dosage_table_preserves_values(
         self,
         pdf_ingestor: IIngestionService,
-        pdf_with_drug_table: Tuple[Path, Dict[str, str]]
+        pdf_with_drug_table: tuple[Path, dict[str, str]]
     ):
         """Drug dosage tables preserve numeric values correctly."""
         pdf_path, expected_values = pdf_with_drug_table
@@ -818,8 +809,8 @@ class TestChunking:
         chunks = chunker.chunk(document_with_topic_shift)
         
         # Should have chunks that don't mix topics
-        cardio_chunks = [c for c in chunks if "heart" in c.text.lower()]
-        nephro_chunks = [c for c in chunks if "kidney" in c.text.lower()]
+        [c for c in chunks if "heart" in c.text.lower()]
+        [c for c in chunks if "kidney" in c.text.lower()]
         
         # Chunks shouldn't heavily mix both topics
         mixed_chunks = [
@@ -883,7 +874,7 @@ class TestEmbedding:
     def test_embed_returns_correct_dimensions(
         self,
         embedder: IEmbeddingService,
-        sample_texts: List[str]
+        sample_texts: list[str]
     ):
         """Embeddings have the expected dimensionality."""
         embeddings = pytest.run_sync(embedder.embed(sample_texts))
@@ -903,7 +894,7 @@ class TestEmbedding:
         
         # Should be identical or very close
         assert len(single) == len(batch)
-        for s, b in zip(single, batch):
+        for s, b in zip(single, batch, strict=False):
             assert abs(s - b) < 1e-6
     
     def test_similar_texts_have_similar_embeddings(
@@ -921,7 +912,7 @@ class TestEmbedding:
         
         # Compute cosine similarity
         def cosine_sim(a, b):
-            dot = sum(x*y for x, y in zip(a, b))
+            dot = sum(x*y for x, y in zip(a, b, strict=False))
             norm_a = sum(x*x for x in a) ** 0.5
             norm_b = sum(x*x for x in b) ** 0.5
             return dot / (norm_a * norm_b)
@@ -1177,8 +1168,8 @@ class TestVectorStore:
     def test_upsert_and_retrieve(
         self,
         vector_store: IVectorStore,
-        sample_vectors: List[List[float]],
-        sample_metadata: List[Dict]
+        sample_vectors: list[list[float]],
+        sample_metadata: list[dict]
     ):
         """Vectors can be stored and retrieved."""
         ids = [f"test_{i}" for i in range(len(sample_vectors))]
@@ -1360,7 +1351,7 @@ class TestClozeGeneration:
         cards = pytest.run_sync(generator.generate_cloze(classified_chunk, count=1))
         
         # At least some cards should have extra content
-        cards_with_extra = [c for c in cards if c.extra and len(c.extra) > 0]
+        [c for c in cards if c.extra and len(c.extra) > 0]
         
         # Not strictly required, but encouraged
         # assert len(cards_with_extra) > 0
@@ -1886,7 +1877,7 @@ class TestDeckBuilding:
     def test_build_deck_creates_file(
         self,
         exporter: IExportService,
-        sample_cards: List[ClozeCard],
+        sample_cards: list[ClozeCard],
         tmp_path: Path
     ):
         """Deck building creates an .apkg file."""
@@ -1902,7 +1893,7 @@ class TestDeckBuilding:
     def test_deck_contains_all_cards(
         self,
         exporter: IExportService,
-        sample_cards: List[ClozeCard],
+        sample_cards: list[ClozeCard],
         tmp_path: Path
     ):
         """Generated deck contains all input cards."""
@@ -1920,11 +1911,11 @@ class TestDeckBuilding:
     def test_deck_has_stable_ids(
         self,
         exporter: IExportService,
-        sample_cards: List[ClozeCard]
+        sample_cards: list[ClozeCard]
     ):
         """Deck and model IDs are stable across builds."""
-        deck1 = exporter.build_deck(sample_cards, ExamType.USMLE_STEP1, "Test")
-        deck2 = exporter.build_deck(sample_cards, ExamType.USMLE_STEP1, "Test")
+        exporter.build_deck(sample_cards, ExamType.USMLE_STEP1, "Test")
+        exporter.build_deck(sample_cards, ExamType.USMLE_STEP1, "Test")
         
         # Files should be similar (same IDs allow proper updates on import)
         # Implementation would check internal IDs
@@ -1932,7 +1923,7 @@ class TestDeckBuilding:
     def test_deck_includes_media(
         self,
         exporter: IExportService,
-        cards_with_images: List[ClozeCard]
+        cards_with_images: list[ClozeCard]
     ):
         """Deck includes referenced media files."""
         output = exporter.build_deck(
@@ -1944,14 +1935,14 @@ class TestDeckBuilding:
         # .apkg is a zip file containing media
         import zipfile
         with zipfile.ZipFile(output, 'r') as zf:
-            names = zf.namelist()
+            zf.namelist()
             # Should have media files (numbered 0, 1, 2...)
             # or a media file that's not empty
     
     def test_deck_name_matches_exam_type(
         self,
         exporter: IExportService,
-        sample_cards: List[ClozeCard]
+        sample_cards: list[ClozeCard]
     ):
         """Deck name reflects the exam type."""
         output_usmle = exporter.build_deck(
@@ -2056,14 +2047,14 @@ class TestEndToEndPipeline:
         tmp_path: Path
     ):
         """Pipeline uses correct taxonomy for exam type."""
-        result_mcat = pipeline.run(
+        pipeline.run(
             input_path=simple_medical_pdf,
             exam_type="mcat",
             cards_per_chunk=1,
             output_dir=tmp_path
         )
         
-        result_usmle = pipeline.run(
+        pipeline.run(
             input_path=simple_medical_pdf,
             exam_type="usmle-step1",
             cards_per_chunk=1,
@@ -2156,7 +2147,7 @@ class TestChunkToCardFlow:
         )
         
         # Generate cards
-        cards = pytest.run_sync(generator.generate_cloze(classified, count=1))
+        pytest.run_sync(generator.generate_cloze(classified, count=1))
         
         # Build tags
         tags = exporter.build_tags(topics, source=cardiology_document.source_path)
@@ -2249,7 +2240,7 @@ class TestChunkingProperties:
         chunks2 = chunker.chunk(sample_document)
         
         assert len(chunks1) == len(chunks2)
-        for c1, c2 in zip(chunks1, chunks2):
+        for c1, c2 in zip(chunks1, chunks2, strict=False):
             assert c1.text == c2.text
 
 
@@ -2719,7 +2710,7 @@ def classified_chunk(cardiology_chunk: Chunk) -> ClassifiedChunk:
 
 
 @pytest.fixture
-def sample_cards() -> List[ClozeCard]:
+def sample_cards() -> list[ClozeCard]:
     """Create sample cloze cards for testing."""
     return [
         ClozeCard(
@@ -2740,7 +2731,7 @@ def sample_cards() -> List[ClozeCard]:
 
 
 @pytest.fixture
-def sample_texts() -> List[str]:
+def sample_texts() -> list[str]:
     """Sample texts for embedding tests."""
     return [
         "Myocardial infarction is caused by coronary artery occlusion",
@@ -2770,7 +2761,7 @@ class pytest:
 class MockLLMClient:
     """Mock LLM client for testing."""
     
-    def __init__(self, responses: Dict[str, str] = None):
+    def __init__(self, responses: dict[str, str] = None):
         self.responses = responses or {}
         self.call_count = 0
         self.last_prompt = None
@@ -2805,10 +2796,10 @@ class MockEmbedder:
     def dimensions(self) -> int:
         return self._dims
     
-    async def embed(self, texts: List[str]) -> List[List[float]]:
+    async def embed(self, texts: list[str]) -> list[list[float]]:
         return [[0.1 * (i + 1)] * self._dims for i in range(len(texts))]
     
-    async def embed_single(self, text: str) -> List[float]:
+    async def embed_single(self, text: str) -> list[float]:
         return [0.1] * self._dims
 
 
@@ -2816,19 +2807,19 @@ class MockVectorStore:
     """Mock vector store for testing."""
     
     def __init__(self):
-        self.collections: Dict[str, List[Dict]] = {}
+        self.collections: dict[str, list[dict]] = {}
     
     async def upsert(
         self,
         collection: str,
-        vectors: List[List[float]],
-        metadata: List[Dict],
-        ids: List[str]
+        vectors: list[list[float]],
+        metadata: list[dict],
+        ids: list[str]
     ) -> None:
         if collection not in self.collections:
             self.collections[collection] = []
         
-        for vec, meta, id_ in zip(vectors, metadata, ids):
+        for vec, meta, id_ in zip(vectors, metadata, ids, strict=False):
             self.collections[collection].append({
                 "id": id_,
                 "vector": vec,
@@ -2839,10 +2830,10 @@ class MockVectorStore:
         self,
         collection: str,
         query_text: str,
-        query_vector: List[float],
+        query_vector: list[float],
         alpha: float,
         limit: int
-    ) -> List[Dict]:
+    ) -> list[dict]:
         items = self.collections.get(collection, [])
         # Return up to limit items with mock scores
         return [

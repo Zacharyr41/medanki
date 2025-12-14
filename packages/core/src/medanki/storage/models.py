@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class JobStatus(str, Enum):
@@ -19,12 +19,12 @@ class Job:
     document_id: str
     status: JobStatus
     progress: int = 0
-    error: Optional[str] = None
+    error: str | None = None
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
     @classmethod
-    def from_row(cls, row: Dict[str, Any]) -> Job:
+    def from_row(cls, row: dict[str, Any]) -> Job:
         return cls(
             id=row["id"],
             document_id=row["document_id"],
@@ -35,7 +35,7 @@ class Job:
             updated_at=datetime.fromisoformat(row["updated_at"]) if isinstance(row["updated_at"], str) else row["updated_at"],
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "document_id": self.document_id,

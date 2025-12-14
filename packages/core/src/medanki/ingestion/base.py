@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol, Any
+from typing import Any, Protocol
 
 
 class IngestionError(Exception):

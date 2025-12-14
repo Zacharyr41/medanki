@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Protocol
-
+from typing import Protocol
 
 BASE_THRESHOLD = 0.65
 RELATIVE_THRESHOLD = 0.80
@@ -18,11 +17,11 @@ class Chunk(Protocol):
 
 class TaxonomyService(Protocol):
     def get_taxonomy(self, exam_type: str) -> dict: ...
-    def get_topics(self) -> List[dict]: ...
+    def get_topics(self) -> list[dict]: ...
 
 
 class VectorStore(Protocol):
-    def hybrid_search(self, query: str, alpha: float = 0.5, **kwargs) -> List[dict]: ...
+    def hybrid_search(self, query: str, alpha: float = 0.5, **kwargs) -> list[dict]: ...
 
 
 @dataclass
@@ -30,7 +29,7 @@ class TopicMatch:
     topic_id: str
     topic_name: str
     confidence: float
-    exam_type: Optional[str] = None
+    exam_type: str | None = None
 
 
 class ClassificationService:
@@ -51,8 +50,8 @@ class ClassificationService:
     def classify(
         self,
         chunk: Chunk,
-        exam_type: Optional[str] = None
-    ) -> List[TopicMatch]:
+        exam_type: str | None = None
+    ) -> list[TopicMatch]:
         if not chunk.text or not chunk.text.strip():
             return []
 
@@ -97,7 +96,7 @@ class ClassificationService:
 
         return "usmle" if usmle_top >= mcat_top else "mcat"
 
-    def _apply_thresholds(self, matches: List[TopicMatch]) -> List[TopicMatch]:
+    def _apply_thresholds(self, matches: list[TopicMatch]) -> list[TopicMatch]:
         if not matches:
             return []
 

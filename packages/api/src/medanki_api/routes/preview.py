@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -31,7 +30,7 @@ def _parse_card_content(card: dict) -> dict:
     return content
 
 
-def _parse_tags(card: dict) -> List[str]:
+def _parse_tags(card: dict) -> list[str]:
     tags = card.get("tags", "[]")
     if isinstance(tags, str):
         try:
@@ -41,7 +40,7 @@ def _parse_tags(card: dict) -> List[str]:
     return tags if tags else []
 
 
-def _extract_topics(tags: List[str]) -> List[str]:
+def _extract_topics(tags: list[str]) -> list[str]:
     topic_patterns = ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B"]
     topics = []
     for tag in tags:
@@ -93,9 +92,9 @@ async def get_job_preview(
     job_id: str,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    type: Optional[str] = Query(default=None),
-    topic: Optional[str] = Query(default=None),
-    status: Optional[str] = Query(default=None),
+    type: str | None = Query(default=None),
+    topic: str | None = Query(default=None),
+    status: str | None = Query(default=None),
 ):
     store = get_store()
 

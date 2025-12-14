@@ -5,7 +5,6 @@ Tests deck building, APKG export, and tag formatting.
 
 from __future__ import annotations
 
-import tempfile
 import zipfile
 from pathlib import Path
 from uuid import uuid4
@@ -15,7 +14,6 @@ import pytest
 from medanki.export.apkg import APKGExporter
 from medanki.export.deck import DeckBuilder
 from medanki.export.tags import TagBuilder
-
 
 # ============================================================================
 # Test Data Classes

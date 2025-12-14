@@ -1,6 +1,5 @@
 """Tests for Anki tag building."""
 
-import pytest
 
 from packages.core.src.medanki.export.tags import TagBuilder
 

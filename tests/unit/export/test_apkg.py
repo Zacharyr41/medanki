@@ -4,8 +4,6 @@ import os
 import tempfile
 import zipfile
 
-import pytest
-
 from packages.core.src.medanki.export.apkg import APKGExporter
 from packages.core.src.medanki.export.deck import DeckBuilder
 from tests.conftest import ClozeCard, VignetteCard
@@ -131,3 +129,77 @@ class TestAPKGExporter:
         exporter.export(deck, str(output_path))
 
         assert output_path.exists()
+
+    def test_deck_contains_all_cards(self, tmp_path):
+        """Deck contains all cards that were added."""
+        builder = DeckBuilder("Card Count Test")
+        for i in range(5):
+            card = ClozeCard(
+                id=f"test_{i:03d}",
+                text=f"The {{{{c1::concept{i}}}}} is important",
+                source_chunk_id=f"chunk_{i:03d}"
+            )
+            builder.add_cloze_card(card)
+        deck = builder.build()
+
+        assert deck.note_count == 5
+
+    def test_deck_has_stable_ids(self, tmp_path):
+        """Same deck name produces same deck ID."""
+        builder1 = DeckBuilder("Stable ID Test")
+        card1 = ClozeCard(
+            id="test_001",
+            text="The {{c1::heart}} pumps blood",
+            source_chunk_id="chunk_001"
+        )
+        builder1.add_cloze_card(card1)
+        deck1 = builder1.build()
+
+        builder2 = DeckBuilder("Stable ID Test")
+        card2 = ClozeCard(
+            id="test_002",
+            text="The {{c1::lungs}} exchange gases",
+            source_chunk_id="chunk_002"
+        )
+        builder2.add_cloze_card(card2)
+        deck2 = builder2.build()
+
+        assert deck1.deck_id == deck2.deck_id
+
+    def test_deck_name_matches_exam_type(self, tmp_path):
+        """Deck name reflects exam type."""
+        builder = DeckBuilder("MedAnki::USMLE_Step1::Cardiology")
+        card = ClozeCard(
+            id="test_001",
+            text="The {{c1::heart}} pumps blood",
+            source_chunk_id="chunk_001"
+        )
+        builder.add_cloze_card(card)
+        deck = builder.build()
+
+        assert "USMLE" in deck.name or "MedAnki" in deck.name
+
+    def test_build_tags_from_topics(self, tmp_path):
+        """Tags are built from topic matches."""
+        from packages.core.src.medanki.export.tags import TagBuilder
+
+        tag_builder = TagBuilder()
+        topics = [
+            {"path": "Cardiology > Heart Failure"},
+            {"path": "Pharmacology > Beta Blockers"},
+        ]
+
+        tags = [tag_builder.build_hierarchical_tag(t["path"].split(" > ")) for t in topics]
+
+        assert len(tags) == 2
+        assert all("::" in tag for tag in tags)
+
+    def test_tags_use_hierarchical_format(self, tmp_path):
+        """Tags use :: separator for hierarchy."""
+        from packages.core.src.medanki.export.tags import TagBuilder
+
+        tag_builder = TagBuilder()
+        tag = tag_builder.build_hierarchical_tag(["USMLE", "Step1", "Cardiology", "CHF"])
+
+        assert tag == "#USMLE::Step1::Cardiology::CHF"
+        assert tag.count("::") == 3

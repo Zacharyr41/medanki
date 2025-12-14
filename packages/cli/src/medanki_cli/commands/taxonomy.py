@@ -1,15 +1,13 @@
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-
 app = typer.Typer(help="Browse and search medical taxonomy")
 console = Console()
 
 
-def get_topics(exam: Optional[str] = None) -> list[dict]:
+def get_topics(exam: str | None = None) -> list[dict]:
     topics = [
         {"id": "1", "name": "Cardiology", "exam": "USMLE"},
         {"id": "2", "name": "Neurology", "exam": "USMLE"},
@@ -26,7 +24,7 @@ def search_topics(query: str) -> list[dict]:
     return [t for t in all_topics if query.lower() in t["name"].lower()]
 
 
-def get_topic_details(topic_id: str) -> Optional[dict]:
+def get_topic_details(topic_id: str) -> dict | None:
     topics = {
         "1": {
             "id": "1",
@@ -46,7 +44,7 @@ def get_topic_details(topic_id: str) -> Optional[dict]:
 
 @app.command("list")
 def list_topics(
-    exam: Optional[str] = typer.Option(
+    exam: str | None = typer.Option(
         None,
         "--exam",
         "-e",

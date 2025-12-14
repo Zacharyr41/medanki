@@ -1,9 +1,7 @@
-import pytest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 from uuid import uuid4
 
-from medanki.storage.weaviate import WeaviateStore, IVectorStore
-from medanki.storage.weaviate import MedicalChunk
+from medanki.storage.weaviate import WeaviateStore
 
 
 class TestWeaviateConnection:
@@ -16,7 +14,7 @@ class TestWeaviateConnection:
     def test_creates_schema_if_missing(self, mock_weaviate_client):
         mock_weaviate_client.collections.exists.return_value = False
 
-        store = WeaviateStore(client=mock_weaviate_client)
+        WeaviateStore(client=mock_weaviate_client)
 
         mock_weaviate_client.collections.create.assert_called_once()
         call_kwargs = mock_weaviate_client.collections.create.call_args

@@ -1,9 +1,7 @@
-import pytest
 from pathlib import Path
 
-from medanki.ingestion.text import TextLoader, MarkdownLoader
 from medanki.ingestion.base import Document
-
+from medanki.ingestion.text import MarkdownLoader, TextLoader
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "data" / "test_fixtures"
 

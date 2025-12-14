@@ -1,9 +1,9 @@
-import pytest
 from pathlib import Path
 
-from medanki.ingestion.pdf import PDFExtractor
-from medanki.ingestion.base import Document, IngestionError
+import pytest
 
+from medanki.ingestion.base import Document, IngestionError
+from medanki.ingestion.pdf import PDFExtractor
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent.parent / "data" / "test_fixtures"
 

@@ -5,7 +5,6 @@ Tests the full ingestion flow from file to Document with sections.
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -13,7 +12,6 @@ import pytest
 from medanki.ingestion.pdf import PDFExtractor
 from medanki.ingestion.text import MarkdownLoader, TextLoader
 from medanki.processing.chunker import ChunkingService
-
 
 # ============================================================================
 # PDF Ingestion Tests

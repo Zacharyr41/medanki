@@ -1,8 +1,6 @@
-import pytest
 from typer.testing import CliRunner
 
 from medanki_cli.main import app
-
 
 runner = CliRunner()
 

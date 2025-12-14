@@ -4,7 +4,7 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -14,7 +14,7 @@ from .models import JobStatus
 class SQLiteStore:
     def __init__(self, db_path: Path | str):
         self.db_path = Path(db_path)
-        self._connection: Optional[aiosqlite.Connection] = None
+        self._connection: aiosqlite.Connection | None = None
 
     async def _get_connection(self) -> aiosqlite.Connection:
         if self._connection is None:
@@ -85,7 +85,7 @@ class SQLiteStore:
             await self._connection.close()
             self._connection = None
 
-    async def _get_tables(self) -> List[str]:
+    async def _get_tables(self) -> list[str]:
         conn = await self._get_connection()
         cursor = await conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
@@ -93,7 +93,7 @@ class SQLiteStore:
         rows = await cursor.fetchall()
         return [row[0] for row in rows]
 
-    async def _get_table_columns(self, table: str) -> List[str]:
+    async def _get_table_columns(self, table: str) -> list[str]:
         conn = await self._get_connection()
         cursor = await conn.execute(f"PRAGMA table_info({table})")
         rows = await cursor.fetchall()
@@ -105,7 +105,7 @@ class SQLiteStore:
         source_path: str,
         content_type: str,
         raw_text: str,
-        metadata: Dict[str, Any]
+        metadata: dict[str, Any]
     ) -> str:
         conn = await self._get_connection()
         await conn.execute(
@@ -118,7 +118,7 @@ class SQLiteStore:
         await conn.commit()
         return id
 
-    async def get_document(self, id: str) -> Optional[Dict[str, Any]]:
+    async def get_document(self, id: str) -> dict[str, Any] | None:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM documents WHERE id = ?", (id,))
         row = await cursor.fetchone()
@@ -133,7 +133,7 @@ class SQLiteStore:
             "created_at": row["created_at"],
         }
 
-    async def list_documents(self) -> List[Dict[str, Any]]:
+    async def list_documents(self) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM documents ORDER BY created_at DESC")
         rows = await cursor.fetchall()
@@ -165,7 +165,7 @@ class SQLiteStore:
         start_char: int,
         end_char: int,
         token_count: int,
-        section_path: List[str]
+        section_path: list[str]
     ) -> str:
         conn = await self._get_connection()
         await conn.execute(
@@ -178,7 +178,7 @@ class SQLiteStore:
         await conn.commit()
         return id
 
-    async def get_chunks_by_document(self, document_id: str) -> List[Dict[str, Any]]:
+    async def get_chunks_by_document(self, document_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM chunks WHERE document_id = ?", (document_id,))
         rows = await cursor.fetchall()
@@ -202,7 +202,7 @@ class SQLiteStore:
         chunk_id: str,
         card_type: str,
         content: str,
-        tags: List[str],
+        tags: list[str],
         status: str = "pending"
     ) -> str:
         conn = await self._get_connection()
@@ -217,7 +217,7 @@ class SQLiteStore:
         await conn.commit()
         return id
 
-    async def get_cards_by_document(self, document_id: str) -> List[Dict[str, Any]]:
+    async def get_cards_by_document(self, document_id: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM cards WHERE document_id = ?", (document_id,))
         rows = await cursor.fetchall()
@@ -236,7 +236,7 @@ class SQLiteStore:
             for row in rows
         ]
 
-    async def get_cards_by_topic(self, topic: str) -> List[Dict[str, Any]]:
+    async def get_cards_by_topic(self, topic: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM cards")
         rows = await cursor.fetchall()
@@ -275,7 +275,7 @@ class SQLiteStore:
         await conn.commit()
         return id
 
-    async def get_job(self, id: str) -> Optional[Dict[str, Any]]:
+    async def get_job(self, id: str) -> dict[str, Any] | None:
         conn = await self._get_connection()
         cursor = await conn.execute("SELECT * FROM jobs WHERE id = ?", (id,))
         row = await cursor.fetchone()
@@ -318,7 +318,7 @@ class SQLiteStore:
         )
         await conn.commit()
 
-    async def list_recent_jobs(self, limit: int = 10, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_recent_jobs(self, limit: int = 10, offset: int = 0) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute(
             "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ? OFFSET ?",

@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from medanki.processing.classifier import ClassificationService, TopicMatch
 
@@ -115,6 +114,55 @@ class TestMultiLabel:
                 f"Match {match.topic_id} has confidence {match.confidence} "
                 f"below relative threshold {relative_threshold}"
             )
+
+
+class TestPharmacologyClassification:
+    """Tests for pharmacology content classification."""
+
+    def test_classify_pharmacology_content(self, mock_taxonomy_service, mock_vector_store):
+        """Pharmacology content is classified to drug-related topics."""
+        from tests.conftest import Chunk
+
+        pharmacology_chunk = Chunk(
+            id="chunk_pharm_001",
+            document_id="doc_pharm",
+            text="Metformin is a biguanide drug used for type 2 diabetes. It decreases hepatic glucose production.",
+            start_char=0,
+            end_char=100,
+            token_count=20,
+        )
+
+        mock_vector_store.hybrid_search.return_value = [
+            {"topic_id": "pharmacology_endocrine_001", "score": 0.90},
+        ]
+        service = ClassificationService(
+            taxonomy_service=mock_taxonomy_service,
+            vector_store=mock_vector_store
+        )
+        results = service.classify(pharmacology_chunk)
+
+        topic_ids = [r.topic_id for r in results]
+        assert any("pharm" in tid.lower() or "drug" in tid.lower() or "endocrine" in tid.lower() for tid in topic_ids), (
+            f"Pharmacology content should map to drug-related topics, got: {topic_ids}"
+        )
+
+
+class TestMaxTopicsLimit:
+    """Tests for max topics limit."""
+
+    def test_classify_respects_max_topics(self, sample_cardiology_chunk, mock_taxonomy_service, mock_vector_store):
+        """Classification respects max topics limit."""
+        mock_vector_store.hybrid_search.return_value = [
+            {"topic_id": f"topic_{i}", "score": 0.90 - (i * 0.02)}
+            for i in range(10)
+        ]
+        service = ClassificationService(
+            taxonomy_service=mock_taxonomy_service,
+            vector_store=mock_vector_store
+        )
+        results = service.classify(sample_cardiology_chunk, max_topics=5)
+
+        assert len(results) <= 5, f"Expected at most 5 topics, got {len(results)}"
 
 
 class TestMedicalAbbreviations:

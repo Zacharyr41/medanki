@@ -9,14 +9,13 @@ Provides fixtures for real services (not mocks) including:
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
-import os
 import tempfile
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, AsyncGenerator, Generator
-from unittest.mock import AsyncMock, MagicMock
+from typing import Any
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import numpy as np
@@ -513,6 +512,7 @@ async def api_client():
     """
     try:
         from httpx import AsyncClient
+
         from medanki_api.main import app
 
         async with AsyncClient(app=app, base_url="http://test") as client:

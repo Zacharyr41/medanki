@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import BaseModel
+
 from medanki.exceptions import LLMError
 from medanki.services.llm import ClaudeClient, LLMClient
-from pydantic import BaseModel
 
 if TYPE_CHECKING:
     pass

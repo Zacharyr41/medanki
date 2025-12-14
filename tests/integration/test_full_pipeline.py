@@ -22,7 +22,6 @@ from medanki.ingestion.text import MarkdownLoader
 from medanki.models.cards import ClozeCard
 from medanki.processing.chunker import ChunkingService
 
-
 # ============================================================================
 # Mock Document for Chunking
 # ============================================================================

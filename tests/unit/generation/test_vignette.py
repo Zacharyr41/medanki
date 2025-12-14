@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
+
 from medanki.generation.vignette import VignetteGenerator
-from medanki.models.cards import VignetteCard, VignetteOption
-from pydantic import BaseModel
+from medanki.models.cards import VignetteCard
 
 if TYPE_CHECKING:
     pass

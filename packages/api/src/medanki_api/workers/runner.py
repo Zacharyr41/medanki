@@ -1,5 +1,5 @@
 import asyncio
-from typing import Callable, Awaitable
+import contextlib
 
 from .processor import BackgroundProcessor
 from .queue import JobQueue
@@ -28,10 +28,8 @@ class BackgroundRunner:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
             self._task = None
 
     async def _run_loop(self) -> None:

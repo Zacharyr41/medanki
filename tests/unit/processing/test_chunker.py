@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
 
 import pytest
@@ -94,6 +95,53 @@ class TestSectionAwareChunking:
                 assert last_char in ".!?:;\"'" or text.endswith("\n"), (
                     f"Chunk should end at sentence boundary, got: ...{text[-50:]}"
                 )
+
+
+class TestChunkIdAndCoverage:
+    """Tests for chunk ID generation and document coverage."""
+
+    def test_chunk_respects_min_token_limit(self, sample_long_document):
+        """Chunks meet minimum token threshold (except final chunk)."""
+        service = ChunkingService()
+        chunks = service.chunk(sample_long_document)
+
+        min_tokens = 100
+        for chunk in chunks[:-1]:
+            assert chunk.token_count >= min_tokens, (
+                f"Chunk has {chunk.token_count} tokens, below minimum {min_tokens}"
+            )
+
+    def test_chunks_cover_entire_document(self, sample_long_document):
+        """Chunks collectively cover all document content."""
+        service = ChunkingService()
+        chunks = service.chunk(sample_long_document)
+
+        combined_text = " ".join(c.text for c in chunks)
+        doc_words = sample_long_document.raw_text.split()
+        sample_indices = [0, len(doc_words)//4, len(doc_words)//2, -1]
+
+        for idx in sample_indices:
+            word = doc_words[idx]
+            if len(word) > 3:
+                assert word in combined_text, f"Word '{word}' not found in chunks"
+
+    def test_chunk_ids_are_unique(self, sample_long_document):
+        """Each chunk has a unique identifier."""
+        service = ChunkingService()
+        chunks = service.chunk(sample_long_document)
+
+        ids = [chunk.id for chunk in chunks]
+        assert len(ids) == len(set(ids)), "Chunk IDs must be unique"
+
+    def test_chunks_track_document_id(self, sample_long_document):
+        """Each chunk references its source document."""
+        service = ChunkingService()
+        chunks = service.chunk(sample_long_document)
+
+        for chunk in chunks:
+            assert chunk.document_id == sample_long_document.id, (
+                f"Chunk document_id {chunk.document_id} doesn't match document {sample_long_document.id}"
+            )
 
 
 class TestMedicalTermPreservation:

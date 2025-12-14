@@ -1,6 +1,5 @@
 """Tests for domain enumerations."""
 
-import pytest
 
 from tests.conftest import CardType, ContentType, ExamType, ValidationStatus
 

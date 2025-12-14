@@ -4,7 +4,6 @@ import json
 import uuid
 from collections import Counter
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
@@ -73,7 +72,7 @@ async def download_deck(job_id: str):
 
 
 @router.post("/jobs/{job_id}/regenerate", response_model=RegenerateResponse)
-async def regenerate_deck(job_id: str, request: Optional[RegenerateRequest] = None):
+async def regenerate_deck(job_id: str, request: RegenerateRequest | None = None):
     store = get_store()
 
     job = await store.get_job(job_id)

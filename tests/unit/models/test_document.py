@@ -1,9 +1,9 @@
 """Tests for Document and related models."""
 
-import pytest
 from datetime import datetime
 
 from tests.conftest import (
+    Chunk,
     ContentType,
     Document,
     MedicalEntity,
@@ -92,6 +92,89 @@ class TestSection:
         assert chapter.level == 1
         assert section.level == 2
         assert subsection.level == 3
+
+
+class TestChunk:
+    def test_chunk_creation_with_required_fields(self):
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="The cardiac cycle consists of systole and diastole.",
+            start_char=0,
+            end_char=51,
+            token_count=10
+        )
+        assert chunk.id == "chunk_001"
+        assert chunk.document_id == "doc_001"
+        assert chunk.text == "The cardiac cycle consists of systole and diastole."
+        assert chunk.start_char == 0
+        assert chunk.end_char == 51
+        assert chunk.token_count == 10
+
+    def test_chunk_default_entities(self):
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="Sample text",
+            start_char=0,
+            end_char=11,
+            token_count=2
+        )
+        assert chunk.entities == []
+
+    def test_chunk_default_embedding(self):
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="Sample text",
+            start_char=0,
+            end_char=11,
+            token_count=2
+        )
+        assert chunk.embedding is None
+
+    def test_chunk_text_property(self):
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="Medical content here",
+            start_char=100,
+            end_char=120,
+            token_count=3
+        )
+        assert chunk.text == "Medical content here"
+        assert len(chunk.text) == 20
+
+    def test_chunk_with_entities(self):
+        entity = MedicalEntity(
+            text="metformin",
+            label="DRUG",
+            start=0,
+            end=9
+        )
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="metformin is used to treat diabetes",
+            start_char=0,
+            end_char=35,
+            token_count=6,
+            entities=[entity]
+        )
+        assert len(chunk.entities) == 1
+        assert chunk.entities[0].text == "metformin"
+        assert chunk.entities[0].label == "DRUG"
+
+    def test_chunk_token_count(self):
+        chunk = Chunk(
+            id="chunk_001",
+            document_id="doc_001",
+            text="This is a sample chunk with several tokens for testing.",
+            start_char=0,
+            end_char=56,
+            token_count=10
+        )
+        assert chunk.token_count == 10
 
 
 class TestMedicalEntity:

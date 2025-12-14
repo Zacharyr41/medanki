@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Callable, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from uuid import UUID
 
 from medanki.models.cards import ClozeCard, VignetteCard

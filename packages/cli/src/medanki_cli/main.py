@@ -2,8 +2,7 @@ import typer
 from rich.console import Console
 
 from medanki_cli import __version__
-from medanki_cli.commands import generate, taxonomy, config
-
+from medanki_cli.commands import config, generate, taxonomy
 
 console = Console()
 

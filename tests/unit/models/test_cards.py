@@ -1,8 +1,7 @@
 """Tests for ClozeCard validation."""
 
-import pytest
 
-from tests.conftest import ClozeCard
+from tests.conftest import ClozeCard, VignetteCard
 
 
 class TestClozeCardValidation:
@@ -136,3 +135,82 @@ class TestClozeCardValidation:
             difficulty="hard"
         )
         assert card.difficulty == "hard"
+
+
+class TestVignetteCard:
+    def test_vignette_creation(self):
+        card = VignetteCard(
+            id="vignette_001",
+            front="A 45-year-old male presents with chest pain. What is the most likely diagnosis?",
+            answer="Myocardial infarction",
+            explanation="The presentation is classic for MI with chest pain radiating to arm.",
+            source_chunk_id="chunk_001"
+        )
+        assert card.id == "vignette_001"
+        assert card.answer == "Myocardial infarction"
+
+    def test_vignette_with_demographics(self):
+        card = VignetteCard(
+            id="vignette_002",
+            front="A 65-year-old female with a history of diabetes presents with fatigue.",
+            answer="Diabetic ketoacidosis",
+            explanation="Classic presentation in diabetic patient.",
+            source_chunk_id="chunk_001"
+        )
+        assert "65-year-old" in card.front
+        assert "female" in card.front
+
+    def test_vignette_ends_with_question(self):
+        card = VignetteCard(
+            id="vignette_003",
+            front="A patient presents with symptoms. What is the diagnosis?",
+            answer="Test answer",
+            explanation="Test explanation",
+            source_chunk_id="chunk_001"
+        )
+        assert card.front.endswith("?")
+
+    def test_vignette_concise_answer(self):
+        card = VignetteCard(
+            id="vignette_004",
+            front="What is the diagnosis?",
+            answer="Heart failure",
+            explanation="Signs and symptoms point to CHF.",
+            source_chunk_id="chunk_001"
+        )
+        word_count = len(card.answer.split())
+        assert word_count <= 3
+
+    def test_vignette_has_explanation(self):
+        card = VignetteCard(
+            id="vignette_005",
+            front="Clinical stem here?",
+            answer="Answer",
+            explanation="Detailed explanation of the diagnosis and reasoning.",
+            source_chunk_id="chunk_001"
+        )
+        assert len(card.explanation) > 0
+        assert card.explanation == "Detailed explanation of the diagnosis and reasoning."
+
+    def test_vignette_with_distinguishing_feature(self):
+        card = VignetteCard(
+            id="vignette_006",
+            front="A patient presents with a rash. What is the diagnosis?",
+            answer="Erythema migrans",
+            explanation="Classic target lesion of Lyme disease.",
+            distinguishing_feature="Target-shaped rash with central clearing",
+            source_chunk_id="chunk_001"
+        )
+        assert card.distinguishing_feature == "Target-shaped rash with central clearing"
+
+    def test_vignette_with_tags(self):
+        card = VignetteCard(
+            id="vignette_007",
+            front="Clinical vignette here?",
+            answer="Diagnosis",
+            explanation="Explanation here.",
+            tags=["cardiology", "USMLE::Step1"],
+            source_chunk_id="chunk_001"
+        )
+        assert card.tags == ["cardiology", "USMLE::Step1"]
+        assert len(card.tags) == 2
