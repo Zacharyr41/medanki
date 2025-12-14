@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import sys
 
-sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
 
 
 from medanki.processing.classifier import ClassificationService, TopicMatch

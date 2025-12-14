@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
-sys.path.insert(0, "/Users/zacharyrothstein/Code/medanki-tests/packages/core/src")
-
 import asyncio
 
 import pytest
