@@ -1,0 +1,57 @@
+[project]
+name = "medanki"
+version = "0.1.0"
+description = "Core library for medical flashcard generation"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "aiosqlite>=0.19.0",
+    "httpx>=0.26.0",
+]
+
+[project.optional-dependencies]
+ingestion = [
+    "marker-pdf>=0.3.0",
+    "pymupdf>=1.23.0",
+    "pymupdf4llm>=0.0.5",
+]
+processing = [
+    "sentence-transformers>=2.3.0",
+    "weaviate-client>=4.4.0",
+    "tiktoken>=0.5.0",
+]
+nlp = [
+    "scispacy>=0.5.4",
+    "spacy>=3.7.0",
+]
+generation = [
+    "anthropic>=0.18.0",
+    "instructor>=1.0.0",
+]
+export = [
+    "genanki>=0.13.0",
+]
+audio = [
+    "openai-whisper>=20231117",
+    "openai>=1.0.0",
+]
+all = [
+    "medanki[ingestion,processing,nlp,generation,export,audio]",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-vcr>=1.0.0",
+    "pytest-cov>=4.1.0",
+    "hypothesis>=6.98.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/medanki"]
