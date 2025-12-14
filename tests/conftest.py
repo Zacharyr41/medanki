@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -445,4 +445,112 @@ no residual stenosis.
         raw_text=text,
         sections=[],
         metadata={}
+    )
+
+
+@pytest.fixture
+def mock_taxonomy_service() -> MagicMock:
+    """Mock taxonomy service for classification tests."""
+    service = MagicMock()
+    service.get_taxonomy.return_value = {
+        "exam_type": "mcat",
+        "topics": [
+            {"id": "cardio_001", "name": "Cardiovascular System"},
+            {"id": "physio_001", "name": "Physiology"},
+        ]
+    }
+    service.get_topics.return_value = [
+        {"id": "cardio_001", "name": "Cardiovascular System"},
+        {"id": "physio_001", "name": "Physiology"},
+    ]
+    return service
+
+
+@pytest.fixture
+def mock_vector_store() -> MagicMock:
+    """Mock vector store for classification tests."""
+    store = MagicMock()
+    store.hybrid_search.return_value = [
+        {"topic_id": "cardio_001", "score": 0.88},
+        {"topic_id": "physio_001", "score": 0.75},
+    ]
+    return store
+
+
+@pytest.fixture
+def sample_cardiology_chunk() -> Chunk:
+    """Sample chunk with cardiology content."""
+    return Chunk(
+        id="chunk_cardio_001",
+        document_id="doc_001",
+        text="The cardiac cycle consists of systole and diastole phases. During systole, "
+             "the ventricles contract and eject blood into the aorta and pulmonary artery.",
+        start_char=0,
+        end_char=150,
+        token_count=35,
+        page_number=1,
+        section_path=["Cardiovascular", "Physiology"]
+    )
+
+
+@pytest.fixture
+def sample_biochemistry_chunk() -> Chunk:
+    """Sample chunk with biochemistry content."""
+    return Chunk(
+        id="chunk_biochem_001",
+        document_id="doc_002",
+        text="Amino acids are the building blocks of proteins. Essential amino acids "
+             "cannot be synthesized by the body and must be obtained from diet.",
+        start_char=0,
+        end_char=140,
+        token_count=30,
+        page_number=1,
+        section_path=["Biochemistry", "Proteins"]
+    )
+
+
+@pytest.fixture
+def empty_chunk() -> Chunk:
+    """Empty chunk for edge case testing."""
+    return Chunk(
+        id="chunk_empty",
+        document_id="doc_empty",
+        text="",
+        start_char=0,
+        end_char=0,
+        token_count=0,
+        page_number=None,
+        section_path=[]
+    )
+
+
+@pytest.fixture
+def sample_chf_chunk() -> Chunk:
+    """Sample chunk with CHF abbreviation."""
+    return Chunk(
+        id="chunk_chf_001",
+        document_id="doc_003",
+        text="Patient presents with CHF symptoms including dyspnea on exertion, "
+             "bilateral lower extremity edema, and elevated JVP.",
+        start_char=0,
+        end_char=120,
+        token_count=25,
+        page_number=1,
+        section_path=["Cardiology", "Heart Failure"]
+    )
+
+
+@pytest.fixture
+def sample_dvt_chunk() -> Chunk:
+    """Sample chunk with DVT abbreviation."""
+    return Chunk(
+        id="chunk_dvt_001",
+        document_id="doc_004",
+        text="DVT is a serious condition involving blood clot formation in deep veins. "
+             "Treatment includes anticoagulation with heparin or warfarin.",
+        start_char=0,
+        end_char=140,
+        token_count=28,
+        page_number=1,
+        section_path=["Hematology", "Coagulation"]
     )
