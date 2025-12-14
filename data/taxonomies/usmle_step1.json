@@ -1,0 +1,201 @@
+{
+  "exam": "USMLE_STEP1",
+  "version": "2024",
+  "systems": [
+    {
+      "id": "SYS1",
+      "title": "General Principles",
+      "keywords": ["biochemistry", "genetics", "pharmacology", "pathology"],
+      "topics": [
+        {
+          "id": "SYS1A",
+          "title": "Biochemistry and Molecular Biology",
+          "keywords": ["biochemistry", "molecular biology", "metabolism", "enzymes"]
+        },
+        {
+          "id": "SYS1B",
+          "title": "Human Development and Genetics",
+          "keywords": ["genetics", "development", "embryology", "inheritance"]
+        },
+        {
+          "id": "SYS1C",
+          "title": "Immunology",
+          "keywords": ["immune system", "antibodies", "inflammation", "immunology"]
+        },
+        {
+          "id": "SYS1D",
+          "title": "Microbiology",
+          "keywords": ["bacteria", "viruses", "fungi", "parasites", "microbiology"]
+        },
+        {
+          "id": "SYS1E",
+          "title": "Pathology",
+          "keywords": ["pathology", "disease", "neoplasia", "inflammation"]
+        },
+        {
+          "id": "SYS1F",
+          "title": "Pharmacology",
+          "keywords": ["pharmacology", "drugs", "pharmacokinetics", "pharmacodynamics"]
+        }
+      ]
+    },
+    {
+      "id": "SYS2",
+      "title": "Blood and Lymphoreticular System",
+      "keywords": ["hematology", "blood", "lymph", "coagulation"],
+      "topics": [
+        {
+          "id": "SYS2A",
+          "title": "Hematopoiesis and Blood Components",
+          "keywords": ["blood cells", "hematopoiesis", "red blood cells", "white blood cells"]
+        },
+        {
+          "id": "SYS2B",
+          "title": "Anemias and Related Disorders",
+          "keywords": ["anemia", "iron deficiency", "sickle cell", "thalassemia"]
+        }
+      ]
+    },
+    {
+      "id": "SYS3",
+      "title": "Cardiovascular System",
+      "keywords": ["cardiovascular", "heart", "blood vessels", "circulation"],
+      "topics": [
+        {
+          "id": "SYS3A",
+          "title": "Cardiac Anatomy and Physiology",
+          "keywords": ["heart anatomy", "cardiac cycle", "ECG", "cardiac output"]
+        },
+        {
+          "id": "SYS3B",
+          "title": "Vascular Disorders",
+          "keywords": ["atherosclerosis", "hypertension", "aneurysm", "vasculitis"]
+        }
+      ]
+    },
+    {
+      "id": "SYS4",
+      "title": "Respiratory System",
+      "keywords": ["respiratory", "lungs", "breathing", "gas exchange"],
+      "topics": [
+        {
+          "id": "SYS4A",
+          "title": "Pulmonary Anatomy and Physiology",
+          "keywords": ["lung anatomy", "ventilation", "perfusion", "gas exchange"]
+        },
+        {
+          "id": "SYS4B",
+          "title": "Obstructive and Restrictive Lung Disease",
+          "keywords": ["asthma", "COPD", "fibrosis", "pneumonia"]
+        }
+      ]
+    },
+    {
+      "id": "SYS5",
+      "title": "Gastrointestinal System",
+      "keywords": ["GI", "digestive", "liver", "pancreas"],
+      "topics": [
+        {
+          "id": "SYS5A",
+          "title": "GI Anatomy and Physiology",
+          "keywords": ["GI tract", "digestion", "absorption", "motility"]
+        },
+        {
+          "id": "SYS5B",
+          "title": "Hepatobiliary System",
+          "keywords": ["liver", "gallbladder", "bile", "hepatitis"]
+        }
+      ]
+    },
+    {
+      "id": "SYS6",
+      "title": "Renal and Urinary System",
+      "keywords": ["renal", "kidney", "urinary", "nephrology"],
+      "topics": [
+        {
+          "id": "SYS6A",
+          "title": "Renal Physiology",
+          "keywords": ["glomerular filtration", "tubular function", "electrolytes", "acid-base"]
+        },
+        {
+          "id": "SYS6B",
+          "title": "Renal Pathology",
+          "keywords": ["glomerulonephritis", "nephrotic syndrome", "acute kidney injury"]
+        }
+      ]
+    },
+    {
+      "id": "SYS7",
+      "title": "Reproductive System",
+      "keywords": ["reproductive", "fertility", "pregnancy", "hormones"],
+      "topics": [
+        {
+          "id": "SYS7A",
+          "title": "Male and Female Reproductive Physiology",
+          "keywords": ["menstrual cycle", "spermatogenesis", "hormones", "fertilization"]
+        },
+        {
+          "id": "SYS7B",
+          "title": "Pregnancy and Obstetrics",
+          "keywords": ["pregnancy", "labor", "fetal development", "complications"]
+        }
+      ]
+    },
+    {
+      "id": "SYS8",
+      "title": "Endocrine System",
+      "keywords": ["endocrine", "hormones", "metabolism", "diabetes"],
+      "topics": [
+        {
+          "id": "SYS8A",
+          "title": "Pituitary and Hypothalamus",
+          "keywords": ["pituitary", "hypothalamus", "growth hormone", "ACTH"]
+        },
+        {
+          "id": "SYS8B",
+          "title": "Thyroid and Parathyroid",
+          "keywords": ["thyroid", "parathyroid", "calcium", "hyperthyroidism"]
+        },
+        {
+          "id": "SYS8C",
+          "title": "Adrenal Glands and Pancreas",
+          "keywords": ["adrenal", "cortisol", "aldosterone", "diabetes", "insulin"]
+        }
+      ]
+    },
+    {
+      "id": "SYS9",
+      "title": "Musculoskeletal System",
+      "keywords": ["musculoskeletal", "bones", "muscles", "joints"],
+      "topics": [
+        {
+          "id": "SYS9A",
+          "title": "Bone and Joint Disorders",
+          "keywords": ["osteoporosis", "arthritis", "fractures", "bone metabolism"]
+        },
+        {
+          "id": "SYS9B",
+          "title": "Muscle Disorders",
+          "keywords": ["myopathy", "muscular dystrophy", "muscle physiology"]
+        }
+      ]
+    },
+    {
+      "id": "SYS10",
+      "title": "Nervous System",
+      "keywords": ["neurology", "brain", "spinal cord", "nerves"],
+      "topics": [
+        {
+          "id": "SYS10A",
+          "title": "Neuroanatomy and Physiology",
+          "keywords": ["brain anatomy", "neurotransmitters", "action potential", "synapses"]
+        },
+        {
+          "id": "SYS10B",
+          "title": "Neurological Disorders",
+          "keywords": ["stroke", "epilepsy", "Parkinson", "multiple sclerosis"]
+        }
+      ]
+    }
+  ]
+}

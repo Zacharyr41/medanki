@@ -1,0 +1,191 @@
+{
+  "exam": "MCAT",
+  "version": "2024",
+  "foundational_concepts": [
+    {
+      "id": "FC1",
+      "title": "Biomolecules have unique properties that determine how they contribute to the structure and function of cells",
+      "keywords": ["biomolecules", "cells", "structure", "function"],
+      "categories": [
+        {
+          "id": "1A",
+          "title": "Structure and function of proteins and their constituent amino acids",
+          "keywords": ["amino acids", "protein", "protein structure", "enzymes"]
+        },
+        {
+          "id": "1B",
+          "title": "Transmission of genetic information from the gene to the protein",
+          "keywords": ["DNA", "RNA", "transcription", "translation", "gene expression"]
+        },
+        {
+          "id": "1C",
+          "title": "Transmission of heritable information from generation to generation",
+          "keywords": ["genetics", "heredity", "chromosomes", "meiosis"]
+        },
+        {
+          "id": "1D",
+          "title": "Principles of bioenergetics and fuel molecule metabolism",
+          "keywords": ["metabolism", "ATP", "glycolysis", "Krebs cycle", "bioenergetics"]
+        }
+      ]
+    },
+    {
+      "id": "FC2",
+      "title": "Highly organized assemblies of molecules, cells, and organs interact to carry out the functions of living organisms",
+      "keywords": ["cells", "organs", "assemblies", "organisms"],
+      "categories": [
+        {
+          "id": "2A",
+          "title": "Assemblies of molecules, cells, and groups of cells within single cellular and multicellular organisms",
+          "keywords": ["cell biology", "tissues", "organelles"]
+        },
+        {
+          "id": "2B",
+          "title": "The structure, growth, physiology, and genetics of prokaryotes and viruses",
+          "keywords": ["bacteria", "viruses", "microbiology", "prokaryotes"]
+        },
+        {
+          "id": "2C",
+          "title": "Processes of cell division, differentiation, and specialization",
+          "keywords": ["mitosis", "cell cycle", "differentiation", "stem cells"]
+        }
+      ]
+    },
+    {
+      "id": "FC3",
+      "title": "Complex systems of tissues and organs sense the internal and external environments of multicellular organisms",
+      "keywords": ["tissues", "organs", "nervous system", "sensory"],
+      "categories": [
+        {
+          "id": "3A",
+          "title": "Structure and functions of the nervous and endocrine systems",
+          "keywords": ["nervous system", "endocrine", "hormones", "neurons"]
+        },
+        {
+          "id": "3B",
+          "title": "Structure and integrative functions of the main organ systems",
+          "keywords": ["cardiovascular", "respiratory", "digestive", "organ systems"]
+        }
+      ]
+    },
+    {
+      "id": "FC4",
+      "title": "Complex living organisms transport materials, sense their environment, process signals, and respond to changes",
+      "keywords": ["transport", "signaling", "homeostasis"],
+      "categories": [
+        {
+          "id": "4A",
+          "title": "Translocation of water and solutes in plants",
+          "keywords": ["plants", "xylem", "phloem", "transpiration"]
+        },
+        {
+          "id": "4B",
+          "title": "Structure and function of the renal and circulatory systems",
+          "keywords": ["kidney", "renal", "circulatory", "blood"]
+        }
+      ]
+    },
+    {
+      "id": "FC5",
+      "title": "The principles that govern chemical interactions and reactions form the basis for a broader understanding of molecular dynamics in living systems",
+      "keywords": ["chemistry", "reactions", "molecular dynamics"],
+      "categories": [
+        {
+          "id": "5A",
+          "title": "Unique nature of water and its solutions",
+          "keywords": ["water", "solutions", "pH", "buffers"]
+        },
+        {
+          "id": "5B",
+          "title": "Nature of molecules and intermolecular interactions",
+          "keywords": ["molecules", "bonding", "intermolecular forces"]
+        },
+        {
+          "id": "5C",
+          "title": "Separation and purification methods",
+          "keywords": ["chromatography", "electrophoresis", "purification"]
+        },
+        {
+          "id": "5D",
+          "title": "Structure, function, and reactivity of biologically-relevant molecules",
+          "keywords": ["organic chemistry", "functional groups", "reactions"]
+        }
+      ]
+    },
+    {
+      "id": "FC6",
+      "title": "Biological, psychological, and sociocultural factors influence the ways that individuals perceive, think about, and react to the world",
+      "keywords": ["perception", "cognition", "behavior"],
+      "categories": [
+        {
+          "id": "6A",
+          "title": "Sensing the environment",
+          "keywords": ["sensation", "perception", "sensory systems"]
+        },
+        {
+          "id": "6B",
+          "title": "Making sense of the environment",
+          "keywords": ["cognition", "memory", "attention", "learning"]
+        }
+      ]
+    },
+    {
+      "id": "FC7",
+      "title": "Biological, psychological, and sociocultural factors influence behavior and behavior change",
+      "keywords": ["behavior", "behavior change", "psychology"],
+      "categories": [
+        {
+          "id": "7A",
+          "title": "Individual influences on behavior",
+          "keywords": ["personality", "attitudes", "self-concept"]
+        },
+        {
+          "id": "7B",
+          "title": "Social processes that influence human behavior",
+          "keywords": ["social influence", "conformity", "groups"]
+        }
+      ]
+    },
+    {
+      "id": "FC8",
+      "title": "Psychological, sociocultural, and biological factors influence the way we interact with others",
+      "keywords": ["social interaction", "relationships"],
+      "categories": [
+        {
+          "id": "8A",
+          "title": "Self-identity",
+          "keywords": ["identity", "self-esteem", "self-efficacy"]
+        },
+        {
+          "id": "8B",
+          "title": "Social thinking",
+          "keywords": ["attribution", "stereotypes", "prejudice"]
+        }
+      ]
+    },
+    {
+      "id": "FC9",
+      "title": "Cultural and social differences influence well-being",
+      "keywords": ["culture", "society", "well-being"],
+      "categories": [
+        {
+          "id": "9A",
+          "title": "Understanding social structure",
+          "keywords": ["social structure", "institutions", "stratification"]
+        }
+      ]
+    },
+    {
+      "id": "FC10",
+      "title": "Social stratification and access to resources influence well-being",
+      "keywords": ["stratification", "resources", "inequality"],
+      "categories": [
+        {
+          "id": "10A",
+          "title": "Social inequality",
+          "keywords": ["inequality", "class", "poverty", "social mobility"]
+        }
+      ]
+    }
+  ]
+}
