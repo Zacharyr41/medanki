@@ -1,6 +1,6 @@
+import '@testing-library/jest-dom'
 import { Blob } from 'buffer'
 
-// Polyfills for Node environment
 class MockFile {
   name: string
   type: string
