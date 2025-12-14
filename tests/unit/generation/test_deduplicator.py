@@ -7,7 +7,7 @@ from medanki.generation.deduplicator import (
     Deduplicator,
     DuplicateStatus,
 )
-from medanki.generation.validator import ClozeCard
+from medanki.models.cards import ClozeCard
 
 
 class TestExactDuplicateDetection:
@@ -15,11 +15,11 @@ class TestExactDuplicateDetection:
         deduplicator = Deduplicator()
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="The mitochondria is the powerhouse of the cell."
+            source_chunk_id="The mitochondria is the powerhouse of the cell."
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="The mitochondria is the powerhouse of the cell."
+            source_chunk_id="The mitochondria is the powerhouse of the cell."
         )
 
         result = deduplicator.check_duplicate(card1, [card2])
@@ -31,11 +31,11 @@ class TestExactDuplicateDetection:
         deduplicator = Deduplicator()
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source B"
+            source_chunk_id="Source B"
         )
 
         hash1 = deduplicator.compute_content_hash(card1)
@@ -61,11 +61,11 @@ class TestSemanticDuplicateDetection:
         deduplicator = Deduplicator(embedding_client=mock_embedding_client)
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondrion}} is the cell's power generator.",
-            source_chunk="Source B"
+            source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -86,11 +86,11 @@ class TestSemanticDuplicateDetection:
         )
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondria}} produces ATP for the cell.",
-            source_chunk="Source B"
+            source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -111,11 +111,11 @@ class TestSemanticDuplicateDetection:
         )
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         card2 = ClozeCard(
             text="{{c1::Hypertension}} is defined as BP > 130/80.",
-            source_chunk="Source B"
+            source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -141,7 +141,7 @@ class TestCrossSessionDeduplication:
     async def test_checks_existing_cards(self, mock_db, mock_embedding_client):
         existing_card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         mock_db.get_existing_cards.return_value = [existing_card]
 
@@ -151,7 +151,7 @@ class TestCrossSessionDeduplication:
         )
         new_card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source B"
+            source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_against_existing(new_card)
@@ -166,7 +166,7 @@ class TestCrossSessionDeduplication:
         )
         card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk="Source A"
+            source_chunk_id="Source A"
         )
         duplicate_result = DeduplicationResult(
             is_duplicate=True,

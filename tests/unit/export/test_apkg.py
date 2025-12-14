@@ -142,7 +142,7 @@ class TestAPKGExporter:
             builder.add_cloze_card(card)
         deck = builder.build()
 
-        assert deck.note_count == 5
+        assert len(deck.notes) == 5
 
     def test_deck_has_stable_ids(self, tmp_path):
         """Same deck name produces same deck ID."""

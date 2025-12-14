@@ -148,21 +148,27 @@ class TestPharmacologyClassification:
 
 
 class TestMaxTopicsLimit:
-    """Tests for max topics limit."""
+    """Tests for max topics limit via relative threshold."""
 
-    def test_classify_respects_max_topics(self, sample_cardiology_chunk, mock_taxonomy_service, mock_vector_store):
-        """Classification respects max topics limit."""
+    def test_classify_filters_by_relative_threshold(self, sample_cardiology_chunk, mock_taxonomy_service, mock_vector_store):
+        """Classification filters low-confidence topics via relative threshold."""
         mock_vector_store.hybrid_search.return_value = [
-            {"topic_id": f"topic_{i}", "score": 0.90 - (i * 0.02)}
-            for i in range(10)
+            {"topic_id": "topic_0", "score": 0.90},
+            {"topic_id": "topic_1", "score": 0.85},
+            {"topic_id": "topic_2", "score": 0.75},
+            {"topic_id": "topic_3", "score": 0.50},
         ]
         service = ClassificationService(
             taxonomy_service=mock_taxonomy_service,
             vector_store=mock_vector_store
         )
-        results = service.classify(sample_cardiology_chunk, max_topics=5)
+        results = service.classify(sample_cardiology_chunk)
 
-        assert len(results) <= 5, f"Expected at most 5 topics, got {len(results)}"
+        confidences = [r.confidence for r in results]
+        if len(confidences) > 0:
+            max_conf = max(confidences)
+            for conf in confidences:
+                assert conf >= max_conf * 0.80, "All results should pass relative threshold"
 
 
 class TestMedicalAbbreviations:

@@ -40,6 +40,7 @@ dev = [
     "pytest-vcr>=1.0.0",
     "respx>=0.21.0",
     "ruff>=0.1.0",
+    "types-aiofiles>=23.0.0",
 ]
 
 [tool.uv.workspace]

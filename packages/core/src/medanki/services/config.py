@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     hybrid_alpha: float = 0.5
 
     @classmethod
-    def settings_customise_sources(
+    def settings_customise_sources(  # type: ignore[override]
         cls,
         settings_cls: type[BaseSettings],
         init_settings: object,
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
         from pydantic_settings import EnvSettingsSource
 
         class AnthropicEnvSource(EnvSettingsSource):
-            def get_field_value(
+            def get_field_value(  # type: ignore[override]
                 self,
                 field: object,
                 field_name: str,
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
                     val = os.environ.get("ANTHROPIC_API_KEY")
                     if val is not None:
                         return val, "ANTHROPIC_API_KEY", False
-                return super().get_field_value(field, field_name)
+                return super().get_field_value(field, field_name)  # type: ignore[arg-type]
 
         return (
             init_settings,
