@@ -7,7 +7,7 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { uploadFile } from '../api/upload'
 
 const DEFAULT_OPTIONS: GenerationOptions = {
-  exam: 'USMLE Step 1',
+  exam: 'MCAT',
   cardTypes: { cloze: true, vignette: true },
   maxCards: 10,
 }

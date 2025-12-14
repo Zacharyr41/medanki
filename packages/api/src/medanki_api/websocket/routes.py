@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocketState
 
 from medanki_api.websocket.manager import ConnectionManager
 
@@ -10,53 +12,70 @@ router = APIRouter()
 
 _manager = ConnectionManager()
 
-
-def get_manager() -> ConnectionManager:
-    return _manager
-
-
-def get_job_status(job_id: str) -> dict[str, Any] | None:
-    return None
+STAGES = ["ingesting", "chunking", "classifying", "generating", "exporting"]
 
 
 @router.websocket("/api/ws/{job_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
     job_id: str,
-    manager: ConnectionManager = Depends(get_manager),  # noqa: B008
 ) -> None:
-    job_status = get_job_status(job_id)
+    job_storage: dict[str, Any] = websocket.app.state.job_storage
+    job = job_storage.get(job_id)
 
-    if job_status is None:
+    if job is None:
         await websocket.close(code=4004, reason="Job not found")
         return
 
     await websocket.accept()
-    await manager.connect(job_id, websocket)
+    await _manager.connect(job_id, websocket)
 
     try:
-        if job_status.get("status") == "completed":
-            await websocket.send_json(
-                {
-                    "type": "complete",
-                    "result": job_status.get("result", {}),
-                }
-            )
+        if job.get("status") == "completed":
+            await websocket.send_json({
+                "type": "complete",
+                "progress": 100,
+            })
             return
 
-        await websocket.send_json(
-            {
-                "type": "progress",
-                "progress": job_status.get("progress", 0),
-                "stage": job_status.get("stage", ""),
-                "details": job_status.get("details", {}),
-            }
-        )
+        job["status"] = "processing"
+        job["stage"] = "ingesting"
+        job["progress"] = 0
 
-        while True:
-            await websocket.receive_text()
+        for stage_idx, stage in enumerate(STAGES):
+            job["stage"] = stage
+            base_progress = (stage_idx / len(STAGES)) * 100
+
+            for step in range(10):
+                if websocket.client_state != WebSocketState.CONNECTED:
+                    return
+
+                step_progress = (step + 1) / 10
+                job["progress"] = base_progress + (step_progress * (100 / len(STAGES)))
+
+                await websocket.send_json({
+                    "type": "progress",
+                    "progress": job["progress"],
+                    "stage": stage,
+                })
+
+                await asyncio.sleep(0.3)
+
+        job["status"] = "completed"
+        job["progress"] = 100
+
+        await websocket.send_json({
+            "type": "complete",
+            "progress": 100,
+        })
 
     except WebSocketDisconnect:
         pass
+    except Exception as e:
+        if websocket.client_state == WebSocketState.CONNECTED:
+            await websocket.send_json({
+                "type": "error",
+                "error": str(e),
+            })
     finally:
-        await manager.disconnect(job_id, websocket)
+        await _manager.disconnect(job_id, websocket)

@@ -13,6 +13,7 @@ from medanki_api.routes import jobs_router, upload_router
 from medanki_api.routes.download import router as download_router
 from medanki_api.routes.preview import router as preview_router
 from medanki_api.schemas.responses import ErrorResponse
+from medanki_api.websocket.routes import router as websocket_router
 
 
 @asynccontextmanager
@@ -90,6 +91,7 @@ app.include_router(upload_router)
 app.include_router(jobs_router)
 app.include_router(preview_router, prefix="/api", tags=["preview"])
 app.include_router(download_router, prefix="/api", tags=["download"])
+app.include_router(websocket_router)
 
 
 @app.exception_handler(Exception)

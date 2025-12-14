@@ -4,13 +4,25 @@ interface UploadResponse {
   jobId: string
 }
 
+interface ApiUploadResponse {
+  job_id: string
+  status: string
+  created_at: string
+}
+
 export async function uploadFile(
   file: File,
   options: GenerationOptions
 ): Promise<UploadResponse> {
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('options', JSON.stringify(options))
+  formData.append('exam', options.exam)
+
+  const cardTypes: string[] = []
+  if (options.cardTypes.cloze) cardTypes.push('cloze')
+  if (options.cardTypes.vignette) cardTypes.push('vignette')
+  formData.append('card_types', cardTypes.join(','))
+  formData.append('max_cards', String(options.maxCards))
 
   const response = await fetch('/api/upload', {
     method: 'POST',
@@ -18,8 +30,10 @@ export async function uploadFile(
   })
 
   if (!response.ok) {
-    throw new Error('Upload failed')
+    const error = await response.text()
+    throw new Error(error || 'Upload failed')
   }
 
-  return response.json()
+  const data: ApiUploadResponse = await response.json()
+  return { jobId: data.job_id }
 }

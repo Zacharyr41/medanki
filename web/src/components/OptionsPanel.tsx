@@ -12,7 +12,11 @@ interface OptionsPanelProps {
   onChange: (options: GenerationOptions) => void
 }
 
-const EXAM_OPTIONS = ['MCAT', 'USMLE Step 1', 'USMLE Step 2']
+const EXAM_OPTIONS = [
+  { value: 'MCAT', label: 'MCAT' },
+  { value: 'USMLE_STEP1', label: 'USMLE Step 1' },
+  { value: 'USMLE_STEP2', label: 'USMLE Step 2' },
+]
 
 export function OptionsPanel({ options, onChange }: OptionsPanelProps) {
   const handleExamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -43,8 +47,8 @@ export function OptionsPanel({ options, onChange }: OptionsPanelProps) {
           onChange={handleExamChange}
         >
           {EXAM_OPTIONS.map((exam) => (
-            <option key={exam} value={exam}>
-              {exam}
+            <option key={exam.value} value={exam.value}>
+              {exam.label}
             </option>
           ))}
         </select>
