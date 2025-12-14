@@ -97,3 +97,37 @@ def real_embedder() -> Generator:
     from medanki.processing.embedder import EmbeddingService
 
     yield EmbeddingService()
+
+
+@pytest.fixture
+def sample_cardiology_vignette() -> dict:
+    return {
+        "stem": "A 58-year-old male with a history of hypertension and diabetes presents to the emergency department with crushing substernal chest pain radiating to the left arm for the past 30 minutes. He is diaphoretic and appears anxious. Blood pressure is 160/95 mmHg, heart rate is 102 bpm. ECG shows ST-segment elevation in leads V1-V4.",
+        "question": "What is the most appropriate next step in management?",
+        "options": [
+            {"letter": "A", "text": "Percutaneous intervention"},
+            {"letter": "B", "text": "Thrombolytic therapy"},
+            {"letter": "C", "text": "Cardiac catheterization"},
+            {"letter": "D", "text": "Stress echocardiography"},
+            {"letter": "E", "text": "Serial troponins"},
+        ],
+        "answer": "A",
+        "explanation": "This patient presents with STEMI (ST-elevation myocardial infarction) as evidenced by ST-elevation in V1-V4. Primary PCI is the preferred reperfusion strategy when available within 90-120 minutes of first medical contact.",
+    }
+
+
+@pytest.fixture
+def sample_infectious_disease_vignette() -> dict:
+    return {
+        "stem": "A 32-year-old female presents with a 5-day history of fever, headache, and myalgias. She recently returned from a camping trip in Connecticut. Physical examination reveals a 10 cm erythematous lesion with central clearing on her right thigh. Temperature is 38.5°C.",
+        "question": "What is the most likely diagnosis?",
+        "options": [
+            {"letter": "A", "text": "Lyme disease"},
+            {"letter": "B", "text": "Rocky Mountain spotted fever"},
+            {"letter": "C", "text": "Ehrlichiosis"},
+            {"letter": "D", "text": "Cellulitis"},
+            {"letter": "E", "text": "Contact dermatitis"},
+        ],
+        "answer": "A",
+        "explanation": "The classic erythema migrans rash (target lesion with central clearing), combined with flu-like symptoms and recent outdoor exposure in an endemic area (Connecticut), is pathognomonic for early Lyme disease caused by Borrelia burgdorferi.",
+    }
