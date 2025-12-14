@@ -1,5 +1,6 @@
 from medanki.storage.models import Job, JobStatus
 from medanki.storage.sqlite import SQLiteStore
+from medanki.storage.taxonomy_repository import TaxonomyRepository
 from medanki.storage.weaviate import (
     IVectorStore,
     MedicalChunk,
@@ -11,6 +12,7 @@ __all__ = [
     "Job",
     "JobStatus",
     "SQLiteStore",
+    "TaxonomyRepository",
     "IVectorStore",
     "MedicalChunk",
     "SearchResult",
