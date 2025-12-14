@@ -1,11 +1,13 @@
-.PHONY: install install-dev sync test test-unit test-integration lint format typecheck clean dev-api dev-web docker-up docker-down setup-hooks
+.PHONY: install install-dev sync test test-unit test-integration lint format typecheck clean dev dev-api dev-web docker-up docker-down docker-build docker-push docker-run-prod setup-hooks help
 
 # Installation
 install:
 	uv sync
+	cd web && npm ci
 
 install-dev:
 	uv sync --all-extras
+	cd web && npm ci
 
 sync:
 	uv sync --all-extras
@@ -13,6 +15,7 @@ sync:
 # Testing
 test:
 	uv run pytest tests/ -v
+	cd web && npm test -- --run
 
 test-unit:
 	uv run pytest tests/unit -v --tb=short
@@ -26,6 +29,8 @@ test-cov:
 # Code quality
 lint:
 	uv run ruff check .
+	uv run mypy packages/
+	cd web && npm run lint
 
 lint-fix:
 	uv run ruff check --fix .
@@ -39,6 +44,11 @@ typecheck:
 check: lint typecheck test-unit
 
 # Development servers
+dev:
+	@echo "Starting development servers..."
+	uv run uvicorn medanki_api.main:app --reload &
+	cd web && npm run dev
+
 dev-api:
 	uv run uvicorn medanki_api.main:app --reload --port 8000
 
@@ -54,6 +64,17 @@ docker-down:
 
 docker-logs:
 	docker-compose -f docker/docker-compose.yml logs -f
+
+docker-build:
+	docker build -f docker/Dockerfile.api -t medanki-api:latest .
+	docker build -f docker/Dockerfile.web -t medanki-web:latest .
+
+docker-push:
+	docker push medanki-api:latest
+	docker push medanki-web:latest
+
+docker-run-prod:
+	docker compose -f docker/docker-compose.prod.yml up -d
 
 # Cleanup
 clean:
@@ -79,11 +100,16 @@ help:
 	@echo "  install-dev    - Install with dev dependencies"
 	@echo "  test           - Run all tests"
 	@echo "  test-unit      - Run unit tests only"
+	@echo "  test-integration - Run integration tests"
 	@echo "  lint           - Run linter"
 	@echo "  format         - Format code"
 	@echo "  typecheck      - Run type checker"
+	@echo "  dev            - Start all dev servers"
 	@echo "  dev-api        - Start FastAPI dev server"
 	@echo "  dev-web        - Start React dev server"
 	@echo "  docker-up      - Start Docker services"
 	@echo "  docker-down    - Stop Docker services"
+	@echo "  docker-build   - Build all Docker images"
+	@echo "  docker-push    - Push images to registry"
+	@echo "  docker-run-prod - Run production compose"
 	@echo "  clean          - Clean build artifacts"
