@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 from uuid import uuid4
 
-from medanki.storage.weaviate import WeaviateStore
+import pytest
+from medanki.storage.weaviate import MedicalChunk, WeaviateStore
 
 
 class TestWeaviateConnection:
@@ -28,11 +29,22 @@ class TestWeaviateConnection:
 
 
 class TestWeaviateCRUD:
-    def test_upsert_single_chunk(self, mock_weaviate_client, sample_chunk):
+    @pytest.fixture
+    def medical_chunk(self):
+        return MedicalChunk(
+            id="chunk_001",
+            content="The cardiac cycle consists of systole and diastole phases.",
+            embedding=[0.1] * 384,
+            document_id="doc_001",
+            exam_type="USMLE",
+            metadata={"page": 1}
+        )
+
+    def test_upsert_single_chunk(self, mock_weaviate_client, medical_chunk):
         store = WeaviateStore(client=mock_weaviate_client)
         collection = mock_weaviate_client.collections.get.return_value
 
-        chunk_id = store.upsert(sample_chunk)
+        chunk_id = store.upsert(medical_chunk)
 
         assert chunk_id is not None
         collection.data.insert.assert_called_once()
@@ -46,25 +58,25 @@ class TestWeaviateCRUD:
         assert len(chunk_ids) == len(sample_chunks_with_embeddings)
         collection.data.insert_many.assert_called_once()
 
-    def test_get_by_id(self, mock_weaviate_client, sample_chunk):
+    def test_get_by_id(self, mock_weaviate_client, medical_chunk):
         store = WeaviateStore(client=mock_weaviate_client)
         collection = mock_weaviate_client.collections.get.return_value
 
         mock_obj = Mock()
         mock_obj.properties = {
-            "content": sample_chunk.content,
-            "document_id": sample_chunk.document_id,
-            "exam_type": sample_chunk.exam_type,
+            "content": medical_chunk.content,
+            "document_id": medical_chunk.document_id,
+            "exam_type": medical_chunk.exam_type,
         }
-        mock_obj.vector = {"default": sample_chunk.embedding}
-        mock_obj.uuid = sample_chunk.id
+        mock_obj.vector = {"default": medical_chunk.embedding}
+        mock_obj.uuid = medical_chunk.id
         collection.query.fetch_object_by_id.return_value = mock_obj
 
-        result = store.get_by_id(sample_chunk.id)
+        result = store.get_by_id(medical_chunk.id)
 
         assert result is not None
-        assert result.content == sample_chunk.content
-        collection.query.fetch_object_by_id.assert_called_once_with(sample_chunk.id, include_vector=True)
+        assert result.content == medical_chunk.content
+        collection.query.fetch_object_by_id.assert_called_once_with(medical_chunk.id, include_vector=True)
 
     def test_delete_by_id(self, mock_weaviate_client, sample_chunk):
         store = WeaviateStore(client=mock_weaviate_client)
