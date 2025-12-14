@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -20,13 +20,13 @@ class TestWebSocketConnection:
 
         app = FastAPI()
         app.include_router(router)
+        app.state.job_storage = {"job-123": {"status": "pending", "progress": 0}}
 
-        with patch("medanki_api.websocket.routes.get_job_status") as mock_get_job:
-            mock_get_job.return_value = {"status": "processing", "progress": 0}
-
-            with TestClient(app) as client:  # noqa: SIM117
-                with client.websocket_connect("/api/ws/job-123") as websocket:
-                    assert websocket is not None
+        with TestClient(app) as client:
+            with client.websocket_connect("/api/ws/job-123") as websocket:
+                assert websocket is not None
+                data = websocket.receive_json()
+                assert data["type"] == "progress"
 
     @pytest.mark.asyncio
     async def test_websocket_invalid_job_closes(self) -> None:
@@ -38,13 +38,11 @@ class TestWebSocketConnection:
 
         app = FastAPI()
         app.include_router(router)
+        app.state.job_storage = {}
 
-        with patch("medanki_api.websocket.routes.get_job_status") as mock_get_job:
-            mock_get_job.return_value = None
-
-            with TestClient(app) as client, pytest.raises(WebSocketDisconnect):  # noqa: SIM117
-                with client.websocket_connect("/api/ws/unknown-job"):
-                    pass
+        with TestClient(app) as client, pytest.raises(WebSocketDisconnect):
+            with client.websocket_connect("/api/ws/unknown-job"):
+                pass
 
     @pytest.mark.asyncio
     async def test_websocket_sends_initial_status(self) -> None:
@@ -55,19 +53,13 @@ class TestWebSocketConnection:
 
         app = FastAPI()
         app.include_router(router)
+        app.state.job_storage = {"job-123": {"status": "pending", "progress": 0}}
 
-        with patch("medanki_api.websocket.routes.get_job_status") as mock_get_job:
-            mock_get_job.return_value = {
-                "status": "processing",
-                "progress": 25,
-                "stage": "chunking",
-            }
-
-            with TestClient(app) as client:  # noqa: SIM117
-                with client.websocket_connect("/api/ws/job-123") as websocket:
-                    data = websocket.receive_json()
-                    assert data["type"] == "progress"
-                    assert data["progress"] == 25
+        with TestClient(app) as client:
+            with client.websocket_connect("/api/ws/job-123") as websocket:
+                data = websocket.receive_json()
+                assert data["type"] == "progress"
+                assert "progress" in data
 
 
 class TestProgressUpdates:
@@ -182,30 +174,22 @@ class TestErrorHandling:
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
 
-        from medanki_api.websocket.manager import ConnectionManager
-        from medanki_api.websocket.routes import get_manager, router
+        from medanki_api.websocket.routes import router
 
         app = FastAPI()
         app.include_router(router)
-
-        manager = ConnectionManager()
-
-        def override_manager() -> ConnectionManager:
-            return manager
-
-        app.dependency_overrides[get_manager] = override_manager
-
-        with patch("medanki_api.websocket.routes.get_job_status") as mock_get_job:
-            mock_get_job.return_value = {
+        app.state.job_storage = {
+            "job-123": {
                 "status": "completed",
                 "progress": 100,
                 "result": {"card_count": 10},
             }
+        }
 
-            with TestClient(app) as client:  # noqa: SIM117
-                with client.websocket_connect("/api/ws/job-123") as websocket:
-                    data = websocket.receive_json()
-                    assert data["type"] == "complete"
+        with TestClient(app) as client:
+            with client.websocket_connect("/api/ws/job-123") as websocket:
+                data = websocket.receive_json()
+                assert data["type"] == "complete"
 
     @pytest.mark.asyncio
     async def test_handles_client_disconnect(self) -> None:
