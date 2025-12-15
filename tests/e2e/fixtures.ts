@@ -2,11 +2,17 @@ import { test as base, expect } from '@playwright/test'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+import { config } from './config'
 
 interface TestFixtures {
   samplePdfPath: string
   sampleMdPath: string
+  sampleDocxPath: string
+  largeMdPath: string
+  invalidFilePath: string
   tempDir: string
+  apiBaseUrl: string
+  webBaseUrl: string
 }
 
 export const test = base.extend<TestFixtures>({
@@ -88,6 +94,67 @@ Initial treatment includes:
 `
     fs.writeFileSync(mdPath, mdContent)
     await use(mdPath)
+  },
+
+  sampleDocxPath: async ({ tempDir }, use) => {
+    const docxPath = path.join(tempDir, 'sample.docx')
+    const docxContent = Buffer.from([
+      0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00, 0x08, 0x00,
+      0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ])
+    fs.writeFileSync(docxPath, docxContent)
+    await use(docxPath)
+  },
+
+  largeMdPath: async ({ tempDir }, use) => {
+    const mdPath = path.join(tempDir, 'large.md')
+    const sections = [
+      '# Comprehensive Medical Review\n\n',
+      '## Cardiovascular System\n\n',
+      'The cardiovascular system consists of the heart, blood vessels, and blood. ' +
+        'The heart is a muscular organ that pumps blood through the circulatory system. ' +
+        'Blood carries oxygen and nutrients to tissues and removes carbon dioxide and waste products.\n\n',
+      '### Heart Anatomy\n\n',
+      'The heart has four chambers: the right atrium, right ventricle, left atrium, and left ventricle. ' +
+        'The right side of the heart receives deoxygenated blood from the body and pumps it to the lungs. ' +
+        'The left side receives oxygenated blood from the lungs and pumps it to the body.\n\n',
+      '### Cardiac Cycle\n\n',
+      'The cardiac cycle consists of systole (contraction) and diastole (relaxation). ' +
+        'During systole, the ventricles contract and eject blood. During diastole, the ventricles relax and fill with blood. ' +
+        'The sinoatrial node initiates each heartbeat as the natural pacemaker.\n\n',
+      '## Respiratory System\n\n',
+      'The respiratory system facilitates gas exchange between the body and the environment. ' +
+        'Air enters through the nose or mouth, travels through the pharynx, larynx, trachea, bronchi, and bronchioles to reach the alveoli. ' +
+        'Oxygen diffuses from alveoli into pulmonary capillaries while carbon dioxide diffuses in the opposite direction.\n\n',
+      '### Lung Volumes\n\n',
+      'Tidal volume is the amount of air inhaled or exhaled during normal breathing (~500mL). ' +
+        'Vital capacity is the maximum amount of air that can be exhaled after maximum inhalation. ' +
+        'Residual volume is the air remaining in lungs after maximum exhalation.\n\n',
+      '## Renal System\n\n',
+      'The kidneys filter blood, regulate fluid balance, and maintain electrolyte homeostasis. ' +
+        'Each kidney contains approximately one million nephrons, the functional units of the kidney. ' +
+        'The nephron consists of the glomerulus, proximal tubule, loop of Henle, distal tubule, and collecting duct.\n\n',
+      '### Glomerular Filtration\n\n',
+      'Blood enters the glomerulus through the afferent arteriole and exits through the efferent arteriole. ' +
+        'Filtration occurs based on size and charge of molecules. ' +
+        'The glomerular filtration rate (GFR) is approximately 125 mL/min or 180 L/day.\n\n',
+    ]
+    fs.writeFileSync(mdPath, sections.join(''))
+    await use(mdPath)
+  },
+
+  invalidFilePath: async ({ tempDir }, use) => {
+    const invalidPath = path.join(tempDir, 'invalid.xyz')
+    fs.writeFileSync(invalidPath, 'This is not a valid medical document format')
+    await use(invalidPath)
+  },
+
+  apiBaseUrl: async ({}, use) => {
+    await use(config.apiUrl)
+  },
+
+  webBaseUrl: async ({}, use) => {
+    await use(config.baseUrl)
   },
 })
 

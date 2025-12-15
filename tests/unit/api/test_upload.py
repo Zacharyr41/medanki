@@ -122,13 +122,13 @@ class TestUploadRejectsUnsupported:
     """Test rejection of unsupported file types."""
 
     async def test_upload_rejects_unsupported(self, client: AsyncClient) -> None:
-        """Uploading .docx returns 415 Unsupported Media Type."""
-        content = b"fake docx content"
+        """Uploading .xyz returns 415 Unsupported Media Type."""
+        content = b"fake xyz content"
         files = {
             "file": (
-                "document.docx",
+                "document.xyz",
                 io.BytesIO(content),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/octet-stream",
             )
         }
 

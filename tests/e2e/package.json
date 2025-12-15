@@ -6,7 +6,9 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug"
+    "test:debug": "playwright test --debug",
+    "test:prod": "playwright test production.spec.ts",
+    "test:smoke": "playwright test production.spec.ts --project=chromium"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

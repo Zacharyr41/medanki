@@ -50,8 +50,8 @@ test.describe('Upload Page', () => {
     await examSelect.selectOption('MCAT')
     await expect(examSelect).toHaveValue('MCAT')
 
-    await examSelect.selectOption('USMLE Step 2')
-    await expect(examSelect).toHaveValue('USMLE Step 2')
+    await examSelect.selectOption('USMLE Step 1')
+    await expect(examSelect).toHaveValue('USMLE Step 1')
   })
 
   test('can toggle card types', async ({ page }) => {
