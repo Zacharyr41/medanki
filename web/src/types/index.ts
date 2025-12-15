@@ -45,3 +45,52 @@ export interface Job {
   created_at: string
   updated_at: string
 }
+
+export type ExamType = 'MCAT' | 'USMLE'
+
+export interface TaxonomyCategory {
+  id: string
+  title: string
+  keywords: string[]
+}
+
+export interface FoundationalConcept {
+  id: string
+  title: string
+  keywords: string[]
+  categories: TaxonomyCategory[]
+}
+
+export interface MCATTaxonomy {
+  exam: 'MCAT'
+  version: string
+  foundational_concepts: FoundationalConcept[]
+}
+
+export interface USMLETopic {
+  id: string
+  title: string
+  keywords: string[]
+}
+
+export interface USMLESystem {
+  id: string
+  title: string
+  keywords: string[]
+  topics: USMLETopic[]
+}
+
+export interface USMLETaxonomy {
+  exam: 'USMLE'
+  version: string
+  systems: USMLESystem[]
+}
+
+export type Taxonomy = MCATTaxonomy | USMLETaxonomy
+
+export interface TaxonomySearchResult {
+  id: string
+  title: string
+  path: string[]
+  type: 'foundational_concept' | 'content_category' | 'topic' | 'system'
+}

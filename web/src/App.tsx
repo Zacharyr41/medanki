@@ -4,6 +4,7 @@ import { Layout } from './components/Layout'
 import { UploadPage } from './pages/UploadPage'
 import { ProcessingPage } from './pages/ProcessingPage'
 import { DownloadPage } from './pages/DownloadPage'
+import { TaxonomyBrowserPage } from './pages/TaxonomyBrowserPage'
 
 const queryClient = new QueryClient()
 
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<UploadPage />} />
             <Route path="/processing/:id" element={<ProcessingPage />} />
             <Route path="/download/:jobId" element={<DownloadPage />} />
+            <Route path="/taxonomy" element={<TaxonomyBrowserPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

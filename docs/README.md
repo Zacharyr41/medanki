@@ -10,6 +10,7 @@ MedAnki is an intelligent flashcard generation system that transforms medical co
 - [Development](./development.md) - Contributing and development setup
 - [Deployment](./deployment.md) - Production deployment guide
 - [Taxonomy](./taxonomy.md) - MCAT/USMLE classification system
+- [Data Sources](./data-sources.md) - Taxonomy data sources and ingestion
 
 ## Overview
 

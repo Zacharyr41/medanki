@@ -178,3 +178,34 @@ chunks (id, document_id, text, start_char, end_char, token_count, section_path)
 cards (id, document_id, chunk_id, card_type, content, content_hash, tags, status, created_at)
 jobs (id, document_id, status, progress, error, created_at, updated_at)
 ```
+
+## Taxonomy System
+
+The taxonomy system provides hierarchical classification for MCAT and USMLE topics.
+
+### TaxonomyServiceV2
+
+The `TaxonomyServiceV2` provides high-level taxonomy operations with SQLite backend:
+
+```python
+async with TaxonomyServiceV2(db_path, vector_store) as service:
+    node = await service.get_node("1A")
+    ancestors = await service.get_ancestors("1A")
+    descendants = await service.get_descendants("FC1", max_depth=2)
+```
+
+### Closure Table Pattern
+
+The taxonomy uses a closure table (`taxonomy_edges`) for efficient hierarchy queries:
+- O(1) ancestor/descendant lookups
+- Single query for full path retrieval
+- Efficient subtree operations
+
+### MeSH Integration
+
+Medical Subject Headings (MeSH) vocabulary is integrated for:
+- Synonym expansion during search
+- Medical term normalization
+- Cross-referencing with NIH terminology
+
+See [taxonomy.md](taxonomy.md) for detailed taxonomy documentation.

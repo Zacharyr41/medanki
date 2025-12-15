@@ -257,3 +257,106 @@ class CustomTagBuilder(TagBuilder):
 3. **Multi-Topic Cards**: Allow cards to have multiple relevant topics
 4. **Regular Updates**: Refresh topic embeddings when taxonomy changes
 5. **Quality Checks**: Review low-confidence classifications manually
+
+## Database Schema
+
+The taxonomy system uses SQLite with a closure table pattern for efficient hierarchy queries.
+
+### Core Tables
+
+```sql
+-- Exam definitions (MCAT, USMLE_STEP1, etc.)
+exams (id, name, version, source_url, created_at)
+
+-- Taxonomy nodes with parent references
+taxonomy_nodes (
+    id, exam_id, node_type, code, title, description,
+    percentage_min, percentage_max, parent_id, sort_order,
+    metadata, created_at, updated_at
+)
+
+-- Closure table for hierarchy queries
+taxonomy_edges (ancestor_id, descendant_id, depth)
+
+-- Associated keywords for search
+keywords (id, node_id, keyword, keyword_type, weight, source)
+
+-- System × Discipline mappings (USMLE)
+cross_classifications (
+    id, primary_node_id, secondary_node_id,
+    relationship_type, weight
+)
+```
+
+### NodeType Enumeration
+
+```python
+class NodeType(str, Enum):
+    FOUNDATIONAL_CONCEPT = "foundational_concept"  # MCAT FC1-FC10
+    CONTENT_CATEGORY = "content_category"          # MCAT 1A, 2B, etc.
+    TOPIC = "topic"                                # Leaf-level topics
+    SUBTOPIC = "subtopic"                          # Sub-topics
+    ORGAN_SYSTEM = "organ_system"                  # USMLE systems
+    DISCIPLINE = "discipline"                      # USMLE disciplines
+    SECTION = "section"                            # Generic section
+```
+
+### Closure Table Operations
+
+The closure table enables efficient hierarchy queries:
+
+```python
+# Get all ancestors (root to parent)
+ancestors = await service.get_ancestors(node_id)
+
+# Get all descendants with optional depth limit
+descendants = await service.get_descendants(node_id, max_depth=2)
+
+# Get full path as string
+path = await service.get_path(node_id)  # "FC1 > 1A > Amino Acids"
+```
+
+### Resource Mappings
+
+External resources (First Aid, Pathoma, etc.) can be mapped to taxonomy nodes:
+
+```sql
+-- Resource definitions
+resources (id, name, resource_type, version, anking_tag_prefix, metadata)
+
+-- Resource sections (chapters, pages)
+resource_sections (
+    id, resource_id, title, section_type, code,
+    parent_id, page_start, page_end, duration_seconds, sort_order
+)
+
+-- Node-to-section mappings
+resource_mappings (id, node_id, section_id, relevance_score, is_primary)
+```
+
+### AnKing Tag Integration
+
+The taxonomy supports AnKing-style hierarchical tags:
+
+```sql
+anking_tags (id, tag_path, resource, note_count, parent_tag_path)
+```
+
+Generate AnKing-compatible tags:
+
+```python
+tag = await service.generate_anking_tag("SYS3A")
+# Returns: "#AK_Step1_v12::Cardiovascular::Cardiac_Anatomy_and_Physiology"
+```
+
+### MeSH Vocabulary Integration
+
+MeSH concepts can be linked to taxonomy nodes for synonym expansion:
+
+```sql
+-- Cached MeSH concepts
+mesh_concepts (mesh_id, name, tree_numbers, scope_note, synonyms, fetched_at)
+
+-- Node-to-MeSH mappings
+mesh_mappings (id, node_id, mesh_id, match_score)
+```

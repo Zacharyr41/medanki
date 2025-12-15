@@ -158,3 +158,110 @@
 .dismiss-button {
   @apply text-xl font-bold text-red-400 hover:text-red-600 ml-4;
 }
+
+.taxonomy-browser {
+  @apply max-w-4xl mx-auto space-y-6;
+}
+
+.taxonomy-browser h1 {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.taxonomy-browser h2 {
+  @apply text-xl font-semibold text-gray-800;
+}
+
+.exam-selection {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.exam-card {
+  @apply p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer text-left;
+}
+
+.exam-card h2 {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.exam-card p {
+  @apply text-gray-600 mt-1;
+}
+
+.breadcrumb {
+  @apply flex items-center text-sm text-gray-600 mb-4;
+}
+
+.breadcrumb a {
+  @apply text-blue-600 hover:underline;
+}
+
+.breadcrumb-separator {
+  @apply mx-2 text-gray-400;
+}
+
+.taxonomy-search-form {
+  @apply mb-4;
+}
+
+.taxonomy-search-input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.search-results {
+  @apply bg-white border border-gray-200 rounded-lg p-4 mb-4;
+}
+
+.search-results h3 {
+  @apply text-sm font-medium text-gray-500 mb-3;
+}
+
+.search-result-item {
+  @apply p-3 hover:bg-gray-50 rounded cursor-pointer;
+}
+
+.search-result-path {
+  @apply text-xs text-gray-400 block;
+}
+
+.search-result-title {
+  @apply text-gray-900;
+}
+
+.fc-list,
+.content-categories,
+.system-list {
+  @apply space-y-2;
+}
+
+.fc-item,
+.category-item {
+  @apply w-full p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer text-left flex flex-col;
+}
+
+.fc-id,
+.category-id,
+.system-id {
+  @apply text-sm font-bold text-blue-600;
+}
+
+.fc-title,
+.category-title,
+.system-title {
+  @apply text-gray-700 mt-1;
+}
+
+.system-item {
+  @apply p-4 border border-gray-200 rounded-lg flex flex-col;
+}
+
+.topic-details {
+  @apply bg-white border border-gray-200 rounded-lg p-6;
+}
+
+.topic-subtopics h3 {
+  @apply text-lg font-medium text-gray-800 mt-4 mb-2;
+}
+
+.topic-subtopics ul {
+  @apply list-disc list-inside space-y-1 text-gray-600;
+}

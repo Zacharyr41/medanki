@@ -15,6 +15,22 @@ Transform medical content into intelligent Anki flashcards with AI-powered class
 - **Preview & Edit** - Review cards before export with filtering options
 - **REST API** - Integrate with your own applications
 
+## Taxonomy
+
+MedAnki uses a hierarchical taxonomy system backed by SQLite with closure tables for efficient hierarchy queries.
+
+### Supported Exams
+- **MCAT** - 10 Foundational Concepts with content categories (1A-10A)
+- **USMLE Step 1** - 10 Organ Systems with discipline cross-classification
+
+### Data Sources
+- Official AAMC/NBME content outlines
+- MeSH (Medical Subject Headings) vocabulary enrichment
+- Hugging Face medical datasets (MedMCQA, MedQA)
+- AnKing deck tag structure
+
+See [docs/taxonomy.md](docs/taxonomy.md) for detailed taxonomy documentation.
+
 ## Quick Start
 
 ### Prerequisites
