@@ -67,7 +67,6 @@ class NodesResponse(BaseModel):
 EXAM_MAPPING = {
     "MCAT": ExamType.MCAT,
     "USMLE_STEP1": ExamType.USMLE_STEP1,
-    "USMLE_STEP2": ExamType.USMLE_STEP2,
 }
 
 AVAILABLE_EXAMS = ["MCAT", "USMLE_STEP1"]

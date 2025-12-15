@@ -35,8 +35,8 @@ describe('FileUpload', () => {
     const onFileSelect = vi.fn()
     render(<FileUpload onFileSelect={onFileSelect} />)
 
-    const file = new File(['test'], 'test.docx', {
-      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    const file = new File(['test'], 'test.exe', {
+      type: 'application/x-msdownload',
     })
     const dropzone = screen.getByTestId('dropzone')
 
