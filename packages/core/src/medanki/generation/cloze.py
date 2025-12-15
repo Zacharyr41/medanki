@@ -97,7 +97,18 @@ TRIVIA_PATTERNS = [
     re.compile(r"\bRR\s*[=:]\s*\d+\.?\d*"),
     re.compile(r"\bOR\s*[=:]\s*\d+\.?\d*"),
     re.compile(r"\b\d{1,2}(?:\.\d+)?%"),
+    re.compile(r"\bet\s+al\.?\b", re.IGNORECASE),
+    re.compile(r"^[A-Z][a-z]+\s+\(\d{4}\)$"),
+    re.compile(r"^(?:Figure|Table|Fig\.?)\s*\d+", re.IGNORECASE),
+    re.compile(r"^(?:19|20)\d{2}$"),
+    re.compile(r"\bPMID\s*\d+", re.IGNORECASE),
+    re.compile(r"^10\.\d+/"),
 ]
+
+JOURNAL_NAMES = frozenset({
+    "nejm", "lancet", "jama", "bmj", "nature", "science", "cell",
+    "annals", "circulation", "chest", "gastroenterology",
+})
 
 
 class ClozeGenerator:
@@ -210,7 +221,10 @@ class ClozeGenerator:
         """Check if any cloze deletion contains research trivia."""
         matches = self._cloze_pattern.findall(text)
         for _, answer in matches:
+            answer_stripped = answer.strip()
             for pattern in TRIVIA_PATTERNS:
-                if pattern.search(answer):
+                if pattern.search(answer_stripped):
                     return True
+            if answer_stripped.lower() in JOURNAL_NAMES:
+                return True
         return False

@@ -52,6 +52,21 @@ export function CardPreview({ card, expanded = false, onToggle }: CardPreviewPro
         )}
       </div>
 
+      {isCloze && expanded && (
+        <div data-testid="cloze-expanded" className="mt-4 space-y-2 border-t pt-4">
+          {card.source && (
+            <div>
+              <span className="font-medium">Source Text:</span>{' '}
+              <span className="text-gray-600">{card.source}</span>
+            </div>
+          )}
+          <div>
+            <span className="font-medium">Full Card:</span>{' '}
+            <span className="text-gray-600">{card.text.replace(/\{\{c\d+::([^}]+)\}\}/g, '[$1]')}</span>
+          </div>
+        </div>
+      )}
+
       {isVignette && expanded && (
         <div className="mt-4 space-y-2 border-t pt-4">
           {card.answer && (

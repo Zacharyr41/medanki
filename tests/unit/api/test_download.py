@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import io
 import json
+import zipfile
 from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from medanki_api.routes.download import router as download_router
+from medanki_api.routes.download import router as download_router, generate_apkg
 
 
 @pytest.fixture
@@ -247,3 +249,99 @@ class TestStatistics:
         assert "created_at" in data["timing"]
         assert "completed_at" in data["timing"]
         assert "duration_seconds" in data["timing"]
+
+
+class TestAPKGGeneration:
+    """Tests for APKG file generation."""
+
+    def test_generate_apkg_returns_valid_zip(self):
+        """Generated APKG is a valid ZIP archive."""
+        cards = [
+            {
+                "id": "card_001",
+                "type": "cloze",
+                "text": "The heart has {{c1::four}} chambers.",
+                "topic_id": "cardiology",
+                "source_chunk": "Chapter 1",
+            }
+        ]
+
+        apkg_bytes = generate_apkg(cards, deck_name="Test Deck")
+
+        assert zipfile.is_zipfile(io.BytesIO(apkg_bytes))
+
+    def test_generate_apkg_contains_collection(self):
+        """APKG contains collection.anki2 or collection.anki21 database."""
+        cards = [
+            {
+                "id": "card_001",
+                "type": "cloze",
+                "text": "{{c1::DNA}} stores genetic information.",
+                "topic_id": "genetics",
+                "source_chunk": "Biology basics",
+            }
+        ]
+
+        apkg_bytes = generate_apkg(cards, deck_name="Test Deck")
+
+        with zipfile.ZipFile(io.BytesIO(apkg_bytes), "r") as zf:
+            names = zf.namelist()
+            has_collection = any("collection.anki2" in n for n in names)
+            assert has_collection, f"Expected collection.anki2, got: {names}"
+
+    def test_generate_apkg_with_multiple_cards(self):
+        """APKG can contain multiple cards."""
+        cards = [
+            {
+                "id": f"card_{i:03d}",
+                "type": "cloze",
+                "text": f"The {{{{c1::concept{i}}}}} is important.",
+                "topic_id": "general",
+                "source_chunk": f"Source {i}",
+            }
+            for i in range(5)
+        ]
+
+        apkg_bytes = generate_apkg(cards, deck_name="Multi Card Deck")
+
+        assert zipfile.is_zipfile(io.BytesIO(apkg_bytes))
+
+    def test_generate_apkg_with_vignette_cards(self):
+        """APKG supports vignette card type."""
+        cards = [
+            {
+                "id": "vig_001",
+                "type": "vignette",
+                "text": "A 45-year-old presents with chest pain...",
+                "topic_id": "cardiology",
+                "source_chunk": "Case study",
+            }
+        ]
+
+        apkg_bytes = generate_apkg(cards, deck_name="Vignette Deck")
+
+        assert zipfile.is_zipfile(io.BytesIO(apkg_bytes))
+
+    def test_generate_apkg_empty_cards_returns_valid(self):
+        """Empty card list still produces valid APKG."""
+        apkg_bytes = generate_apkg([], deck_name="Empty Deck")
+
+        assert zipfile.is_zipfile(io.BytesIO(apkg_bytes))
+
+    def test_download_returns_real_apkg(self, client, sample_job):
+        """Download endpoint returns actual APKG file, not stub."""
+        sample_job["cards"] = [
+            {
+                "id": "card_001",
+                "type": "cloze",
+                "text": "The {{c1::mitochondria}} is the powerhouse.",
+                "topic_id": "biology",
+                "source_chunk": "Cell biology",
+            }
+        ]
+        client.app.state.job_storage["job_001"] = sample_job
+
+        response = client.get("/api/jobs/job_001/download")
+
+        assert response.status_code == 200
+        assert zipfile.is_zipfile(io.BytesIO(response.content))

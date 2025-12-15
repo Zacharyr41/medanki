@@ -507,3 +507,117 @@ class TestClozeCardUniqueness:
 
         card_texts = [card.text for card in cards]
         assert len(card_texts) == len(set(card_texts)), "All cards should be unique"
+
+
+class TestAntiTriviaPatterns:
+    """Tests for filtering trivia-like content from cloze cards."""
+
+    @pytest.mark.asyncio
+    async def test_filters_author_citations(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generator filters cards with author citation deletions."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "According to {{c1::Smith et al.}}, the heart has four chambers.", "tags": []},
+            {"text": "{{c1::Johnson (2020)}} showed that aspirin reduces mortality.", "tags": []},
+            {"text": "The heart has {{c1::four}} chambers.", "tags": []},
+        ]
+
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
+
+        for card in cards:
+            assert "et al" not in card.text.lower()
+            assert not re.search(r"\{\{c\d+::[A-Z][a-z]+\s+\(\d{4}\)\}\}", card.text)
+
+    @pytest.mark.asyncio
+    async def test_filters_figure_references(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generator filters cards with figure/table reference deletions."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "As shown in {{c1::Figure 3}}, glucose is phosphorylated.", "tags": []},
+            {"text": "{{c1::Table 2}} lists all drug interactions.", "tags": []},
+            {"text": "Glucose is {{c1::phosphorylated}} in the first step.", "tags": []},
+        ]
+
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
+
+        for card in cards:
+            cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
+            answers = cloze_pattern.findall(card.text)
+            for answer in answers:
+                assert not re.match(r"(?:Figure|Table|Fig\.?)\s*\d+", answer, re.IGNORECASE)
+
+    @pytest.mark.asyncio
+    async def test_filters_year_only_deletions(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generator filters cards where the deletion is just a year."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "Penicillin was discovered in {{c1::1928}}.", "tags": []},
+            {"text": "The guidelines were updated in {{c1::2019}}.", "tags": []},
+            {"text": "Penicillin inhibits {{c1::cell wall}} synthesis.", "tags": []},
+        ]
+
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
+
+        cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
+        for card in cards:
+            answers = cloze_pattern.findall(card.text)
+            for answer in answers:
+                assert not re.match(r"^\d{4}$", answer.strip())
+
+    @pytest.mark.asyncio
+    async def test_filters_journal_names(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generator filters cards with journal name deletions."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "Published in {{c1::NEJM}}, this study showed benefits.", "tags": []},
+            {"text": "The {{c1::Lancet}} published findings on cardiac outcomes.", "tags": []},
+            {"text": "Beta-blockers reduce {{c1::mortality}} in heart failure.", "tags": []},
+        ]
+
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
+
+        journal_names = {"nejm", "lancet", "jama", "bmj", "nature", "science", "cell"}
+        cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
+        for card in cards:
+            answers = cloze_pattern.findall(card.text)
+            for answer in answers:
+                assert answer.strip().lower() not in journal_names
+
+    @pytest.mark.asyncio
+    async def test_filters_doi_pmid_references(
+        self,
+        cloze_generator: ClozeGenerator,
+        sample_classified_chunk: MockClassifiedChunk,
+        mock_llm_client: AsyncMock,
+    ) -> None:
+        """Generator filters cards with DOI/PMID deletions."""
+        mock_llm_client.generate_cloze_cards.return_value = [
+            {"text": "Reference: {{c1::PMID 12345678}}.", "tags": []},
+            {"text": "DOI: {{c1::10.1000/xyz123}}.", "tags": []},
+            {"text": "ACE inhibitors block {{c1::angiotensin converting enzyme}}.", "tags": []},
+        ]
+
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
+
+        cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
+        for card in cards:
+            answers = cloze_pattern.findall(card.text)
+            for answer in answers:
+                assert "pmid" not in answer.lower()
+                assert not re.match(r"10\.\d+/", answer)

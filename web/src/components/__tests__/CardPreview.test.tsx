@@ -75,4 +75,17 @@ describe('CardPreview', () => {
     expect(screen.getByTestId('card-source')).toBeInTheDocument()
     expect(screen.getByText(/Chapter 1, Page 5/)).toBeInTheDocument()
   })
+
+  it('test_cloze_expanded_shows_source - Cloze expansion shows source details', () => {
+    render(<CardPreview card={mockClozeCard} expanded={true} onToggle={() => {}} />)
+
+    expect(screen.getByTestId('cloze-expanded')).toBeInTheDocument()
+    expect(screen.getByText(/Source Text:/)).toBeInTheDocument()
+  })
+
+  it('test_cloze_collapsed_hides_expanded - Cloze collapsed hides expanded section', () => {
+    render(<CardPreview card={mockClozeCard} expanded={false} onToggle={() => {}} />)
+
+    expect(screen.queryByTestId('cloze-expanded')).not.toBeInTheDocument()
+  })
 })

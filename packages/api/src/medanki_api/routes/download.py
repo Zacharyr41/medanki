@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import io
 import json
+import tempfile
 import uuid
 from collections import Counter
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
@@ -32,8 +36,81 @@ def _get_job_or_none(request: Request, job_id: str) -> dict | None:
     return storage.get(job_id)
 
 
+@dataclass
+class ClozeCardData:
+    """Data class for cloze cards compatible with DeckBuilder."""
+
+    text: str
+    extra: str
+    source_chunk_id: str
+    tags: list[str]
+
+
+@dataclass
+class VignetteCardData:
+    """Data class for vignette cards compatible with DeckBuilder."""
+
+    front: str
+    answer: str
+    explanation: str
+    distinguishing_feature: str | None
+    source_chunk_id: str
+    tags: list[str]
+
+
 def generate_apkg(cards: list, deck_name: str = "MedAnki") -> bytes:
-    return b"APKG_CONTENT"
+    """Generate a real APKG file from cards using genanki."""
+    from medanki.export.apkg import APKGExporter
+    from medanki.export.deck import DeckBuilder
+
+    builder = DeckBuilder(deck_name)
+
+    for card in cards:
+        card_type = card.get("type", "cloze")
+        topic_id = card.get("topic_id", "")
+        source = card.get("source_chunk", "")[:100] if card.get("source_chunk") else ""
+        tags = [topic_id] if topic_id else []
+
+        if card_type == "cloze":
+            cloze_data = ClozeCardData(
+                text=card.get("text", ""),
+                extra="",
+                source_chunk_id=source,
+                tags=tags,
+            )
+            builder.add_cloze_card(cloze_data)
+        elif card_type == "vignette":
+            vignette_data = VignetteCardData(
+                front=card.get("text", card.get("front", "")),
+                answer=card.get("answer", ""),
+                explanation=card.get("explanation", ""),
+                distinguishing_feature=card.get("distinguishing_feature"),
+                source_chunk_id=source,
+                tags=tags,
+            )
+            builder.add_vignette_card(vignette_data)
+        else:
+            cloze_data = ClozeCardData(
+                text=card.get("text", ""),
+                extra="",
+                source_chunk_id=source,
+                tags=tags,
+            )
+            builder.add_cloze_card(cloze_data)
+
+    deck = builder.build()
+    exporter = APKGExporter()
+
+    with tempfile.NamedTemporaryFile(suffix=".apkg", delete=False) as tmp:
+        tmp_path = tmp.name
+
+    try:
+        exporter.export(deck, tmp_path)
+        apkg_bytes = Path(tmp_path).read_bytes()
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+    return apkg_bytes
 
 
 def create_processing_job(document_id: str, options: dict) -> str:
