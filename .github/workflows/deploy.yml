@@ -43,16 +43,8 @@ jobs:
           docker push ${{ env.REGISTRY }}/api:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/api:latest
 
-      - name: Build and push Web image
-        run: |
-          docker build -t ${{ env.REGISTRY }}/web:${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/web:latest \
-            --build-arg VITE_API_URL=https://medanki-api-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app \
-            -f docker/Dockerfile.web .
-          docker push ${{ env.REGISTRY }}/web:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/web:latest
-
       - name: Deploy API to Cloud Run
+        id: deploy-api
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.API_SERVICE }}
@@ -73,7 +65,17 @@ jobs:
             WEAVIATE_URL=https://zwckhrybsdkzwezf8aja.c0.us-east1.gcp.weaviate.cloud
             MEDANKI_ENABLE_VIGNETTES=true
 
+      - name: Build and push Web image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/web:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/web:latest \
+            --build-arg VITE_API_URL=${{ steps.deploy-api.outputs.url }} \
+            -f docker/Dockerfile.web .
+          docker push ${{ env.REGISTRY }}/web:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/web:latest
+
       - name: Deploy Web to Cloud Run
+        id: deploy-web
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.WEB_SERVICE }}
@@ -90,5 +92,5 @@ jobs:
 
       - name: Show deployment URLs
         run: |
-          echo "API URL: https://medanki-api-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app"
-          echo "Web URL: https://medanki-web-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app"
+          echo "API URL: ${{ steps.deploy-api.outputs.url }}"
+          echo "Web URL: ${{ steps.deploy-web.outputs.url }}"
