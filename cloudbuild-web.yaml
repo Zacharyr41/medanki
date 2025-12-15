@@ -1,0 +1,21 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/medanki-web:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/medanki-web:latest'
+      - '-f'
+      - 'docker/Dockerfile.web'
+      - '--build-arg'
+      - 'VITE_API_URL=https://medanki-api-767583014352.us-central1.run.app'
+      - '--build-arg'
+      - 'VITE_GOOGLE_CLIENT_ID=767583014352-velh34o46djngd58uv0kdhnlg8oclfar.apps.googleusercontent.com'
+      - '.'
+
+images:
+  - 'gcr.io/$PROJECT_ID/medanki-web:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/medanki-web:latest'
+
+timeout: '900s'

@@ -70,11 +70,33 @@ class SQLiteStore:
                 FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
             );
 
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                google_id TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                picture_url TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                last_login TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS saved_cards (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                job_id TEXT NOT NULL,
+                card_id TEXT NOT NULL,
+                saved_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE (user_id, card_id)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_chunks_document ON chunks(document_id);
             CREATE INDEX IF NOT EXISTS idx_cards_document ON cards(document_id);
             CREATE INDEX IF NOT EXISTS idx_cards_content_hash ON cards(content_hash);
             CREATE INDEX IF NOT EXISTS idx_jobs_document ON jobs(document_id);
             CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+            CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+            CREATE INDEX IF NOT EXISTS idx_saved_cards_user ON saved_cards(user_id);
 
             PRAGMA foreign_keys = ON;
         """)
