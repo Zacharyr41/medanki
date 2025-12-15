@@ -1,89 +1,94 @@
-name: Deploy
+name: Deploy to Cloud Run
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  PROJECT_ID: medanki-481307
+  REGION: us-central1
+  API_SERVICE: medanki-api
+  WEB_SERVICE: medanki-web
+  REGISTRY: us-central1-docker.pkg.dev/medanki-481307/medanki
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Extract metadata for API image
-        id: meta-api
-        uses: docker/metadata-action@v5
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and push API image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile.api
-          push: true
-          tags: ${{ steps.meta-api.outputs.tags }}
-          labels: ${{ steps.meta-api.outputs.labels }}
-
-      - name: Extract metadata for Web image
-        id: meta-web
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
+        run: |
+          docker build -t ${{ env.REGISTRY }}/api:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/api:latest \
+            -f docker/Dockerfile.api .
+          docker push ${{ env.REGISTRY }}/api:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/api:latest
 
       - name: Build and push Web image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile.web
-          push: true
-          tags: ${{ steps.meta-web.outputs.tags }}
-          labels: ${{ steps.meta-web.outputs.labels }}
+        run: |
+          docker build -t ${{ env.REGISTRY }}/web:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/web:latest \
+            --build-arg VITE_API_URL=https://medanki-api-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app \
+            -f docker/Dockerfile.web .
+          docker push ${{ env.REGISTRY }}/web:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/web:latest
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    environment: production
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Cloud Run (API)
+      - name: Deploy API to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
-        if: ${{ vars.DEPLOY_PLATFORM == 'cloudrun' }}
         with:
-          service: medanki-api
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ github.ref_name }}
-          region: ${{ vars.GCP_REGION }}
+          service: ${{ env.API_SERVICE }}
+          image: ${{ env.REGISTRY }}/api:${{ github.sha }}
+          region: ${{ env.REGION }}
+          flags: |
+            --allow-unauthenticated
+            --memory=2Gi
+            --cpu=2
+            --timeout=300
+            --concurrency=80
+            --min-instances=0
+            --max-instances=10
+          secrets: |
+            ANTHROPIC_API_KEY=anthropic-api-key:latest
+            WEAVIATE_API_KEY=weaviate-api-key:latest
+          env_vars: |
+            WEAVIATE_URL=https://zwckhrybsdkzwezf8aja.c0.us-east1.gcp.weaviate.cloud
+            MEDANKI_ENABLE_VIGNETTES=true
 
-      - name: Deploy to Cloud Run (Web)
+      - name: Deploy Web to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
-        if: ${{ vars.DEPLOY_PLATFORM == 'cloudrun' }}
         with:
-          service: medanki-web
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ github.ref_name }}
-          region: ${{ vars.GCP_REGION }}
+          service: ${{ env.WEB_SERVICE }}
+          image: ${{ env.REGISTRY }}/web:${{ github.sha }}
+          region: ${{ env.REGION }}
+          flags: |
+            --allow-unauthenticated
+            --memory=256Mi
+            --cpu=1
+            --timeout=60
+            --concurrency=200
+            --min-instances=0
+            --max-instances=5
+
+      - name: Show deployment URLs
+        run: |
+          echo "API URL: https://medanki-api-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app"
+          echo "Web URL: https://medanki-web-${{ env.PROJECT_ID }}.${{ env.REGION }}.run.app"
