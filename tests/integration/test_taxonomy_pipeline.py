@@ -32,8 +32,7 @@ async def populated_repo(
     repo = TaxonomyRepository(db_path)
     await repo.initialize()
 
-    with open(taxonomy_dir / "mcat.json") as f:
-        mcat_data = json.load(f)
+    mcat_data = json.loads((taxonomy_dir / "mcat.json").read_text())
 
     await repo.insert_exam(
         {
@@ -82,8 +81,7 @@ async def populated_repo(
                     }
                 )
 
-    with open(taxonomy_dir / "usmle_step1.json") as f:
-        usmle_data = json.load(f)
+    usmle_data = json.loads((taxonomy_dir / "usmle_step1.json").read_text())
 
     await repo.insert_exam(
         {
@@ -257,8 +255,7 @@ class TestTaxonomyServiceV2Integration:
             repo = TaxonomyRepository(db_path)
             await repo.initialize()
 
-            with open(taxonomy_dir / "mcat.json") as f:
-                mcat_data = json.load(f)
+            mcat_data = json.loads((taxonomy_dir / "mcat.json").read_text())
 
             await repo.insert_exam(
                 {

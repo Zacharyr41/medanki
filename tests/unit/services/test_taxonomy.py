@@ -214,7 +214,7 @@ class TestAsyncMethods:
         assert len(topics) > 0
         from medanki.services.taxonomy import ExamType
 
-        exam_types = set(t.exam_type for t in topics)
+        exam_types = {t.exam_type for t in topics}
         assert ExamType.MCAT in exam_types
         assert ExamType.USMLE_STEP1 in exam_types
 
