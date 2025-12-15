@@ -30,11 +30,13 @@ async def _send_progress(
         return
     job["progress"] = progress
     job["stage"] = stage
-    await websocket.send_json({
-        "type": "progress",
-        "progress": progress,
-        "stage": stage,
-    })
+    await websocket.send_json(
+        {
+            "type": "progress",
+            "progress": progress,
+            "stage": stage,
+        }
+    )
 
 
 async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
@@ -97,9 +99,11 @@ async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
 
     try:
         import weaviate
+
         weaviate_client = weaviate.connect_to_local(port=8080)
 
         from medanki.services.taxonomy_indexer import TaxonomyIndexer
+
         indexer = TaxonomyIndexer(weaviate_client, TAXONOMY_DIR)
 
         collection = weaviate_client.collections.get("TaxonomyTopic")
@@ -117,33 +121,39 @@ async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
             results = indexer.search(chunk.text, exam_type=exam, limit=3)
 
             if results and results[0]["score"] >= BASE_THRESHOLD:
-                classified_chunks.append({
-                    "chunk": chunk,
-                    "topic_id": results[0]["topic_id"],
-                    "topic_title": results[0]["title"],
-                    "topic_path": results[0]["path"],
-                    "score": results[0]["score"],
-                })
+                classified_chunks.append(
+                    {
+                        "chunk": chunk,
+                        "topic_id": results[0]["topic_id"],
+                        "topic_title": results[0]["title"],
+                        "topic_path": results[0]["path"],
+                        "score": results[0]["score"],
+                    }
+                )
             else:
-                classified_chunks.append({
-                    "chunk": chunk,
-                    "topic_id": None,
-                    "topic_title": None,
-                    "topic_path": None,
-                    "score": results[0]["score"] if results else 0.0,
-                })
+                classified_chunks.append(
+                    {
+                        "chunk": chunk,
+                        "topic_id": None,
+                        "topic_title": None,
+                        "topic_path": None,
+                        "score": results[0]["score"] if results else 0.0,
+                    }
+                )
 
         weaviate_client.close()
     except Exception as e:
         print(f"Classification error (falling back to unclassified): {e}")
         for chunk in chunks:
-            classified_chunks.append({
-                "chunk": chunk,
-                "topic_id": exam,
-                "topic_title": None,
-                "topic_path": None,
-                "score": 0.0,
-            })
+            classified_chunks.append(
+                {
+                    "chunk": chunk,
+                    "topic_id": exam,
+                    "topic_title": None,
+                    "topic_path": None,
+                    "score": 0.0,
+                }
+            )
 
     relevant_chunks = [c for c in classified_chunks if c["topic_id"] is not None]
     if not relevant_chunks:
@@ -157,63 +167,103 @@ async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     cards: list[dict[str, Any]] = []
 
+    card_types_str = job.get("card_types", "cloze,vignette") or "cloze,vignette"
+    enabled_types = {t.strip().lower() for t in card_types_str.split(",")}
+    generate_cloze = "cloze" in enabled_types
+    generate_vignette = "vignette" in enabled_types
+
     if api_key:
         from uuid import uuid4
 
         from medanki.generation.cloze import ClozeGenerator
+        from medanki.generation.vignette import VignetteGenerator
         from medanki.services.llm import ClaudeClient
 
         client = ClaudeClient(api_key=api_key)
-        generator = ClozeGenerator(llm_client=client)
+        cloze_generator = ClozeGenerator(llm_client=client) if generate_cloze else None
+        vignette_generator = VignetteGenerator(llm_client=client) if generate_vignette else None
 
-        max_cards = job.get("max_cards", 10) or 10
-        cards_per_chunk = min(3, max(1, max_cards // len(relevant_chunks))) if relevant_chunks else 1
+        max_cards = job.get("max_cards", 20) or 20
+        num_chunks = len(relevant_chunks) or 1
+        cards_per_chunk = max(1, max_cards // num_chunks)
+        cloze_per_chunk = min(cards_per_chunk, 3) if generate_cloze else 0
+        vignette_per_chunk = 1 if generate_vignette else 0
 
         for i, classified in enumerate(relevant_chunks):
             chunk = classified["chunk"]
             topic_id = classified["topic_id"]
             topic_title = classified["topic_title"]
             topic_path = classified["topic_path"]
-            if len(cards) >= max_cards:
-                break
 
             progress = 65 + (i / len(relevant_chunks)) * 25
             await _send_progress(websocket, job, progress, "generating")
 
             topic_context = f"Topic: {topic_path}" if topic_path else None
+            chunk_id = uuid4()
 
-            try:
-                chunk_id = uuid4()
-                generated = await generator.generate(
-                    content=chunk.text,
-                    source_chunk_id=chunk_id,
-                    topic_id=topic_id or exam,
-                    topic_context=topic_context,
-                    num_cards=cards_per_chunk,
-                )
-                for card in generated:
-                    cards.append({
-                        "id": str(card.id),
-                        "type": "cloze",
-                        "text": card.text,
-                        "topic_id": topic_id or exam,
-                        "topic_title": topic_title,
-                        "source_chunk": chunk.text[:200],
-                    })
-            except Exception as e:
-                print(f"Generation error for chunk {i}: {e}")
-                continue
+            if cloze_generator:
+                try:
+                    generated = await cloze_generator.generate(
+                        content=chunk.text,
+                        source_chunk_id=chunk_id,
+                        topic_id=topic_id or exam,
+                        topic_context=topic_context,
+                        num_cards=cloze_per_chunk,
+                    )
+                    for card in generated:
+                        cards.append(
+                            {
+                                "id": str(card.id),
+                                "type": "cloze",
+                                "text": card.text,
+                                "topic_id": topic_id or exam,
+                                "topic_title": topic_title,
+                                "source_chunk": chunk.text[:200],
+                            }
+                        )
+                except Exception as e:
+                    print(f"Cloze generation error for chunk {i}: {e}")
+
+            if vignette_generator:
+                try:
+                    vignettes = await vignette_generator.generate(
+                        content=chunk.text,
+                        source_chunk_id=chunk_id,
+                        topic_id=topic_id or exam,
+                        num_cards=vignette_per_chunk,
+                    )
+                    for vcard in vignettes:
+                        options_text = " | ".join(
+                            f"{opt.letter}. {opt.text}" for opt in vcard.options
+                        )
+                        cards.append(
+                            {
+                                "id": str(vcard.id),
+                                "type": "vignette",
+                                "text": f"{vcard.stem}\n\n{vcard.question}",
+                                "front": f"{vcard.stem}\n\n{vcard.question}\n\n{options_text}",
+                                "answer": vcard.answer,
+                                "explanation": vcard.explanation,
+                                "topic_id": topic_id or exam,
+                                "topic_title": topic_title,
+                                "source_chunk": chunk.text[:200],
+                            }
+                        )
+                except Exception as e:
+                    print(f"Vignette generation error for chunk {i}: {e}")
     else:
         for i, classified in enumerate(relevant_chunks[:5]):
             chunk = classified["chunk"]
-            cards.append({
-                "id": f"card_{i}",
-                "type": "cloze",
-                "text": f"{{{{c1::{chunk.text[:50]}}}}} is important medical content.",
-                "topic_id": classified["topic_id"] or exam,
-                "topic_title": classified["topic_title"],
-                "source_chunk": chunk.text[:200],
-            })
+            cards.append(
+                {
+                    "id": f"card_{i}",
+                    "type": "cloze",
+                    "text": f"{{{{c1::{chunk.text[:50]}}}}} is important medical content.",
+                    "topic_id": classified["topic_id"] or exam,
+                    "topic_title": classified["topic_title"],
+                    "source_chunk": chunk.text[:200],
+                }
+            )
 
     await _send_progress(websocket, job, 90, "generating")
 
@@ -243,11 +293,13 @@ async def websocket_endpoint(
 
     try:
         if job.get("status") == "completed":
-            await websocket.send_json({
-                "type": "complete",
-                "progress": 100,
-                "cards_generated": job.get("cards_generated", 0),
-            })
+            await websocket.send_json(
+                {
+                    "type": "complete",
+                    "progress": 100,
+                    "cards_generated": job.get("cards_generated", 0),
+                }
+            )
             return
 
         job["status"] = "processing"
@@ -258,11 +310,13 @@ async def websocket_endpoint(
 
         job["status"] = "completed"
 
-        await websocket.send_json({
-            "type": "complete",
-            "progress": 100,
-            "cards_generated": job.get("cards_generated", 0),
-        })
+        await websocket.send_json(
+            {
+                "type": "complete",
+                "progress": 100,
+                "cards_generated": job.get("cards_generated", 0),
+            }
+        )
 
     except WebSocketDisconnect:
         pass
@@ -270,9 +324,11 @@ async def websocket_endpoint(
         job["status"] = "failed"
         job["error_message"] = str(e)
         if websocket.client_state == WebSocketState.CONNECTED:
-            await websocket.send_json({
-                "type": "error",
-                "error": str(e),
-            })
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "error": str(e),
+                }
+            )
     finally:
         await _manager.disconnect(job_id, websocket)
