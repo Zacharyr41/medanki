@@ -1,13 +1,47 @@
 from __future__ import annotations
 
+import json
+from functools import lru_cache
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Query, Request
 
-from medanki_api.schemas.preview import CardPreview, PreviewResponse
+from medanki_api.schemas.preview import CardPreview, PreviewResponse, TopicInfo
 
 router = APIRouter()
 
+TAXONOMY_DIR = Path("data/taxonomies")
 
-def _card_to_preview(card: dict) -> CardPreview:
+
+@lru_cache(maxsize=1)
+def _load_topic_lookup() -> dict[str, str]:
+    """Load a lookup dict mapping topic IDs to titles from taxonomy JSON files."""
+    lookup: dict[str, str] = {}
+
+    usmle_path = TAXONOMY_DIR / "usmle_step1.json"
+    if usmle_path.exists():
+        data = json.loads(usmle_path.read_text())
+        for system in data.get("systems", []):
+            sys_id = system.get("id", "")
+            lookup[sys_id] = system.get("title", sys_id)
+            for topic in system.get("topics", []):
+                topic_id = topic.get("id", "")
+                lookup[topic_id] = topic.get("title", topic_id)
+
+    mcat_path = TAXONOMY_DIR / "mcat.json"
+    if mcat_path.exists():
+        data = json.loads(mcat_path.read_text())
+        for fc in data.get("foundational_concepts", []):
+            fc_id = fc.get("id", "")
+            lookup[fc_id] = fc.get("title", fc_id)
+            for cat in fc.get("categories", []):
+                cat_id = cat.get("id", "")
+                lookup[cat_id] = cat.get("title", cat_id)
+
+    return lookup
+
+
+def _card_to_preview(card: dict, topic_lookup: dict[str, str]) -> CardPreview:
     """Convert a card dict to CardPreview model."""
     card_type = card.get("type", "cloze")
     text = card.get("text", "")
@@ -17,7 +51,10 @@ def _card_to_preview(card: dict) -> CardPreview:
     if not tags and topic_id:
         tags = [topic_id]
 
-    topics = [topic_id] if topic_id else []
+    topics: list[TopicInfo] = []
+    if topic_id:
+        topic_title = topic_lookup.get(topic_id)
+        topics = [TopicInfo(id=topic_id, title=topic_title)]
 
     return CardPreview(
         id=card.get("id", ""),
@@ -67,7 +104,8 @@ async def get_job_preview(
 
     total = len(cards)
     paginated_cards = cards[offset : offset + limit]
-    preview_cards = [_card_to_preview(c) for c in paginated_cards]
+    topic_lookup = _load_topic_lookup()
+    preview_cards = [_card_to_preview(c, topic_lookup) for c in paginated_cards]
 
     return PreviewResponse(
         cards=preview_cards,

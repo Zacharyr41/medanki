@@ -1,9 +1,14 @@
+export interface TopicInfo {
+  id: string
+  title: string | null
+}
+
 export interface CardPreview {
   id: string
   type: 'cloze' | 'vignette' | 'basic_qa'
   text: string
   tags: string[]
-  topics: string[]
+  topics: TopicInfo[]
   status: string
   source?: string
   front?: string

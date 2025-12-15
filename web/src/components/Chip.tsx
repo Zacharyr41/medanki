@@ -3,9 +3,10 @@ interface ChipProps {
   variant?: 'default' | 'primary' | 'success'
   onRemove?: () => void
   testId?: string
+  title?: string
 }
 
-export function Chip({ label, variant = 'default', onRemove, testId }: ChipProps) {
+export function Chip({ label, variant = 'default', onRemove, testId, title }: ChipProps) {
   const variantStyles = {
     default: 'bg-gray-100 text-gray-800',
     primary: 'bg-blue-100 text-blue-800',
@@ -15,6 +16,7 @@ export function Chip({ label, variant = 'default', onRemove, testId }: ChipProps
   return (
     <span
       data-testid={testId}
+      title={title}
       className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${variantStyles[variant]}`}
     >
       {label}

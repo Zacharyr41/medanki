@@ -24,7 +24,7 @@ describe('CardList', () => {
       type: 'cloze' as const,
       text: 'Test cloze card {{c1::answer}}',
       tags: ['tag1'],
-      topics: ['1A'],
+      topics: [{ id: '1A', title: 'Structure and function of proteins' }],
       status: 'pending',
     },
     {
@@ -32,7 +32,7 @@ describe('CardList', () => {
       type: 'vignette' as const,
       text: 'Test vignette card',
       tags: ['tag2'],
-      topics: ['2A'],
+      topics: [{ id: '2A', title: 'Assemblies of molecules and cells' }],
       status: 'pending',
     },
   ]

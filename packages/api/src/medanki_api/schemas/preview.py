@@ -3,12 +3,17 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 
+class TopicInfo(BaseModel):
+    id: str
+    title: str | None = None
+
+
 class CardPreview(BaseModel):
     id: str
     type: str
     text: str
     tags: list[str]
-    topics: list[str]
+    topics: list[TopicInfo]
     status: str
     source: str | None = None
     front: str | None = None

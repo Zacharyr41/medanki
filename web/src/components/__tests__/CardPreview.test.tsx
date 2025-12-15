@@ -9,7 +9,10 @@ describe('CardPreview', () => {
     type: 'cloze',
     text: 'The {{c1::mitochondria}} is the powerhouse of the cell.',
     tags: ['biology', 'cell-biology'],
-    topics: ['1A', '1B'],
+    topics: [
+      { id: '1A', title: 'Structure and function of proteins' },
+      { id: '1B', title: 'Transmission of genetic information' },
+    ],
     status: 'pending',
     source: 'Chapter 1, Page 5',
   }
@@ -19,7 +22,7 @@ describe('CardPreview', () => {
     type: 'vignette',
     text: 'A 45-year-old man presents with chest pain...',
     tags: ['cardiology', 'emergency'],
-    topics: ['2A'],
+    topics: [{ id: '2A', title: 'Assemblies of molecules and cells' }],
     status: 'pending',
     source: 'Case Study 1',
     front: 'A 45-year-old man presents with chest pain...',

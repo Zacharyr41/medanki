@@ -15,7 +15,6 @@ interface OptionsPanelProps {
 const EXAM_OPTIONS = [
   { value: 'MCAT', label: 'MCAT' },
   { value: 'USMLE_STEP1', label: 'USMLE Step 1' },
-  { value: 'USMLE_STEP2', label: 'USMLE Step 2' },
 ]
 
 export function OptionsPanel({ options, onChange }: OptionsPanelProps) {

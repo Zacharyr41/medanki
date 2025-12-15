@@ -23,7 +23,6 @@ describe('OptionsPanel', () => {
 
     expect(screen.getByRole('option', { name: /mcat/i })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /usmle step 1/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /usmle step 2/i })).toBeInTheDocument()
   })
 
   it('renders card type checkboxes', () => {

@@ -44,7 +44,7 @@ describe('DownloadPage', () => {
         type: 'cloze' as const,
         text: 'Test card',
         tags: ['tag1'],
-        topics: ['1A'],
+        topics: [{ id: '1A', title: 'Structure and function of proteins' }],
         status: 'pending',
       },
     ],

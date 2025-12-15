@@ -95,7 +95,13 @@ export function CardPreview({ card, expanded = false, onToggle }: CardPreviewPro
 
       <div className="mt-2 flex flex-wrap gap-2">
         {card.topics.map((topic) => (
-          <Chip key={topic} label={topic} variant="primary" testId={`topic-${topic}`} />
+          <Chip
+            key={topic.id}
+            label={topic.title || topic.id}
+            variant="primary"
+            testId={`topic-${topic.id}`}
+            title={topic.title ? `${topic.id}: ${topic.title}` : topic.id}
+          />
         ))}
       </div>
 
