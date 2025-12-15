@@ -20,6 +20,15 @@ jobs:
       id-token: write
 
     steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af
+          df -h
+
       - uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud
@@ -48,7 +57,7 @@ jobs:
             ${{ env.REGISTRY }}/api:${{ github.sha }}
             ${{ env.REGISTRY }}/api:latest
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
 
       - name: Deploy API to Cloud Run
         id: deploy-api
@@ -84,7 +93,7 @@ jobs:
           build-args: |
             VITE_API_URL=${{ steps.deploy-api.outputs.url }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
 
       - name: Deploy Web to Cloud Run
         id: deploy-web
