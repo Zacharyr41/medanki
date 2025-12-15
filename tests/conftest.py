@@ -21,7 +21,6 @@ TEST_DATA_DIR = Path(__file__).parent.parent / "data" / "test_fixtures"
 class ExamType(str, Enum):
     MCAT = "mcat"
     USMLE_STEP1 = "usmle_step1"
-    USMLE_STEP2 = "usmle_step2"
 
 
 class ContentType(str, Enum):

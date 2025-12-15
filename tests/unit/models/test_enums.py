@@ -11,11 +11,8 @@ class TestExamType:
     def test_usmle_step1_value(self):
         assert ExamType.USMLE_STEP1.value == "usmle_step1"
 
-    def test_usmle_step2_value(self):
-        assert ExamType.USMLE_STEP2.value == "usmle_step2"
-
     def test_all_exam_types_exist(self):
-        expected = {"MCAT", "USMLE_STEP1", "USMLE_STEP2"}
+        expected = {"MCAT", "USMLE_STEP1"}
         actual = {e.name for e in ExamType}
         assert actual == expected
 

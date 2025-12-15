@@ -40,7 +40,7 @@ Cards are tagged against the AAMC MCAT content outline:
 
 ## USMLE Content Outline
 
-Cards are tagged against USMLE Step 1 and Step 2 outlines:
+Cards are tagged against the USMLE Step 1 outline:
 
 ### Step 1 Topics
 
@@ -64,27 +64,6 @@ Cards are tagged against USMLE Step 1 and Step 2 outlines:
 - Reproductive
 - Respiratory
 - Skin/Subcutaneous
-
-### Step 2 Topics
-
-**Task Categories:**
-- Health Maintenance
-- Diagnosis
-- Prognosis
-- Treatment/Management
-
-**Patient Age Groups:**
-- Newborn
-- Infancy
-- Childhood
-- Adolescence
-- Adult
-- Geriatric
-
-**Clinical Settings:**
-- Ambulatory
-- Emergency
-- Inpatient
 
 ## Using Tags in Anki
 

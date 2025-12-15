@@ -18,7 +18,6 @@ Your uploaded files are processed and not stored permanently. Generated cards ar
 
 - MCAT
 - USMLE Step 1
-- USMLE Step 2
 
 The exam selection affects tagging and card style but you can use generated cards for any purpose.
 
@@ -28,6 +27,8 @@ The exam selection affects tagging and card style but you can use generated card
 
 - PDF (.pdf)
 - Markdown (.md)
+- Plain Text (.txt)
+- Word Documents (.docx)
 
 ### What's the maximum file size?
 

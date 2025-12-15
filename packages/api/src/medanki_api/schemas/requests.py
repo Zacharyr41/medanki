@@ -12,8 +12,7 @@ class ExamType(str, Enum):
     """Supported exam types for flashcard generation."""
 
     MCAT = "MCAT"
-    USMLE_STEP1 = "USMLE_STEP1"
-    USMLE_STEP2 = "USMLE_STEP2"
+    USMLE_STEP1 = "USMLE Step 1"
 
 
 class CardTypeOption(str, Enum):

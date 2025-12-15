@@ -12,7 +12,6 @@ Choose the exam you're preparing for:
 |------|-------|------------|
 | **MCAT** | Basic sciences, critical thinking | Shorter vignettes, more cloze cards |
 | **USMLE Step 1** | Basic science mechanisms | Pathophysiology-focused vignettes |
-| **USMLE Step 2** | Clinical management | Management-focused vignettes |
 
 The selected exam affects:
 - Topic classification and tagging
@@ -77,19 +76,6 @@ Focus on:
 - Pathophysiology correlations
 - First-order pharmacology
 
-### USMLE Step 2
-
-```
-Exam: USMLE Step 2
-Card Types: Vignette
-Max Cards: 3-5
-```
-
-Focus on:
-- Clinical presentations
-- Diagnostic workups
-- Management algorithms
-
 ## Optimizing for Study Style
 
 ### Active Recall Focus
@@ -103,7 +89,7 @@ If you prioritize testing yourself:
 
 If you prioritize clinical thinking:
 - Emphasize vignette cards
-- Use Step 2 difficulty
+- Use higher difficulty settings
 - Include mechanism questions
 
 ### Efficient Review

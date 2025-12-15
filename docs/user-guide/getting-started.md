@@ -15,12 +15,14 @@ MedAnki converts your medical study materials into high-quality Anki flashcards,
 Supported formats:
 - **PDF:** Textbooks, lecture slides, study guides
 - **Markdown:** Notes, summaries
+- **TXT:** Plain text files
+- **DOCX:** Word documents
 
 Simply drag and drop your file onto the upload area, or click to browse.
 
 ### 3. Configure Options
 
-- **Target Exam:** Choose MCAT, USMLE Step 1, or USMLE Step 2
+- **Target Exam:** Choose MCAT or USMLE Step 1
 - **Card Types:** Cloze deletions, clinical vignettes, or both
 - **Max Cards per Chunk:** How many cards to generate per content section (1-50)
 

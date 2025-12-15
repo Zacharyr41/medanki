@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { API_BASE_URL } from '../api/client'
 
 export type Stage = 'ingesting' | 'chunking' | 'classifying' | 'generating' | 'exporting'
 export type Status = 'connecting' | 'connected' | 'complete' | 'error' | 'disconnected'
@@ -43,9 +44,8 @@ export function useWebSocket(jobId: string): WebSocketState {
   const shouldReconnectRef = useRef(true)
 
   const connect = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.host
-    const url = `${protocol}//${host}/api/ws/${jobId}`
+    const wsUrl = API_BASE_URL.replace(/^http/, 'ws')
+    const url = `${wsUrl}/api/ws/${jobId}`
 
     const ws = new WebSocket(url)
     wsRef.current = ws

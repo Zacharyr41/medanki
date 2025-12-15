@@ -6,8 +6,14 @@ interface FileUploadProps {
   maxSizeMB?: number
 }
 
-const DEFAULT_ACCEPTED_TYPES = ['application/pdf', 'text/markdown', 'text/x-markdown']
-const DEFAULT_ACCEPTED_EXTENSIONS = ['.pdf', '.md']
+const DEFAULT_ACCEPTED_TYPES = [
+  'application/pdf',
+  'text/markdown',
+  'text/x-markdown',
+  'text/plain',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]
+const DEFAULT_ACCEPTED_EXTENSIONS = ['.pdf', '.md', '.txt', '.docx']
 
 export function FileUpload({
   onFileSelect,
@@ -27,7 +33,7 @@ export function FileUpload({
         DEFAULT_ACCEPTED_EXTENSIONS.includes(extension)
 
       if (!isValidType) {
-        setError('Unsupported file type. Please upload a PDF or Markdown file.')
+        setError('Unsupported file type. Please upload a PDF, Markdown, TXT, or DOCX file.')
         return false
       }
 
@@ -123,7 +129,7 @@ export function FileUpload({
           ref={inputRef}
           type="file"
           data-testid="file-input"
-          accept=".pdf,.md"
+          accept=".pdf,.md,.txt,.docx"
           onChange={handleInputChange}
           style={{ display: 'none' }}
         />
@@ -148,7 +154,7 @@ export function FileUpload({
         ) : (
           <div className="dropzone-content">
             <p>Drop your file here or click to browse</p>
-            <p className="supported-formats">Supported: PDF, Markdown</p>
+            <p className="supported-formats">Supported: PDF, Markdown, TXT, DOCX</p>
           </div>
         )}
       </div>
