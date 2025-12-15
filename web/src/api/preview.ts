@@ -1,6 +1,7 @@
 import type { PreviewResponse, StatsResponse } from '../types'
+import { API_BASE_URL } from './client'
 
-const API_BASE = '/api'
+const API_BASE = `${API_BASE_URL}/api`
 
 export interface FetchPreviewParams {
   jobId: string

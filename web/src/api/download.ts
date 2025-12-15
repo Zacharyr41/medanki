@@ -1,4 +1,6 @@
-const API_BASE = '/api'
+import { API_BASE_URL } from './client'
+
+const API_BASE = `${API_BASE_URL}/api`
 
 export async function downloadDeck(jobId: string): Promise<Blob> {
   const response = await fetch(`${API_BASE}/jobs/${jobId}/download`)
