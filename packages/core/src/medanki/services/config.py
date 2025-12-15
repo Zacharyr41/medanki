@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str
 
     weaviate_url: str = "http://localhost:8080"
+    weaviate_api_key: str | None = None
     debug: bool = False
     enable_vignettes: bool = True
     max_cards_per_chunk: int = 5
@@ -66,12 +67,20 @@ class Settings(BaseSettings):
                 field: object,
                 field_name: str,
             ) -> tuple[object, str, bool]:
-                if field_name == "anthropic_api_key":
-                    import os
+                import os
 
+                if field_name == "anthropic_api_key":
                     val = os.environ.get("ANTHROPIC_API_KEY")
                     if val is not None:
                         return val, "ANTHROPIC_API_KEY", False
+                if field_name == "weaviate_url":
+                    val = os.environ.get("WEAVIATE_URL")
+                    if val is not None:
+                        return val, "WEAVIATE_URL", False
+                if field_name == "weaviate_api_key":
+                    val = os.environ.get("WEAVIATE_API_KEY")
+                    if val is not None:
+                        return val, "WEAVIATE_API_KEY", False
                 return super().get_field_value(field, field_name)  # type: ignore[arg-type]
 
         return (

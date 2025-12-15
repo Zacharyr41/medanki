@@ -100,8 +100,18 @@ async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
 
     try:
         import weaviate
+        from weaviate.classes.init import Auth
 
-        weaviate_client = weaviate.connect_to_local(port=8080)
+        weaviate_url = os.environ.get("WEAVIATE_URL", "http://localhost:8080")
+        weaviate_api_key = os.environ.get("WEAVIATE_API_KEY")
+
+        if weaviate_url.startswith("https://") and weaviate_api_key:
+            weaviate_client = weaviate.connect_to_weaviate_cloud(
+                cluster_url=weaviate_url,
+                auth_credentials=Auth.api_key(weaviate_api_key),
+            )
+        else:
+            weaviate_client = weaviate.connect_to_local(port=8080)
 
         from medanki.services.taxonomy_indexer import TaxonomyIndexer
 
