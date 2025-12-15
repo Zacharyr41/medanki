@@ -33,7 +33,7 @@ class TestGetExams:
 
     def test_returns_list_of_exams(self, client):
         """Should return list of available exams."""
-        response = client.get("/taxonomy/exams")
+        response = client.get("/api/taxonomy/exams")
 
         assert response.status_code == 200
         data = response.json()
@@ -43,7 +43,7 @@ class TestGetExams:
 
     def test_exams_response_format(self, client):
         """Should return exams with proper metadata."""
-        response = client.get("/taxonomy/exams")
+        response = client.get("/api/taxonomy/exams")
 
         assert response.status_code == 200
         data = response.json()
@@ -73,7 +73,7 @@ class TestGetRootNodes:
         ]
         mock_taxonomy_service.get_root_nodes.return_value = mock_nodes
 
-        response = client.get("/taxonomy/MCAT/root")
+        response = client.get("/api/taxonomy/MCAT/root")
 
         assert response.status_code == 200
         data = response.json()
@@ -94,7 +94,7 @@ class TestGetRootNodes:
         ]
         mock_taxonomy_service.get_root_nodes.return_value = mock_nodes
 
-        response = client.get("/taxonomy/USMLE_STEP1/root")
+        response = client.get("/api/taxonomy/USMLE_STEP1/root")
 
         assert response.status_code == 200
         data = response.json()
@@ -102,7 +102,7 @@ class TestGetRootNodes:
 
     def test_invalid_exam_returns_404(self, client, mock_taxonomy_service):
         """Should return 404 for invalid exam."""
-        response = client.get("/taxonomy/INVALID/root")
+        response = client.get("/api/taxonomy/INVALID/root")
 
         assert response.status_code == 404
 
@@ -121,7 +121,7 @@ class TestGetNode:
         )
         mock_taxonomy_service.get_node.return_value = mock_node
 
-        response = client.get("/taxonomy/nodes/mcat-bio-1")
+        response = client.get("/api/taxonomy/nodes/mcat-bio-1")
 
         assert response.status_code == 200
         data = response.json()
@@ -133,7 +133,7 @@ class TestGetNode:
         """Should return 404 for nonexistent node."""
         mock_taxonomy_service.get_node.return_value = None
 
-        response = client.get("/taxonomy/nodes/nonexistent")
+        response = client.get("/api/taxonomy/nodes/nonexistent")
 
         assert response.status_code == 404
 
@@ -161,7 +161,7 @@ class TestGetChildren:
         ]
         mock_taxonomy_service.get_children.return_value = mock_children
 
-        response = client.get("/taxonomy/nodes/mcat-bio-1/children")
+        response = client.get("/api/taxonomy/nodes/mcat-bio-1/children")
 
         assert response.status_code == 200
         data = response.json()
@@ -184,7 +184,7 @@ class TestSearchNodes:
         ]
         mock_taxonomy_service.search_by_keyword.return_value = mock_results
 
-        response = client.get("/taxonomy/search?q=amino")
+        response = client.get("/api/taxonomy/search?q=amino")
 
         assert response.status_code == 200
         data = response.json()
@@ -195,7 +195,7 @@ class TestSearchNodes:
         """Should filter search by exam."""
         mock_taxonomy_service.search_by_keyword.return_value = []
 
-        response = client.get("/taxonomy/search?q=cardio&exam=MCAT")
+        response = client.get("/api/taxonomy/search?q=cardio&exam=MCAT")
 
         assert response.status_code == 200
         mock_taxonomy_service.search_by_keyword.assert_called_once()
