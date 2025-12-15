@@ -226,6 +226,5 @@ class ClassificationServiceV2:
         mapping = {
             ExamType.MCAT: "MCAT",
             ExamType.USMLE_STEP1: "USMLE_STEP1",
-            ExamType.USMLE_STEP2: "USMLE_STEP2",
         }
         return mapping.get(exam_type, exam_type.value.upper())

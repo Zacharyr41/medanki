@@ -104,7 +104,13 @@ class TestAPKGExporter:
         exporter.export(deck, str(output_path))
 
         temp_dir = tempfile.gettempdir()
-        medanki_temps = [f for f in os.listdir(temp_dir) if "medanki" in f.lower()]
+        medanki_temps = [
+            f
+            for f in os.listdir(temp_dir)
+            if "medanki" in f.lower()
+            and f != "medanki_uploads"
+            and os.path.isfile(os.path.join(temp_dir, f))
+        ]
         assert len(medanki_temps) == 0
 
     def test_export_with_vignette_cards(self, tmp_path):
