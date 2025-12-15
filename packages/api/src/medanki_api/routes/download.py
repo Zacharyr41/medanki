@@ -5,7 +5,7 @@ import uuid
 from collections import Counter
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
 
 from medanki_api.schemas.preview import (
@@ -18,16 +18,18 @@ from medanki_api.schemas.preview import (
 
 router = APIRouter()
 
-_store = None
+
+def _get_job_storage(request: Request) -> dict:
+    """Get the job storage from app state."""
+    if not hasattr(request.app.state, "job_storage"):
+        request.app.state.job_storage = {}
+    return request.app.state.job_storage
 
 
-def get_store():
-    return _store
-
-
-def set_store(store):
-    global _store
-    _store = store
+def _get_job_or_none(request: Request, job_id: str) -> dict | None:
+    """Get a job by ID or return None."""
+    storage = _get_job_storage(request)
+    return storage.get(job_id)
 
 
 def generate_apkg(cards: list, deck_name: str = "MedAnki") -> bytes:
@@ -49,17 +51,15 @@ def _parse_tags(card: dict) -> list:
 
 
 @router.get("/jobs/{job_id}/download")
-async def download_deck(job_id: str):
-    store = get_store()
-
-    job = await store.get_job(job_id)
+async def download_deck(request: Request, job_id: str):
+    job = _get_job_or_none(request, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
     if job["status"] != "completed":
         raise HTTPException(status_code=409, detail="Job not complete")
 
-    cards = await store.get_cards_by_document(job["document_id"])
+    cards = job.get("cards", [])
     apkg_content = generate_apkg(cards)
 
     return Response(
@@ -72,39 +72,35 @@ async def download_deck(job_id: str):
 
 
 @router.post("/jobs/{job_id}/regenerate", response_model=RegenerateResponse)
-async def regenerate_deck(job_id: str, request: RegenerateRequest | None = None):
-    store = get_store()
-
-    job = await store.get_job(job_id)
+async def regenerate_deck(request: Request, job_id: str, body: RegenerateRequest | None = None):
+    job = _get_job_or_none(request, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
     options = {}
-    if request:
-        if request.deck_name:
-            options["deck_name"] = request.deck_name
-        if request.include_tags:
-            options["include_tags"] = request.include_tags
-        if request.exclude_tags:
-            options["exclude_tags"] = request.exclude_tags
+    if body:
+        if body.deck_name:
+            options["deck_name"] = body.deck_name
+        if body.include_tags:
+            options["include_tags"] = body.include_tags
+        if body.exclude_tags:
+            options["exclude_tags"] = body.exclude_tags
 
-    new_job_id = create_processing_job(job["document_id"], options)
+    new_job_id = create_processing_job(job.get("document_id", job_id), options)
 
     return RegenerateResponse(job_id=new_job_id)
 
 
 @router.get("/jobs/{job_id}/stats", response_model=StatsResponse)
-async def get_job_stats(job_id: str):
-    store = get_store()
-
-    job = await store.get_job(job_id)
+async def get_job_stats(request: Request, job_id: str):
+    job = _get_job_or_none(request, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
 
     if job["status"] != "completed":
         raise HTTPException(status_code=409, detail="Job not complete")
 
-    cards = await store.get_cards_by_document(job["document_id"])
+    cards = job.get("cards", [])
 
     type_counter = Counter(c.get("card_type", "cloze") for c in cards)
     topic_counter: Counter = Counter()

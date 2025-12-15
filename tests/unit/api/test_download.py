@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI
@@ -16,18 +16,14 @@ from medanki_api.routes.download import router as download_router
 def app():
     app = FastAPI()
     app.include_router(download_router, prefix="/api")
+    app.state.job_storage = {}
     return app
 
 
 @pytest.fixture
 def client(app):
-    return TestClient(app)
-
-
-@pytest.fixture
-def mock_store():
-    store = AsyncMock()
-    return store
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest.fixture
@@ -94,62 +90,55 @@ def sample_cards():
 class TestDownload:
     """Tests for GET /api/jobs/{id}/download endpoint."""
 
-    def test_download_apkg(self, client, mock_store, sample_job, sample_cards):
+    def test_download_apkg(self, client, sample_job, sample_cards):
         """GET /api/jobs/{id}/download returns file."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
-                mock_gen.return_value = b"APKG_CONTENT"
-                response = client.get("/api/jobs/job_001/download")
+        with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
+            mock_gen.return_value = b"APKG_CONTENT"
+            response = client.get("/api/jobs/job_001/download")
 
         assert response.status_code == 200
 
-    def test_download_not_ready(self, client, mock_store):
+    def test_download_not_ready(self, client):
         """Job not complete returns 409."""
-        mock_store.get_job.return_value = {
+        client.app.state.job_storage["job_001"] = {
             "id": "job_001",
             "document_id": "doc_001",
             "status": "processing",
             "progress": 50
         }
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/job_001/download")
+        response = client.get("/api/jobs/job_001/download")
 
         assert response.status_code == 409
 
-    def test_download_not_found(self, client, mock_store):
+    def test_download_not_found(self, client):
         """Unknown job returns 404."""
-        mock_store.get_job.return_value = None
-
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/unknown_job/download")
+        response = client.get("/api/jobs/unknown_job/download")
 
         assert response.status_code == 404
 
-    def test_download_content_type(self, client, mock_store, sample_job, sample_cards):
+    def test_download_content_type(self, client, sample_job, sample_cards):
         """Returns application/octet-stream."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
-                mock_gen.return_value = b"APKG_CONTENT"
-                response = client.get("/api/jobs/job_001/download")
+        with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
+            mock_gen.return_value = b"APKG_CONTENT"
+            response = client.get("/api/jobs/job_001/download")
 
         assert response.headers["content-type"] == "application/octet-stream"
 
-    def test_download_filename(self, client, mock_store, sample_job, sample_cards):
+    def test_download_filename(self, client, sample_job, sample_cards):
         """Content-Disposition has filename."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
-                mock_gen.return_value = b"APKG_CONTENT"
-                response = client.get("/api/jobs/job_001/download")
+        with patch("medanki_api.routes.download.generate_apkg") as mock_gen:
+            mock_gen.return_value = b"APKG_CONTENT"
+            response = client.get("/api/jobs/job_001/download")
 
         content_disposition = response.headers.get("content-disposition", "")
         assert "filename=" in content_disposition
@@ -159,43 +148,40 @@ class TestDownload:
 class TestRegeneration:
     """Tests for POST /api/jobs/{id}/regenerate endpoint."""
 
-    def test_regenerate_deck(self, client, mock_store, sample_job):
+    def test_regenerate_deck(self, client, sample_job):
         """POST /api/jobs/{id}/regenerate creates new deck."""
-        mock_store.get_job.return_value = sample_job
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.create_processing_job") as mock_create:
-                mock_create.return_value = "new_job_001"
-                response = client.post("/api/jobs/job_001/regenerate")
+        with patch("medanki_api.routes.download.create_processing_job") as mock_create:
+            mock_create.return_value = "new_job_001"
+            response = client.post("/api/jobs/job_001/regenerate")
 
         assert response.status_code == 200
         data = response.json()
         assert "job_id" in data
 
-    def test_regenerate_with_options(self, client, mock_store, sample_job):
+    def test_regenerate_with_options(self, client, sample_job):
         """Can change options."""
-        mock_store.get_job.return_value = sample_job
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.create_processing_job") as mock_create:
-                mock_create.return_value = "new_job_002"
-                response = client.post(
-                    "/api/jobs/job_001/regenerate",
-                    json={"deck_name": "Custom Deck", "include_tags": ["cardiology"]}
-                )
+        with patch("medanki_api.routes.download.create_processing_job") as mock_create:
+            mock_create.return_value = "new_job_002"
+            response = client.post(
+                "/api/jobs/job_001/regenerate",
+                json={"deck_name": "Custom Deck", "include_tags": ["cardiology"]}
+            )
 
         assert response.status_code == 200
         data = response.json()
         assert "job_id" in data
 
-    def test_regenerate_creates_new_job(self, client, mock_store, sample_job):
+    def test_regenerate_creates_new_job(self, client, sample_job):
         """Returns new job_id."""
-        mock_store.get_job.return_value = sample_job
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            with patch("medanki_api.routes.download.create_processing_job") as mock_create:
-                mock_create.return_value = "new_job_003"
-                response = client.post("/api/jobs/job_001/regenerate")
+        with patch("medanki_api.routes.download.create_processing_job") as mock_create:
+            mock_create.return_value = "new_job_003"
+            response = client.post("/api/jobs/job_001/regenerate")
 
         assert response.status_code == 200
         data = response.json()
@@ -206,25 +192,23 @@ class TestRegeneration:
 class TestStatistics:
     """Tests for GET /api/jobs/{id}/stats endpoint."""
 
-    def test_job_stats(self, client, mock_store, sample_job, sample_cards):
+    def test_job_stats(self, client, sample_job, sample_cards):
         """GET /api/jobs/{id}/stats returns statistics."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/job_001/stats")
+        response = client.get("/api/jobs/job_001/stats")
 
         assert response.status_code == 200
         data = response.json()
         assert "counts" in data
 
-    def test_stats_has_counts(self, client, mock_store, sample_job, sample_cards):
+    def test_stats_has_counts(self, client, sample_job, sample_cards):
         """Card counts by type."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/job_001/stats")
+        response = client.get("/api/jobs/job_001/stats")
 
         assert response.status_code == 200
         data = response.json()
@@ -236,13 +220,12 @@ class TestStatistics:
         assert counts["cloze"] == 2
         assert counts["vignette"] == 1
 
-    def test_stats_has_topics(self, client, mock_store, sample_job, sample_cards):
+    def test_stats_has_topics(self, client, sample_job, sample_cards):
         """Topic distribution."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/job_001/stats")
+        response = client.get("/api/jobs/job_001/stats")
 
         assert response.status_code == 200
         data = response.json()
@@ -251,13 +234,12 @@ class TestStatistics:
         assert "cardiology" in topics
         assert topics["cardiology"] == 3
 
-    def test_stats_has_timing(self, client, mock_store, sample_job, sample_cards):
+    def test_stats_has_timing(self, client, sample_job, sample_cards):
         """Processing duration."""
-        mock_store.get_job.return_value = sample_job
-        mock_store.get_cards_by_document.return_value = sample_cards
+        sample_job["cards"] = sample_cards
+        client.app.state.job_storage["job_001"] = sample_job
 
-        with patch("medanki_api.routes.download.get_store", return_value=mock_store):
-            response = client.get("/api/jobs/job_001/stats")
+        response = client.get("/api/jobs/job_001/stats")
 
         assert response.status_code == 200
         data = response.json()
