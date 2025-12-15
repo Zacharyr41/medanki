@@ -11,12 +11,8 @@ interface ApiUploadResponse {
   created_at: string
 }
 
-export async function uploadFile(
-  file: File,
-  options: GenerationOptions
-): Promise<UploadResponse> {
+function buildFormData(options: GenerationOptions): FormData {
   const formData = new FormData()
-  formData.append('file', file)
   formData.append('exam', options.exam)
 
   const cardTypes: string[] = []
@@ -24,6 +20,37 @@ export async function uploadFile(
   if (options.cardTypes.vignette) cardTypes.push('vignette')
   formData.append('card_types', cardTypes.join(','))
   formData.append('max_cards', String(options.maxCards))
+
+  return formData
+}
+
+export async function uploadFile(
+  file: File,
+  options: GenerationOptions
+): Promise<UploadResponse> {
+  const formData = buildFormData(options)
+  formData.append('file', file)
+
+  const response = await fetch(`${API_BASE_URL}/api/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(error || 'Upload failed')
+  }
+
+  const data: ApiUploadResponse = await response.json()
+  return { jobId: data.job_id }
+}
+
+export async function uploadWithTopic(
+  topicText: string,
+  options: GenerationOptions
+): Promise<UploadResponse> {
+  const formData = buildFormData(options)
+  formData.append('topic_text', topicText)
 
   const response = await fetch(`${API_BASE_URL}/api/upload`, {
     method: 'POST',

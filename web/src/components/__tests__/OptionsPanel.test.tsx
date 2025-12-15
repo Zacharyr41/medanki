@@ -6,7 +6,7 @@ import { OptionsPanel, type GenerationOptions } from '../OptionsPanel'
 const defaultOptions: GenerationOptions = {
   exam: 'USMLE Step 1',
   cardTypes: { cloze: true, vignette: true },
-  maxCards: 10,
+  maxCards: 20,
 }
 
 describe('OptionsPanel', () => {
@@ -32,10 +32,10 @@ describe('OptionsPanel', () => {
     expect(screen.getByLabelText(/vignette/i)).toBeInTheDocument()
   })
 
-  it('renders max cards input', () => {
+  it('renders total cards input', () => {
     render(<OptionsPanel options={defaultOptions} onChange={vi.fn()} />)
 
-    const input = screen.getByLabelText(/max.*cards/i)
+    const input = screen.getByLabelText(/total.*cards/i)
     expect(input).toBeInTheDocument()
     expect(input).toHaveAttribute('type', 'number')
   })

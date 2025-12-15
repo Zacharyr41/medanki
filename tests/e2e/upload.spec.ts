@@ -71,12 +71,12 @@ test.describe('Upload Page', () => {
     await expect(clozeCheckbox).toBeChecked()
   })
 
-  test('can change max cards', async ({ page }) => {
-    const maxCardsInput = page.getByLabel('Max Cards per Chunk')
-    await expect(maxCardsInput).toHaveValue('10')
+  test('can change total cards', async ({ page }) => {
+    const totalCardsInput = page.getByLabel('Total Cards')
+    await expect(totalCardsInput).toHaveValue('20')
 
-    await maxCardsInput.fill('25')
-    await expect(maxCardsInput).toHaveValue('25')
+    await totalCardsInput.fill('50')
+    await expect(totalCardsInput).toHaveValue('50')
   })
 
   test('submit navigates to processing', async ({ page, sampleMdPath }) => {

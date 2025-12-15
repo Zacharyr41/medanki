@@ -274,3 +274,87 @@ class TestUploadReturnsCreatedAt:
         # Verify it's a valid ISO timestamp
         created_at = datetime.fromisoformat(data["created_at"].replace("Z", "+00:00"))
         assert isinstance(created_at, datetime)
+
+
+class TestTopicTextUpload:
+    """Test topic text upload without file."""
+
+    async def test_upload_topic_text_success(self, client: AsyncClient) -> None:
+        """POST /api/upload with topic_text returns job_id."""
+        data = {"topic_text": "I want to learn about cardiac electrophysiology"}
+
+        response = await client.post("/api/upload", data=data)
+
+        assert response.status_code == 200
+        result = response.json()
+        assert "job_id" in result
+        assert result["status"] == "pending"
+
+    async def test_upload_topic_text_with_options(self, client: AsyncClient) -> None:
+        """Topic text with exam and card options."""
+        data = {
+            "topic_text": "Study the cardiovascular system",
+            "exam": "MCAT",
+            "card_types": "cloze",
+            "max_cards": "30",
+        }
+
+        response = await client.post("/api/upload", data=data)
+
+        assert response.status_code == 200
+        result = response.json()
+        assert "job_id" in result
+
+    async def test_upload_rejects_empty_topic_text(self, client: AsyncClient) -> None:
+        """Empty topic text without file returns 400."""
+        data = {"topic_text": "   "}
+
+        response = await client.post("/api/upload", data=data)
+
+        assert response.status_code == 400
+
+    async def test_upload_file_takes_precedence(
+        self, client: AsyncClient, sample_pdf_content: bytes
+    ) -> None:
+        """When both file and topic_text provided, file is used."""
+        files = {"file": ("lecture.pdf", io.BytesIO(sample_pdf_content), "application/pdf")}
+        data = {"topic_text": "This should be ignored"}
+
+        response = await client.post("/api/upload", files=files, data=data)
+
+        assert response.status_code == 200
+
+
+class TestUploadInputType:
+    """Test that input_type is set correctly in job."""
+
+    async def test_file_upload_sets_file_input_type(
+        self, client: AsyncClient, sample_pdf_content: bytes
+    ) -> None:
+        """File upload creates job with input_type=file."""
+        from medanki_api.main import app
+
+        files = {"file": ("lecture.pdf", io.BytesIO(sample_pdf_content), "application/pdf")}
+
+        response = await client.post("/api/upload", files=files)
+
+        assert response.status_code == 200
+        job_id = response.json()["job_id"]
+        job = app.state.job_storage.get(job_id)
+        assert job is not None
+        assert job.get("input_type") == "file"
+
+    async def test_topic_upload_sets_topic_input_type(self, client: AsyncClient) -> None:
+        """Topic upload creates job with input_type=topic."""
+        from medanki_api.main import app
+
+        data = {"topic_text": "Learn about pharmacology"}
+
+        response = await client.post("/api/upload", data=data)
+
+        assert response.status_code == 200
+        job_id = response.json()["job_id"]
+        job = app.state.job_storage.get(job_id)
+        assert job is not None
+        assert job.get("input_type") == "topic"
+        assert job.get("topic_text") == "Learn about pharmacology"

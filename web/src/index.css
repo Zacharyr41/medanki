@@ -265,3 +265,43 @@
 .topic-subtopics ul {
   @apply list-disc list-inside space-y-1 text-gray-600;
 }
+
+.input-mode-selector {
+  @apply flex gap-1 p-1 bg-gray-100 rounded-lg;
+}
+
+.mode-tab {
+  @apply flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors;
+}
+
+.mode-tab:not(.active) {
+  @apply text-gray-600 hover:text-gray-900 hover:bg-gray-200;
+}
+
+.mode-tab.active {
+  @apply bg-white text-blue-600 shadow-sm;
+}
+
+.topic-input-container {
+  @apply w-full;
+}
+
+.topic-input {
+  @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.topic-input::placeholder {
+  @apply text-gray-400;
+}
+
+.topic-input-footer {
+  @apply flex justify-end mt-2 text-sm text-gray-500;
+}
+
+.char-count {
+  @apply font-medium;
+}
+
+.char-limit {
+  @apply text-gray-400;
+}

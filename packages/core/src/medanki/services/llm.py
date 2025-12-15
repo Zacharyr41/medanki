@@ -174,3 +174,66 @@ class ClaudeClient:
             system=system,
         )
         return [{"text": card.text, "tags": card.tags} for card in response.cards]
+
+    async def generate_cards_from_topic(
+        self,
+        topic_prompt: str,
+        count: int = 20,
+        exam_type: str = "USMLE_STEP1",
+    ) -> list[dict[str, Any]]:
+        """Generate cloze cards from a topic description without source text.
+
+        The LLM will generate educational content and cloze cards based on
+        the user's topic description.
+
+        Args:
+            topic_prompt: User's description of what they want to learn.
+            count: Number of cards to generate.
+            exam_type: Target exam (MCAT, USMLE_STEP1, etc.).
+
+        Returns:
+            List of dictionaries with 'text' and 'topic' keys.
+        """
+        system = f"""You are a medical education expert creating flashcards for {exam_type} preparation.
+
+The user will describe topics they want to study. Your job is to:
+1. Generate high-yield, accurate medical facts about those topics
+2. Create cloze deletion flashcards using {{{{c1::answer}}}} format
+3. Focus on testable, clinically relevant information
+4. Each card should test ONE key concept
+5. Keep cloze deletions to 1-4 words (key terms, values, or concepts)
+
+Rules for cloze cards:
+- Use {{{{c1::term}}}} syntax for the hidden answer
+- One cloze deletion per card
+- Answer should be a key medical term, value, or concept
+- Card text should provide enough context to recall the answer
+- Focus on mechanisms, clinical presentations, treatments, and distinguishing features
+
+{CLOZE_FEW_SHOT_EXAMPLES}
+"""
+
+        prompt = f"""Generate {count} cloze deletion flashcards about the following topics:
+
+{topic_prompt}
+
+Focus on high-yield concepts that are commonly tested on {exam_type}.
+Include cards about:
+- Key definitions and terminology
+- Mechanisms and pathophysiology
+- Clinical presentations and findings
+- Diagnostic criteria
+- Treatment approaches
+- Important distinguishing features
+
+Generate exactly {count} cards."""
+
+        response = await self.generate_structured(
+            prompt=prompt,
+            response_model=ClozeGenerationResponse,
+            system=system,
+        )
+        return [
+            {"text": card.text, "tags": card.tags, "topic": topic_prompt[:100]}
+            for card in response.cards
+        ]
