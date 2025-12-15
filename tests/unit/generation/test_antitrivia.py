@@ -23,19 +23,13 @@ def extract_cloze_answers(text: str) -> list[str]:
 
 def contains_trivia(text: str) -> bool:
     """Check if text contains research trivia patterns."""
-    for pattern in TRIVIA_PATTERNS.values():
-        if pattern.search(text):
-            return True
-    return False
+    return any(pattern.search(text) for pattern in TRIVIA_PATTERNS.values())
 
 
 def has_trivia_deletion(card_text: str) -> bool:
     """Check if any cloze deletion contains trivia."""
     answers = extract_cloze_answers(card_text)
-    for answer in answers:
-        if contains_trivia(answer):
-            return True
-    return False
+    return any(contains_trivia(answer) for answer in answers)
 
 
 class TestTriviaDetection:

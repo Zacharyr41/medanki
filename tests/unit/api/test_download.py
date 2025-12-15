@@ -11,7 +11,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from medanki_api.routes.download import router as download_router, generate_apkg
+from medanki_api.routes.download import generate_apkg
+from medanki_api.routes.download import router as download_router
 
 
 @pytest.fixture

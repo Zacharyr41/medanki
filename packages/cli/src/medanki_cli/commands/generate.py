@@ -219,13 +219,13 @@ def generate(
         except ValueError as e:
             console.print(f"[red]Error: {e}[/red]")
             console.print("[yellow]Hint: Set ANTHROPIC_API_KEY environment variable[/yellow]")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
         except Exception as e:
             console.print(f"[red]Error during processing: {e}[/red]")
             if verbose:
                 import traceback
                 console.print(traceback.format_exc())
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
 
     cards = result.get("cards", [])
     stats = result.get("stats", {})

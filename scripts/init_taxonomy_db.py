@@ -13,10 +13,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "packages" / "core" / "src
 from medanki.storage.taxonomy_repository import TaxonomyRepository
 
 
-async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
-    """Load MCAT taxonomy from JSON."""
+def load_mcat_taxonomy_sync(repo: TaxonomyRepository, json_path: Path) -> tuple[dict, list, list]:
+    """Load MCAT taxonomy data from JSON (sync part)."""
     with open(json_path) as f:
         data = json.load(f)
+    return data
+
+
+async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
+    """Load MCAT taxonomy from JSON."""
+    data = load_mcat_taxonomy_sync(repo, json_path)
 
     await repo.insert_exam({
         "id": "MCAT",
@@ -68,10 +74,15 @@ async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
     return len(nodes)
 
 
+def load_usmle_taxonomy_sync(json_path: Path) -> dict:
+    """Load USMLE taxonomy data from JSON (sync part)."""
+    with open(json_path) as f:
+        return json.load(f)
+
+
 async def load_usmle_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
     """Load USMLE taxonomy from JSON."""
-    with open(json_path) as f:
-        data = json.load(f)
+    data = load_usmle_taxonomy_sync(json_path)
 
     await repo.insert_exam({
         "id": "USMLE_STEP1",
@@ -84,23 +95,23 @@ async def load_usmle_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
     keywords = []
     sort_order = 0
 
-    for sys in data.get("systems", []):
-        sys_id = f"USMLE_{sys['id']}"
+    for system in data.get("systems", []):
+        sys_id = f"USMLE_{system['id']}"
         nodes.append({
             "id": sys_id,
             "exam_id": "USMLE_STEP1",
             "node_type": "organ_system",
-            "code": sys["id"],
-            "title": sys["title"],
+            "code": system["id"],
+            "title": system["title"],
             "parent_id": None,
             "sort_order": sort_order,
         })
         sort_order += 1
 
-        for kw in sys.get("keywords", []):
+        for kw in system.get("keywords", []):
             keywords.append({"node_id": sys_id, "keyword": kw.lower()})
 
-        for topic in sys.get("topics", []):
+        for topic in system.get("topics", []):
             topic_id = f"USMLE_{topic['id']}"
             nodes.append({
                 "id": topic_id,

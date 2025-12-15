@@ -97,8 +97,8 @@ class TestClassificationWithTaxonomy:
         assert any(
             "Pharmacology" in t or "SYS1F" in tid or
             "Cardiovascular" in t or "Vascular" in t or "SYS3" in tid
-            for t, tid in zip(topic_titles, topic_ids)
-        ), f"Expected CVD or pharmacology topic, got {list(zip(topic_titles, topic_ids))}"
+            for t, tid in zip(topic_titles, topic_ids, strict=False)
+        ), f"Expected CVD or pharmacology topic, got {list(zip(topic_titles, topic_ids, strict=False))}"
 
     @pytest.mark.integration
     def test_threshold_filters_low_confidence(self, indexed_taxonomy):
@@ -132,5 +132,5 @@ class TestClassificationWithTaxonomy:
         topic_titles = [r["title"] for r in results]
         assert any(
             "Vascular" in t or "Cardiovascular" in t or "SYS3" in tid 
-            for t, tid in zip(topic_titles, topic_ids)
-        ), f"Expected vascular/cardiovascular topic, got {list(zip(topic_titles, topic_ids))}"
+            for t, tid in zip(topic_titles, topic_ids, strict=False)
+        ), f"Expected vascular/cardiovascular topic, got {list(zip(topic_titles, topic_ids, strict=False))}"
