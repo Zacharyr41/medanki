@@ -6,7 +6,7 @@ describe('ProgressBar', () => {
   it('shows percentage', () => {
     render(<ProgressBar progress={50} stage="chunking" />)
 
-    expect(screen.getByText('50%')).toBeInTheDocument()
+    expect(screen.getByText('50.0%')).toBeInTheDocument()
   })
 
   it('fills to percentage', () => {

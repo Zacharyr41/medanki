@@ -20,7 +20,7 @@ export function ProgressBar({ progress, stage }: ProgressBarProps) {
         <span className="text-sm font-medium text-gray-700">
           {stageLabels[stage]}
         </span>
-        <span className="text-sm font-medium text-gray-700">{progress}%</span>
+        <span className="text-sm font-medium text-gray-700">{progress.toFixed(1)}%</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
         <div

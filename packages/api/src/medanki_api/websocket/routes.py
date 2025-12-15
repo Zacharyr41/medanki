@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -309,6 +310,7 @@ async def websocket_endpoint(
         await _process_job(websocket, job)
 
         job["status"] = "completed"
+        job["updated_at"] = datetime.now(UTC).isoformat()
 
         await websocket.send_json(
             {
