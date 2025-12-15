@@ -15,8 +15,21 @@ from tenacity import (
 )
 
 from medanki.exceptions import LLMError
+from medanki.generation.prompts.cloze_prompt import (
+    CLOZE_FEW_SHOT_EXAMPLES,
+    CLOZE_SYSTEM_PROMPT,
+)
 
 T = TypeVar("T", bound=BaseModel)
+
+
+class ClozeCardResponse(BaseModel):
+    text: str
+    tags: list[str]
+
+
+class ClozeGenerationResponse(BaseModel):
+    cards: list[ClozeCardResponse]
 
 
 @dataclass
@@ -140,3 +153,21 @@ class ClaudeClient:
             raise
         except anthropic.APIError as e:
             raise LLMError(str(e)) from e
+
+    async def generate_cloze_cards(
+        self,
+        text: str,
+        count: int = 3,
+        tags: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        prompt = f"Generate {count} cloze deletion flashcards from the following medical text:\n\n{text}"
+        if tags:
+            prompt += f"\n\nSuggested tags: {', '.join(tags)}"
+
+        system = CLOZE_SYSTEM_PROMPT + "\n\n" + CLOZE_FEW_SHOT_EXAMPLES
+        response = await self.generate_structured(
+            prompt=prompt,
+            response_model=ClozeGenerationResponse,
+            system=system,
+        )
+        return [{"text": card.text, "tags": card.tags} for card in response.cards]

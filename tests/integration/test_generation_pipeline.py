@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from medanki.generation.cloze import ClozeGenerator, GeneratedClozeCard
+from medanki.generation.cloze import ClozeGenerator
 from medanki.generation.deduplicator import Deduplicator
 from medanki.generation.validator import CardValidator, ClozeCardInput, VignetteCardInput
 from medanki.models.cards import ClozeCard, VignetteCard, VignetteOption
@@ -32,8 +32,9 @@ class TestClozeGeneration:
         generator = ClozeGenerator(llm_client=mock_llm_client)
 
         cards = await generator.generate(
-            classified_chunk=sample_chunk_with_cardiology,
-            count=3,
+            content=sample_chunk_with_cardiology.text,
+            source_chunk_id=uuid4(),
+            num_cards=3,
         )
 
         # Should generate at least one card
@@ -41,7 +42,7 @@ class TestClozeGeneration:
 
         # Each card should have valid cloze syntax
         for card in cards:
-            assert isinstance(card, GeneratedClozeCard)
+            assert isinstance(card, ClozeCard)
             assert "{{c1::" in card.text
             assert "}}" in card.text
             assert card.source_chunk_id is not None
@@ -55,31 +56,33 @@ class TestClozeGeneration:
         generator = ClozeGenerator(llm_client=mock_llm_client)
 
         cards = await generator.generate(
-            classified_chunk=sample_chunk_with_cardiology,
-            count=2,
+            content=sample_chunk_with_cardiology.text,
+            source_chunk_id=uuid4(),
+            num_cards=2,
         )
 
         # Should not exceed requested count
         assert len(cards) <= 2
 
-    async def test_generate_cloze_includes_tags(
+    async def test_generate_cloze_includes_topic_id(
         self,
         mock_llm_client,
         sample_chunk_with_cardiology,
     ) -> None:
-        """Test that generated cards include topic tags."""
+        """Test that generated cards include topic_id."""
         generator = ClozeGenerator(llm_client=mock_llm_client)
 
         cards = await generator.generate(
-            classified_chunk=sample_chunk_with_cardiology,
-            count=3,
+            content=sample_chunk_with_cardiology.text,
+            source_chunk_id=uuid4(),
+            topic_id="cardiology",
+            num_cards=3,
         )
 
-        # Cards should have tags
+        # Cards should have topic_id
         for card in cards:
-            assert hasattr(card, "tags")
-            # Tags should be a list (may be empty)
-            assert isinstance(card.tags, list)
+            assert hasattr(card, "topic_id")
+            assert card.topic_id == "cardiology"
 
 
 # ============================================================================
@@ -185,16 +188,13 @@ class TestCardValidation:
         mock_llm_client,
     ) -> None:
         """Test that generated cards pass validation."""
-        # Generate some test cards
-        @dataclass
-        class MockChunk:
-            id: str = "test_chunk"
-            text: str = "Systole and diastole are phases of the cardiac cycle."
-            tags: list[str] = field(default_factory=lambda: ["cardiology"])
-
         async def run_test():
             generator = ClozeGenerator(llm_client=mock_llm_client)
-            cards = await generator.generate(MockChunk(), count=2)
+            cards = await generator.generate(
+                content="Systole and diastole are phases of the cardiac cycle.",
+                source_chunk_id=uuid4(),
+                num_cards=2,
+            )
             return cards
 
         import asyncio
@@ -502,22 +502,21 @@ class TestGenerationPipelineIntegration:
         all_cards: list[ClozeCard] = []
 
         for chunk in [sample_chunk_with_cardiology, sample_chunk_with_pharmacology]:
-            generated = await generator.generate(chunk, count=3)
+            generated = await generator.generate(
+                content=chunk.text,
+                source_chunk_id=uuid4(),
+                num_cards=3,
+            )
 
             # Validate each card
-            for gen_card in generated:
+            for card in generated:
                 card_input = ClozeCardInput(
-                    text=gen_card.text,
+                    text=card.text,
                     source_chunk=chunk.text,
                 )
                 result = validator.validate_schema(card_input)
 
                 if result.status.value == "valid":
-                    # Convert to ClozeCard for deduplication
-                    card = ClozeCard(
-                        text=gen_card.text,
-                        source_chunk_id=gen_card.source_chunk_id,
-                    )
                     all_cards.append(card)
 
         # Deduplicate
@@ -536,14 +535,12 @@ class TestGenerationPipelineIntegration:
         mock_llm_client,
     ) -> None:
         """Test that empty chunks don't generate cards."""
-        @dataclass
-        class EmptyChunk:
-            id: str = "empty_chunk"
-            text: str = ""
-            tags: list[str] = field(default_factory=list)
-
         generator = ClozeGenerator(llm_client=mock_llm_client)
-        cards = await generator.generate(EmptyChunk(), count=3)
+        cards = await generator.generate(
+            content="",
+            source_chunk_id=uuid4(),
+            num_cards=3,
+        )
 
         # Empty text should not produce cards
         # (The generator or LLM should handle this gracefully)

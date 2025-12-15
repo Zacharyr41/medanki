@@ -54,6 +54,9 @@ medanki = { workspace = true }
 medanki-cli = { workspace = true }
 medanki-api = { workspace = true }
 
+[project.scripts]
+medanki = "medanki_cli.main:app"
+
 [tool.setuptools.packages.find]
 where = ["packages/core/src"]
 
@@ -67,7 +70,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["packages/core/src/medanki", "packages/api/src/medanki_api"]
+packages = ["packages/core/src/medanki", "packages/cli/src/medanki_cli", "packages/api/src/medanki_api"]
 
 [tool.ruff]
 line-length = 100

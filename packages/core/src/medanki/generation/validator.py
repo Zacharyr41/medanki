@@ -1,7 +1,10 @@
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from medanki.models.cards import ClozeCard, VignetteCard
 
 
 class ValidationStatus(Enum):
@@ -47,6 +50,31 @@ class CardValidator:
 
     def __init__(self, llm_client: ILLMClient | None = None):
         self.llm_client = llm_client
+
+    async def validate(
+        self,
+        card: "ClozeCard | VignetteCard",
+        source_content: str | None = None,
+    ) -> tuple[bool, list[str]]:
+        from medanki.models.cards import ClozeCard, VignetteCard
+
+        issues: list[str] = []
+
+        if isinstance(card, ClozeCard):
+            matches = self.CLOZE_PATTERN.findall(card.text)
+            if not matches:
+                issues.append("No valid cloze deletion found")
+            for match in matches:
+                word_count = len(match.split())
+                if word_count > self.MAX_ANSWER_WORDS:
+                    issues.append(f"Cloze answer too long: {word_count} words")
+        elif isinstance(card, VignetteCard):
+            if len(card.options) < 2:
+                issues.append("Vignette must have at least 2 options")
+            if card.answer.upper() not in self.VALID_ANSWERS:
+                issues.append(f"Invalid answer '{card.answer}'")
+
+        return len(issues) == 0, issues
 
     def validate_schema(self, card: ClozeCardInput | VignetteCardInput) -> ValidationResult:
         if isinstance(card, ClozeCardInput):

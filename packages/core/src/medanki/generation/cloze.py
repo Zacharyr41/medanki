@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from uuid import UUID, uuid4
 
+from medanki.models.cards import ClozeCard
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -103,62 +105,63 @@ class ClozeGenerator:
 
     async def generate(
         self,
-        classified_chunk: Any,
-        count: int = 3,
-    ) -> list[GeneratedClozeCard]:
-        """Generate cloze cards from a classified chunk.
+        content: str,
+        source_chunk_id: UUID,
+        topic_id: str | None = None,
+        num_cards: int = 3,
+    ) -> list[ClozeCard]:
+        """Generate cloze cards from content.
 
         Args:
-            classified_chunk: A chunk with text and topic classifications.
-            count: Maximum number of cards to generate.
+            content: Text content to generate cards from.
+            source_chunk_id: UUID of the source chunk.
+            topic_id: Optional topic ID for tagging.
+            num_cards: Maximum number of cards to generate.
 
         Returns:
-            List of validated GeneratedClozeCard objects.
+            List of validated ClozeCard objects.
 
         Raises:
             Exception: If the LLM client fails.
         """
-        # Extract text and tags from the classified chunk
-        text = getattr(classified_chunk, "text", "")
-        tags = getattr(classified_chunk, "tags", [])
-        chunk_id = getattr(classified_chunk, "id", uuid4())
+        tags = [topic_id] if topic_id else []
 
-        # Call LLM to generate cards
         raw_cards = await self._llm_client.generate_cloze_cards(
-            text=text,
-            count=count,
+            text=content,
+            count=num_cards,
             tags=tags,
         )
 
-        # Process and validate cards
-        valid_cards: list[GeneratedClozeCard] = []
+        valid_cards: list[ClozeCard] = []
         for raw_card in raw_cards:
             card_text = raw_card.get("text", "")
-            card_tags = raw_card.get("tags", [])
+            card_tags = raw_card.get("tags", tags)
 
-            # Skip cards without valid cloze syntax
             if not self._has_valid_cloze_syntax(card_text):
                 continue
 
-            # Skip cards with trivial deletions
             if self._has_trivial_deletion(card_text):
                 continue
 
-            # Skip cards with answers that are too long
             if self._has_long_answer(card_text):
                 continue
 
-            card = GeneratedClozeCard(
+            generated = GeneratedClozeCard(
                 text=card_text,
-                source_chunk_id=chunk_id,
-                tags=card_tags or tags,
+                source_chunk_id=source_chunk_id,
+                tags=card_tags,
             )
 
-            if card.is_valid():
-                valid_cards.append(card)
+            if generated.is_valid():
+                valid_cards.append(
+                    ClozeCard(
+                        text=generated.text,
+                        source_chunk_id=source_chunk_id,
+                        topic_id=topic_id,
+                    )
+                )
 
-        # Respect the count parameter
-        return valid_cards[:count]
+        return valid_cards[:num_cards]
 
     def _has_valid_cloze_syntax(self, text: str) -> bool:
         """Check if text has valid cloze deletion syntax."""

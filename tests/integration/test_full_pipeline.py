@@ -300,16 +300,12 @@ class TestMarkdownToAPKGPipeline:
         async def generate():
             all_card_texts = []
             for chunk in chunks[:2]:
-                @dataclass
-                class ChunkWrapper:
-                    id: str
-                    text: str
-                    tags: list[str] = field(default_factory=list)
-
-                wrapper = ChunkWrapper(id=chunk.id, text=chunk.text)
-
                 try:
-                    cards = await generator.generate(wrapper, count=3)
+                    cards = await generator.generate(
+                        content=chunk.text,
+                        source_chunk_id=uuid4(),
+                        num_cards=3,
+                    )
                     for card in cards:
                         all_card_texts.append(card.text)
                 except Exception:
@@ -580,16 +576,12 @@ class TestPipelineStatistics:
         async def count_cards():
             nonlocal total_cards
             for chunk in chunks:
-                @dataclass
-                class ChunkWrapper:
-                    id: str
-                    text: str
-                    tags: list[str] = field(default_factory=list)
-
-                wrapper = ChunkWrapper(id=chunk.id, text=chunk.text)
-
                 try:
-                    cards = await generator.generate(wrapper, count=3)
+                    cards = await generator.generate(
+                        content=chunk.text,
+                        source_chunk_id=uuid4(),
+                        num_cards=3,
+                    )
                     total_cards += len(cards)
                 except Exception:
                     pass

@@ -14,6 +14,15 @@ if TYPE_CHECKING:
     from medanki.generation.cloze import ClozeGenerator
 
 
+async def generate_from_chunk(generator: "ClozeGenerator", chunk, count: int = 3):
+    """Helper to call generator with new signature using chunk data."""
+    return await generator.generate(
+        content=chunk.text,
+        source_chunk_id=chunk.id,
+        num_cards=count,
+    )
+
+
 # Test fixtures and data classes for testing
 @dataclass
 class MockClassifiedChunk:
@@ -126,7 +135,7 @@ class TestClozeCardGeneration:
         self, cloze_generator: ClozeGenerator, sample_classified_chunk: MockClassifiedChunk
     ) -> None:
         """Generation returns list of ClozeCard objects."""
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         assert isinstance(cards, list)
         assert len(cards) > 0
@@ -148,7 +157,7 @@ class TestClozeCardGeneration:
             {"text": "Card {{c1::three}}.", "tags": []},
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk, count=3)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk, count=3)
 
         assert len(cards) == 3
 
@@ -157,7 +166,7 @@ class TestClozeCardGeneration:
         self, cloze_generator: ClozeGenerator, sample_classified_chunk: MockClassifiedChunk
     ) -> None:
         """All generated cards have valid {{c1::...}} syntax."""
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         cloze_pattern = re.compile(r"\{\{c(\d+)::([^}]+)\}\}")
         for card in cards:
@@ -169,7 +178,7 @@ class TestClozeCardGeneration:
         self, cloze_generator: ClozeGenerator, sample_classified_chunk: MockClassifiedChunk
     ) -> None:
         """Cloze answers are 1-4 words."""
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
         for card in cards:
@@ -183,21 +192,20 @@ class TestClozeCardGeneration:
         self, cloze_generator: ClozeGenerator, sample_classified_chunk: MockClassifiedChunk
     ) -> None:
         """Cards track provenance via source_chunk_id."""
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         for card in cards:
             assert card.source_chunk_id == sample_classified_chunk.id
 
     @pytest.mark.asyncio
-    async def test_cards_have_tags(
+    async def test_cards_have_topic_id(
         self, cloze_generator: ClozeGenerator, sample_classified_chunk: MockClassifiedChunk
     ) -> None:
-        """Cards include tags from classified chunk topics."""
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        """Cards have topic_id attribute."""
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         for card in cards:
-            assert hasattr(card, "tags")
-            assert isinstance(card.tags, list)
+            assert hasattr(card, "topic_id")
 
 
 class TestClozeContentQuality:
@@ -217,7 +225,7 @@ class TestClozeContentQuality:
             {"text": "{{c1::ATP}} is produced in mitochondria.", "tags": []},
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         # Check that key medical concepts are included in the cards
         all_text = " ".join(card.text for card in cards)
@@ -241,7 +249,7 @@ class TestClozeContentQuality:
             {"text": "ATP {{c1::is}} important.", "tags": []},  # Bad - trivial
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
         trivial_words = {"the", "a", "an", "is", "are", "was", "were", "be", "been", "of", "to", "and", "or"}
@@ -268,7 +276,7 @@ class TestClozeContentQuality:
             },
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         for card in cards:
             # Card should have enough context (minimum length)
@@ -290,7 +298,7 @@ class TestClozeContentQuality:
             },
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         cloze_pattern = re.compile(r"\{\{c(\d+)::([^}]+)\}\}")
         multi_deletion_card = cards[0]
@@ -323,7 +331,7 @@ class TestTopicSpecificGeneration:
             },
         ]
 
-        cards = await cloze_generator.generate(sample_pharmacology_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_pharmacology_chunk)
 
         all_text = " ".join(card.text.lower() for card in cards)
         assert "biguanide" in all_text, "Pharmacology card should include drug class"
@@ -347,7 +355,7 @@ class TestTopicSpecificGeneration:
             },
         ]
 
-        cards = await cloze_generator.generate(sample_anatomy_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_anatomy_chunk)
 
         all_text = " ".join(card.text.lower() for card in cards)
         location_terms = ["anterior", "left ventricle", "groove", "coronary", "interventricular"]
@@ -373,7 +381,7 @@ class TestTopicSpecificGeneration:
             },
         ]
 
-        cards = await cloze_generator.generate(sample_biochemistry_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_biochemistry_chunk)
 
         all_text = " ".join(card.text.lower() for card in cards)
         pathway_terms = ["glycolysis", "pathway", "enzyme", "phosphate"]
@@ -398,7 +406,7 @@ class TestClozeGeneratorValidation:
             {"text": "Bad syntax {{c1:missing closing}}", "tags": []},  # Invalid
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         # Should only include valid cards
         assert len(cards) == 1
@@ -420,7 +428,7 @@ class TestClozeGeneratorValidation:
             {"text": "The {{c1::mitochondria}} produces ATP.", "tags": []},
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         # Should filter out the card with long answer
         cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
@@ -439,7 +447,7 @@ class TestClozeGeneratorValidation:
         """Generator handles empty LLM response gracefully."""
         mock_llm_client.generate_cloze_cards.return_value = []
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         assert cards == []
 
@@ -454,7 +462,7 @@ class TestClozeGeneratorValidation:
         mock_llm_client.generate_cloze_cards.side_effect = Exception("LLM API error")
 
         with pytest.raises(Exception) as exc_info:
-            await cloze_generator.generate(sample_classified_chunk)
+            await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         assert "LLM" in str(exc_info.value) or "error" in str(exc_info.value).lower()
 
@@ -474,7 +482,7 @@ class TestClozeCardUniqueness:
             {"text": "The {{c1::mitochondria}} is the powerhouse of the cell.", "tags": []},
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         for card in cards:
             cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
@@ -495,7 +503,7 @@ class TestClozeCardUniqueness:
             {"text": "The {{c1::Krebs cycle}} generates electron carriers.", "tags": []},
         ]
 
-        cards = await cloze_generator.generate(sample_classified_chunk)
+        cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         card_texts = [card.text for card in cards]
         assert len(card_texts) == len(set(card_texts)), "All cards should be unique"
