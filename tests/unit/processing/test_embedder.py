@@ -40,6 +40,7 @@ class TestBasicEmbedding:
 
 
 class TestMedicalDomain:
+    @pytest.mark.slow
     @pytest.mark.asyncio
     async def test_medical_terms_similar(self, real_embedder: EmbeddingService) -> None:
         chf_embedding = await real_embedder.embed("CHF")
@@ -47,6 +48,7 @@ class TestMedicalDomain:
         similarity = np.dot(chf_embedding, heart_failure_embedding)
         assert similarity > 0.7
 
+    @pytest.mark.slow
     @pytest.mark.asyncio
     async def test_unrelated_terms_distant(self, real_embedder: EmbeddingService) -> None:
         chf_embedding = await real_embedder.embed("CHF")
