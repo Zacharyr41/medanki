@@ -8,13 +8,34 @@ from .base import Document, IngestionError, Section
 
 class PDFExtractor:
     def extract(self, path: Path) -> Document:
-        try:
-            md_text = pymupdf4llm.to_markdown(str(path), page_chunks=True)
-        except Exception as e:
-            raise IngestionError(f"Failed to extract PDF: {e}") from e
+        md_text = self._extract_with_fallback(path)
 
         if not md_text:
             raise IngestionError("PDF extraction returned empty result")
+
+        return self._parse_markdown_result(md_text, path)
+
+    def _extract_with_fallback(self, path: Path) -> list | str:
+        strategies = [
+            {"page_chunks": True},
+            {"page_chunks": True, "table_strategy": ""},
+            {"page_chunks": False},
+            {"page_chunks": False, "table_strategy": ""},
+        ]
+
+        last_error = None
+        for kwargs in strategies:
+            try:
+                result = pymupdf4llm.to_markdown(str(path), **kwargs)
+                if result:
+                    return result
+            except Exception as e:
+                last_error = e
+                continue
+
+        raise IngestionError(f"Failed to extract PDF: {last_error}") from last_error
+
+    def _parse_markdown_result(self, md_text: list | str, path: Path) -> Document:
 
         full_content = ""
         sections: list[Section] = []
