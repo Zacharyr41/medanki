@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from medanki_api.routes import jobs_router, upload_router
+from medanki_api.routes import jobs_router, taxonomy_router, upload_router
 from medanki_api.routes.download import router as download_router
 from medanki_api.routes.preview import router as preview_router
 from medanki_api.schemas.responses import ErrorResponse
@@ -91,6 +91,7 @@ app.include_router(upload_router)
 app.include_router(jobs_router)
 app.include_router(preview_router, prefix="/api", tags=["preview"])
 app.include_router(download_router, prefix="/api", tags=["download"])
+app.include_router(taxonomy_router, tags=["taxonomy"])
 app.include_router(websocket_router)
 
 
