@@ -49,7 +49,8 @@ def _card_to_preview(card: dict, topic_lookup: dict[str, str]) -> CardPreview:
 
     tags = card.get("tags", [])
     if not tags and topic_id:
-        tags = [topic_id]
+        topic_title = topic_lookup.get(topic_id)
+        tags = [topic_title] if topic_title else [topic_id]
 
     topics: list[TopicInfo] = []
     if topic_id:
