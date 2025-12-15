@@ -93,7 +93,9 @@ class BackgroundProcessor:
         await self._broadcast_progress(job_id, 60, "classification")
         return self.classification_service.classify(chunks)
 
-    async def _generate(self, job_id: str, classified: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    async def _generate(
+        self, job_id: str, classified: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         self.store.update_job(job_id, progress=80, stage="generation")
         await self._broadcast_progress(job_id, 80, "generation")
         return self.generation_service.generate(classified)

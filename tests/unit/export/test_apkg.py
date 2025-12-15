@@ -16,7 +16,7 @@ class TestAPKGExporter:
         card = ClozeCard(
             id="test_001",
             text="The {{c1::mitochondria}} is the powerhouse of the cell",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         builder.add_cloze_card(card)
         deck = builder.build()
@@ -34,7 +34,7 @@ class TestAPKGExporter:
         card = ClozeCard(
             id="test_001",
             text="{{c1::DNA}} encodes genetic information",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         builder.add_cloze_card(card)
         deck = builder.build()
@@ -44,7 +44,7 @@ class TestAPKGExporter:
         exporter.export(deck, str(output_path))
 
         assert zipfile.is_zipfile(str(output_path))
-        with zipfile.ZipFile(str(output_path), 'r') as zf:
+        with zipfile.ZipFile(str(output_path), "r") as zf:
             names = zf.namelist()
             assert "collection.anki2" in names or any("anki2" in n for n in names)
 
@@ -54,7 +54,7 @@ class TestAPKGExporter:
         card = ClozeCard(
             id="test_001",
             text="{{c1::Heart}} diagram <img src='heart.png'>",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         builder.add_cloze_card(card)
         deck = builder.build()
@@ -67,7 +67,7 @@ class TestAPKGExporter:
         output_path = tmp_path / "test_media.apkg"
         exporter.export(deck, str(output_path), media_files=[str(media_dir / "heart.png")])
 
-        with zipfile.ZipFile(str(output_path), 'r') as zf:
+        with zipfile.ZipFile(str(output_path), "r") as zf:
             names = zf.namelist()
             assert "media" in names or any("heart" in n.lower() for n in names) or "0" in names
 
@@ -79,7 +79,7 @@ class TestAPKGExporter:
             card = ClozeCard(
                 id=f"test_{i:03d}",
                 text=f"The {{{{c1::concept{i}}}}} is important",
-                source_chunk_id=f"chunk_{i:03d}"
+                source_chunk_id=f"chunk_{i:03d}",
             )
             b.add_cloze_card(card)
             builders.append(b)
@@ -95,11 +95,7 @@ class TestAPKGExporter:
     def test_cleanup_temp_files(self, tmp_path):
         """Temp files cleaned up after export."""
         builder = DeckBuilder("Cleanup Test")
-        card = ClozeCard(
-            id="test_001",
-            text="{{c1::Test}} cleanup",
-            source_chunk_id="chunk_001"
-        )
+        card = ClozeCard(id="test_001", text="{{c1::Test}} cleanup", source_chunk_id="chunk_001")
         builder.add_cloze_card(card)
         deck = builder.build()
 
@@ -119,7 +115,7 @@ class TestAPKGExporter:
             answer="Appendicitis",
             explanation="Classic presentation",
             distinguishing_feature="RLQ pain",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         builder.add_vignette_card(card)
         deck = builder.build()
@@ -137,7 +133,7 @@ class TestAPKGExporter:
             card = ClozeCard(
                 id=f"test_{i:03d}",
                 text=f"The {{{{c1::concept{i}}}}} is important",
-                source_chunk_id=f"chunk_{i:03d}"
+                source_chunk_id=f"chunk_{i:03d}",
             )
             builder.add_cloze_card(card)
         deck = builder.build()
@@ -148,18 +144,14 @@ class TestAPKGExporter:
         """Same deck name produces same deck ID."""
         builder1 = DeckBuilder("Stable ID Test")
         card1 = ClozeCard(
-            id="test_001",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_001", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         builder1.add_cloze_card(card1)
         deck1 = builder1.build()
 
         builder2 = DeckBuilder("Stable ID Test")
         card2 = ClozeCard(
-            id="test_002",
-            text="The {{c1::lungs}} exchange gases",
-            source_chunk_id="chunk_002"
+            id="test_002", text="The {{c1::lungs}} exchange gases", source_chunk_id="chunk_002"
         )
         builder2.add_cloze_card(card2)
         deck2 = builder2.build()
@@ -170,9 +162,7 @@ class TestAPKGExporter:
         """Deck name reflects exam type."""
         builder = DeckBuilder("MedAnki::USMLE_Step1::Cardiology")
         card = ClozeCard(
-            id="test_001",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_001", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         builder.add_cloze_card(card)
         deck = builder.build()

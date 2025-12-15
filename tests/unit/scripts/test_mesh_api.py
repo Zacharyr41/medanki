@@ -156,9 +156,7 @@ class TestMeshAPIClientCaching:
     def test_get_synonyms_uses_cache(self, mock_get):
         mock_response = Mock()
         mock_response.json.return_value = {
-            "results": {
-                "bindings": [{"altLabel": {"value": "Cardiac Failure"}}]
-            }
+            "results": {"bindings": [{"altLabel": {"value": "Cardiac Failure"}}]}
         }
         mock_response.raise_for_status = Mock()
         mock_get.return_value = mock_response

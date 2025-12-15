@@ -6,7 +6,9 @@ TRIVIA_PATTERNS = {
     "study_name": re.compile(r"\b[A-Z]{2,}(?:-[A-Z]+)*\s+(?:trial|study|cohort)\b", re.IGNORECASE),
     "hazard_ratio": re.compile(r"\bHR\s*[=:]\s*\d+\.?\d*"),
     "p_value": re.compile(r"\bp\s*[<>=]\s*0?\.\d+"),
-    "year_guideline": re.compile(r"\b(?:19|20)\d{2}\s+(?:guidelines?|recommendations?)\b", re.IGNORECASE),
+    "year_guideline": re.compile(
+        r"\b(?:19|20)\d{2}\s+(?:guidelines?|recommendations?)\b", re.IGNORECASE
+    ),
     "confidence_interval": re.compile(r"\b\d+%?\s*CI\b|\bconfidence interval\b", re.IGNORECASE),
     "relative_risk": re.compile(r"\bRR\s*[=:]\s*\d+\.?\d*"),
     "odds_ratio": re.compile(r"\bOR\s*[=:]\s*\d+\.?\d*"),

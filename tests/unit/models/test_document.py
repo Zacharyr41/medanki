@@ -17,7 +17,7 @@ class TestDocument:
             id="doc_001",
             source_path="/path/to/file.pdf",
             content_type=ContentType.PDF_TEXTBOOK,
-            raw_text="Medical content here"
+            raw_text="Medical content here",
         )
         assert doc.id == "doc_001"
         assert doc.source_path == "/path/to/file.pdf"
@@ -29,7 +29,7 @@ class TestDocument:
             id="doc_001",
             source_path="/path/to/file.pdf",
             content_type=ContentType.PDF_TEXTBOOK,
-            raw_text="Content"
+            raw_text="Content",
         )
         assert doc.sections == []
 
@@ -38,7 +38,7 @@ class TestDocument:
             id="doc_001",
             source_path="/path/to/file.pdf",
             content_type=ContentType.PDF_TEXTBOOK,
-            raw_text="Content"
+            raw_text="Content",
         )
         assert doc.metadata == {}
 
@@ -48,7 +48,7 @@ class TestDocument:
             id="doc_001",
             source_path="/path/to/file.pdf",
             content_type=ContentType.PDF_TEXTBOOK,
-            raw_text="Content"
+            raw_text="Content",
         )
         after = datetime.utcnow()
         assert before <= doc.extracted_at <= after
@@ -63,12 +63,7 @@ class TestDocument:
 
 class TestSection:
     def test_section_creation(self):
-        section = Section(
-            title="Chapter 1: Introduction",
-            level=1,
-            start_char=0,
-            end_char=500
-        )
+        section = Section(title="Chapter 1: Introduction", level=1, start_char=0, end_char=500)
         assert section.title == "Chapter 1: Introduction"
         assert section.level == 1
         assert section.start_char == 0
@@ -76,13 +71,7 @@ class TestSection:
         assert section.page_number is None
 
     def test_section_with_page_number(self):
-        section = Section(
-            title="Subsection",
-            level=2,
-            start_char=100,
-            end_char=200,
-            page_number=5
-        )
+        section = Section(title="Subsection", level=2, start_char=100, end_char=200, page_number=5)
         assert section.page_number == 5
 
     def test_section_levels(self):
@@ -102,7 +91,7 @@ class TestChunk:
             text="The cardiac cycle consists of systole and diastole.",
             start_char=0,
             end_char=51,
-            token_count=10
+            token_count=10,
         )
         assert chunk.id == "chunk_001"
         assert chunk.document_id == "doc_001"
@@ -118,7 +107,7 @@ class TestChunk:
             text="Sample text",
             start_char=0,
             end_char=11,
-            token_count=2
+            token_count=2,
         )
         assert chunk.entities == []
 
@@ -129,7 +118,7 @@ class TestChunk:
             text="Sample text",
             start_char=0,
             end_char=11,
-            token_count=2
+            token_count=2,
         )
         assert chunk.embedding is None
 
@@ -140,18 +129,13 @@ class TestChunk:
             text="Medical content here",
             start_char=100,
             end_char=120,
-            token_count=3
+            token_count=3,
         )
         assert chunk.text == "Medical content here"
         assert len(chunk.text) == 20
 
     def test_chunk_with_entities(self):
-        entity = MedicalEntity(
-            text="metformin",
-            label="DRUG",
-            start=0,
-            end=9
-        )
+        entity = MedicalEntity(text="metformin", label="DRUG", start=0, end=9)
         chunk = Chunk(
             id="chunk_001",
             document_id="doc_001",
@@ -159,7 +143,7 @@ class TestChunk:
             start_char=0,
             end_char=35,
             token_count=6,
-            entities=[entity]
+            entities=[entity],
         )
         assert len(chunk.entities) == 1
         assert chunk.entities[0].text == "metformin"
@@ -172,59 +156,34 @@ class TestChunk:
             text="This is a sample chunk with several tokens for testing.",
             start_char=0,
             end_char=56,
-            token_count=10
+            token_count=10,
         )
         assert chunk.token_count == 10
 
 
 class TestMedicalEntity:
     def test_medical_entity_creation(self):
-        entity = MedicalEntity(
-            text="congestive heart failure",
-            label="DISEASE",
-            start=10,
-            end=34
-        )
+        entity = MedicalEntity(text="congestive heart failure", label="DISEASE", start=10, end=34)
         assert entity.text == "congestive heart failure"
         assert entity.label == "DISEASE"
         assert entity.start == 10
         assert entity.end == 34
 
     def test_medical_entity_with_umls_cui(self):
-        entity = MedicalEntity(
-            text="metformin",
-            label="DRUG",
-            start=0,
-            end=9,
-            cui="C0025598"
-        )
+        entity = MedicalEntity(text="metformin", label="DRUG", start=0, end=9, cui="C0025598")
         assert entity.cui == "C0025598"
 
     def test_medical_entity_default_cui(self):
-        entity = MedicalEntity(
-            text="hypertension",
-            label="DISEASE",
-            start=0,
-            end=12
-        )
+        entity = MedicalEntity(text="hypertension", label="DISEASE", start=0, end=12)
         assert entity.cui is None
 
     def test_medical_entity_default_confidence(self):
-        entity = MedicalEntity(
-            text="aspirin",
-            label="DRUG",
-            start=0,
-            end=7
-        )
+        entity = MedicalEntity(text="aspirin", label="DRUG", start=0, end=7)
         assert entity.confidence == 1.0
 
     def test_medical_entity_custom_confidence(self):
         entity = MedicalEntity(
-            text="possible cardiomyopathy",
-            label="DISEASE",
-            start=0,
-            end=23,
-            confidence=0.75
+            text="possible cardiomyopathy", label="DISEASE", start=0, end=23, confidence=0.75
         )
         assert entity.confidence == 0.75
 

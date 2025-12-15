@@ -18,6 +18,7 @@ from medanki.models.cards import ClozeCard, VignetteCard, VignetteOption
 # Cloze Card Generation Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestClozeGeneration:
     """Test cloze card generation from chunks."""
@@ -88,6 +89,7 @@ class TestClozeGeneration:
 # Vignette Card Generation Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestVignetteGeneration:
     """Test vignette card generation from chunks."""
@@ -134,6 +136,7 @@ class TestVignetteGeneration:
 # ============================================================================
 # Card Validation Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestCardValidation:
@@ -187,6 +190,7 @@ class TestCardValidation:
         mock_llm_client,
     ) -> None:
         """Test that generated cards pass validation."""
+
         async def run_test():
             generator = ClozeGenerator(llm_client=mock_llm_client)
             cards = await generator.generate(
@@ -197,6 +201,7 @@ class TestCardValidation:
             return cards
 
         import asyncio
+
         cards = asyncio.get_event_loop().run_until_complete(run_test())
 
         validator = CardValidator()
@@ -248,6 +253,7 @@ class TestCardValidation:
 # Accuracy and Grounding Validation Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestAccuracyValidation:
     """Test accuracy and grounding validation with LLM."""
@@ -284,6 +290,7 @@ class TestAccuracyValidation:
 # ============================================================================
 # Deduplication Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestDeduplication:
@@ -419,6 +426,7 @@ class TestDeduplication:
 # Semantic Deduplication Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestSemanticDeduplication:
     """Test semantic similarity-based deduplication."""
@@ -481,6 +489,7 @@ class TestSemanticDeduplication:
 # ============================================================================
 # Generation Pipeline Integration Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestGenerationPipelineIntegration:

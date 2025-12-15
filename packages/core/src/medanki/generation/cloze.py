@@ -81,11 +81,34 @@ class GeneratedClozeCard:
 
 
 # Trivial words that should not be cloze deletions
-TRIVIAL_WORDS = frozenset({
-    "the", "a", "an", "is", "are", "was", "were", "be", "been",
-    "of", "to", "and", "or", "in", "on", "at", "for", "with",
-    "it", "its", "this", "that", "these", "those",
-})
+TRIVIAL_WORDS = frozenset(
+    {
+        "the",
+        "a",
+        "an",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "of",
+        "to",
+        "and",
+        "or",
+        "in",
+        "on",
+        "at",
+        "for",
+        "with",
+        "it",
+        "its",
+        "this",
+        "that",
+        "these",
+        "those",
+    }
+)
 
 # Research trivia patterns that should not be cloze deletions
 TRIVIA_PATTERNS = [
@@ -105,10 +128,21 @@ TRIVIA_PATTERNS = [
     re.compile(r"^10\.\d+/"),
 ]
 
-JOURNAL_NAMES = frozenset({
-    "nejm", "lancet", "jama", "bmj", "nature", "science", "cell",
-    "annals", "circulation", "chest", "gastroenterology",
-})
+JOURNAL_NAMES = frozenset(
+    {
+        "nejm",
+        "lancet",
+        "jama",
+        "bmj",
+        "nature",
+        "science",
+        "cell",
+        "annals",
+        "circulation",
+        "chest",
+        "gastroenterology",
+    }
+)
 
 
 class ClozeGenerator:

@@ -1,6 +1,5 @@
 """Tests for ClozeCard validation."""
 
-
 from tests.conftest import ClozeCard, VignetteCard
 
 
@@ -8,9 +7,7 @@ class TestClozeCardValidation:
     def test_valid_cloze_syntax_passes(self):
         """Valid cloze syntax: 'The {{c1::heart}} pumps blood'"""
         card = ClozeCard(
-            id="test_001",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_001", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         is_valid, issues = card.validate()
         assert is_valid
@@ -18,11 +15,7 @@ class TestClozeCardValidation:
 
     def test_invalid_cloze_no_deletions_fails(self):
         """Invalid cloze: 'No deletions here'"""
-        card = ClozeCard(
-            id="test_002",
-            text="No deletions here",
-            source_chunk_id="chunk_001"
-        )
+        card = ClozeCard(id="test_002", text="No deletions here", source_chunk_id="chunk_001")
         is_valid, issues = card.validate()
         assert not is_valid
         assert "Missing cloze deletion syntax" in issues
@@ -32,7 +25,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_003",
             text="The enzyme is {{c1::this answer is way too long for a cloze}}",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert not is_valid
@@ -43,7 +36,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_004",
             text="{{c1::A}} and {{c2::B}} are related concepts",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert is_valid
@@ -54,7 +47,7 @@ class TestClozeCardValidation:
             id="test_005",
             text="{{c1::PFK-1}} is the rate-limiting enzyme of glycolysis",
             extra="Allosterically regulated by ATP and citrate",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert is_valid
@@ -65,7 +58,7 @@ class TestClozeCardValidation:
             id="test_006",
             text="{{c1::Aspirin}} inhibits cyclooxygenase",
             tags=["pharmacology", "cardiovascular"],
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert card.tags == ["pharmacology", "cardiovascular"]
 
@@ -74,7 +67,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_007",
             text="The mitral valve is also called the {{c1::bicuspid}} valve",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert is_valid
@@ -84,7 +77,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_008",
             text="The {{c1::left anterior descending artery}} supplies the heart",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert is_valid
@@ -94,7 +87,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_009",
             text="The {{c1::left anterior descending coronary artery}} supplies blood",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert not is_valid
@@ -104,7 +97,7 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_010",
             text="{{c1::Metformin}} treats {{c2::type 2 diabetes mellitus condition disorder}}",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         is_valid, issues = card.validate()
         assert not is_valid
@@ -114,17 +107,13 @@ class TestClozeCardValidation:
         card = ClozeCard(
             id="test_011",
             text="{{c1::Heart}} pumps {{c2::blood}} through {{c3::vessels}}",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         answers = ClozeCard.CLOZE_PATTERN.findall(card.text)
         assert answers == ["Heart", "blood", "vessels"]
 
     def test_default_difficulty(self):
-        card = ClozeCard(
-            id="test_012",
-            text="{{c1::Test}} content",
-            source_chunk_id="chunk_001"
-        )
+        card = ClozeCard(id="test_012", text="{{c1::Test}} content", source_chunk_id="chunk_001")
         assert card.difficulty == "medium"
 
     def test_custom_difficulty(self):
@@ -132,7 +121,7 @@ class TestClozeCardValidation:
             id="test_013",
             text="{{c1::Complex}} content",
             source_chunk_id="chunk_001",
-            difficulty="hard"
+            difficulty="hard",
         )
         assert card.difficulty == "hard"
 
@@ -144,7 +133,7 @@ class TestVignetteCard:
             front="A 45-year-old male presents with chest pain. What is the most likely diagnosis?",
             answer="Myocardial infarction",
             explanation="The presentation is classic for MI with chest pain radiating to arm.",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert card.id == "vignette_001"
         assert card.answer == "Myocardial infarction"
@@ -155,7 +144,7 @@ class TestVignetteCard:
             front="A 65-year-old female with a history of diabetes presents with fatigue.",
             answer="Diabetic ketoacidosis",
             explanation="Classic presentation in diabetic patient.",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert "65-year-old" in card.front
         assert "female" in card.front
@@ -166,7 +155,7 @@ class TestVignetteCard:
             front="A patient presents with symptoms. What is the diagnosis?",
             answer="Test answer",
             explanation="Test explanation",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert card.front.endswith("?")
 
@@ -176,7 +165,7 @@ class TestVignetteCard:
             front="What is the diagnosis?",
             answer="Heart failure",
             explanation="Signs and symptoms point to CHF.",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         word_count = len(card.answer.split())
         assert word_count <= 3
@@ -187,7 +176,7 @@ class TestVignetteCard:
             front="Clinical stem here?",
             answer="Answer",
             explanation="Detailed explanation of the diagnosis and reasoning.",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert len(card.explanation) > 0
         assert card.explanation == "Detailed explanation of the diagnosis and reasoning."
@@ -199,7 +188,7 @@ class TestVignetteCard:
             answer="Erythema migrans",
             explanation="Classic target lesion of Lyme disease.",
             distinguishing_feature="Target-shaped rash with central clearing",
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert card.distinguishing_feature == "Target-shaped rash with central clearing"
 
@@ -210,7 +199,7 @@ class TestVignetteCard:
             answer="Diagnosis",
             explanation="Explanation here.",
             tags=["cardiology", "USMLE::Step1"],
-            source_chunk_id="chunk_001"
+            source_chunk_id="chunk_001",
         )
         assert card.tags == ["cardiology", "USMLE::Step1"]
         assert len(card.tags) == 2

@@ -95,9 +95,7 @@ class MeshAPIClient:
         LIMIT {limit}
         """
 
-        response = requests.get(
-            self.SPARQL_URL, params={"query": sparql_query, "format": "json"}
-        )
+        response = requests.get(self.SPARQL_URL, params={"query": sparql_query, "format": "json"})
         response.raise_for_status()
         data = response.json()
 
@@ -159,9 +157,7 @@ class MeshAPIClient:
         }}
         """
 
-        response = requests.get(
-            self.SPARQL_URL, params={"query": sparql_query, "format": "json"}
-        )
+        response = requests.get(self.SPARQL_URL, params={"query": sparql_query, "format": "json"})
         response.raise_for_status()
         data = response.json()
 
@@ -224,9 +220,7 @@ class MeshAPIClient:
 
         return concept
 
-    def get_category_descriptors(
-        self, category: str, limit: int = 1000
-    ) -> list[MeshConcept]:
+    def get_category_descriptors(self, category: str, limit: int = 1000) -> list[MeshConcept]:
         """Get all descriptors in a MeSH category (e.g., 'C' for diseases)."""
         cache_key = self._cache_key("category", f"{category}:{limit}")
         cached = self._get_cached(cache_key)
@@ -259,9 +253,7 @@ class MeshAPIClient:
         LIMIT {limit}
         """
 
-        response = requests.get(
-            self.SPARQL_URL, params={"query": sparql_query, "format": "json"}
-        )
+        response = requests.get(self.SPARQL_URL, params={"query": sparql_query, "format": "json"})
         response.raise_for_status()
         data = response.json()
 
@@ -305,9 +297,7 @@ class MeshAPIClient:
         vocab: dict[str, dict] = {}
 
         for category in categories:
-            descriptors = self.get_category_descriptors(
-                category, limit=limit_per_category
-            )
+            descriptors = self.get_category_descriptors(category, limit=limit_per_category)
             for desc in descriptors:
                 synonyms = self.get_synonyms(desc.name)
                 vocab[desc.mesh_id] = {

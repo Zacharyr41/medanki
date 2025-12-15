@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-CIMT_PDF_PATH = Path("/Users/zacharyrothstein/Downloads/DOC/Carotid Intima-Media Thickness_ Rise, Fall, and Rehabilitation of a Cardiovascular Biomarker.pdf")
+CIMT_PDF_PATH = Path(
+    "/Users/zacharyrothstein/Downloads/DOC/Carotid Intima-Media Thickness_ Rise, Fall, and Rehabilitation of a Cardiovascular Biomarker.pdf"
+)
 
 
 @pytest.fixture
@@ -28,7 +30,10 @@ class TestPDFIngestion:
 
         assert document is not None
         assert len(document.content) > 0
-        assert "intima-media" in document.content.lower() or "atherosclerosis" in document.content.lower()
+        assert (
+            "intima-media" in document.content.lower()
+            or "atherosclerosis" in document.content.lower()
+        )
 
     @pytest.mark.e2e
     def test_chunking_cimt_content(self, cimt_pdf):
@@ -109,7 +114,11 @@ class TestClassificationIntegration:
                 results = indexer.search(chunk.text, exam_type="USMLE_STEP1", limit=3)
                 if results:
                     for r in results:
-                        if "SYS3" in r["topic_id"] or "Cardiovascular" in r["title"] or "Vascular" in r["title"]:
+                        if (
+                            "SYS3" in r["topic_id"]
+                            or "Cardiovascular" in r["title"]
+                            or "Vascular" in r["title"]
+                        ):
                             cardio_chunks += 1
                             break
 
@@ -191,4 +200,6 @@ class TestCardGeneration:
             answers = [m.group(1) for m in cloze_pattern.finditer(card.text)]
             for answer in answers:
                 for pattern in trivia_patterns:
-                    assert not pattern.search(answer), f"Card contains trivia: {answer} in {card.text}"
+                    assert not pattern.search(answer), (
+                        f"Card contains trivia: {answer} in {card.text}"
+                    )

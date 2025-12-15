@@ -50,9 +50,7 @@ class TestJobExecution:
 
         await processor.process_job(job_id)
 
-        mock_services["store"].update_job.assert_any_call(
-            job_id, status="processing"
-        )
+        mock_services["store"].update_job.assert_any_call(job_id, status="processing")
 
     @pytest.mark.asyncio
     async def test_completes_job(self, processor, mock_services):
@@ -65,9 +63,7 @@ class TestJobExecution:
 
         await processor.process_job(job_id)
 
-        mock_services["store"].update_job.assert_any_call(
-            job_id, status="completed"
-        )
+        mock_services["store"].update_job.assert_any_call(job_id, status="completed")
 
     @pytest.mark.asyncio
     async def test_records_error_on_failure(self, processor, mock_services):
@@ -176,9 +172,7 @@ class TestPipelineStages:
         mock_services["classification_service"].classify.return_value = [
             {"chunk": "chunk1", "category": "anatomy"}
         ]
-        mock_services["generation_service"].generate.return_value = [
-            {"card": "test card"}
-        ]
+        mock_services["generation_service"].generate.return_value = [{"card": "test card"}]
 
         await processor.process_job(job_id)
 
@@ -214,7 +208,8 @@ class TestProgressReporting:
         await processor.process_job(job_id)
 
         progress_calls = [
-            call for call in mock_services["store"].update_job.call_args_list
+            call
+            for call in mock_services["store"].update_job.call_args_list
             if "progress" in str(call)
         ]
         assert len(progress_calls) >= 5

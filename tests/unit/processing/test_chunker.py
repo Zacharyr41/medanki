@@ -114,7 +114,7 @@ class TestChunkIdAndCoverage:
 
         combined_text = " ".join(c.text for c in chunks)
         doc_words = sample_long_document.raw_text.split()
-        sample_indices = [0, len(doc_words)//4, len(doc_words)//2, -1]
+        sample_indices = [0, len(doc_words) // 4, len(doc_words) // 2, -1]
 
         for idx in sample_indices:
             word = doc_words[idx]

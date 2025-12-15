@@ -106,6 +106,7 @@ Hydrochlorothiazide 12.5-50mg inhibits Na-Cl cotransporter in the distal tubule.
 # Mock services for integration tests
 # ============================================================================
 
+
 @dataclass
 class MockLLMClient:
     """Mock LLM client that returns predetermined cloze cards."""
@@ -116,47 +117,61 @@ class MockLLMClient:
 
         # Extract key medical terms and create cloze deletions
         if "systole" in text.lower() and "diastole" in text.lower():
-            cards.append({
-                "text": "The cardiac cycle consists of {{c1::systole}} and {{c2::diastole}} phases.",
-                "tags": ["cardiology", "physiology"]
-            })
+            cards.append(
+                {
+                    "text": "The cardiac cycle consists of {{c1::systole}} and {{c2::diastole}} phases.",
+                    "tags": ["cardiology", "physiology"],
+                }
+            )
 
         if "lisinopril" in text.lower():
-            cards.append({
-                "text": "{{c1::Lisinopril}} is an ACE inhibitor used for hypertension.",
-                "tags": ["pharmacology", "cardiovascular"]
-            })
+            cards.append(
+                {
+                    "text": "{{c1::Lisinopril}} is an ACE inhibitor used for hypertension.",
+                    "tags": ["pharmacology", "cardiovascular"],
+                }
+            )
 
         if "metoprolol" in text.lower():
-            cards.append({
-                "text": "{{c1::Metoprolol}} is a beta-blocker that reduces heart rate.",
-                "tags": ["pharmacology", "cardiovascular"]
-            })
+            cards.append(
+                {
+                    "text": "{{c1::Metoprolol}} is a beta-blocker that reduces heart rate.",
+                    "tags": ["pharmacology", "cardiovascular"],
+                }
+            )
 
         if "chf" in text.lower() or "heart failure" in text.lower():
-            cards.append({
-                "text": "Congestive heart failure occurs when the heart cannot {{c1::pump}} enough blood.",
-                "tags": ["cardiology", "pathology"]
-            })
+            cards.append(
+                {
+                    "text": "Congestive heart failure occurs when the heart cannot {{c1::pump}} enough blood.",
+                    "tags": ["cardiology", "pathology"],
+                }
+            )
 
         if "furosemide" in text.lower():
-            cards.append({
-                "text": "{{c1::Furosemide}} inhibits the Na-K-2Cl cotransporter in the loop of Henle.",
-                "tags": ["pharmacology", "nephrology"]
-            })
+            cards.append(
+                {
+                    "text": "{{c1::Furosemide}} inhibits the Na-K-2Cl cotransporter in the loop of Henle.",
+                    "tags": ["pharmacology", "nephrology"],
+                }
+            )
 
         if "left anterior descending" in text.lower():
-            cards.append({
-                "text": "The {{c1::left anterior descending}} artery supplies the anterior wall of the left ventricle.",
-                "tags": ["cardiology", "anatomy"]
-            })
+            cards.append(
+                {
+                    "text": "The {{c1::left anterior descending}} artery supplies the anterior wall of the left ventricle.",
+                    "tags": ["cardiology", "anatomy"],
+                }
+            )
 
         # Default card if no specific content matched
         if not cards:
-            cards.append({
-                "text": "Medical knowledge requires {{c1::understanding}} of key concepts.",
-                "tags": ["general"]
-            })
+            cards.append(
+                {
+                    "text": "Medical knowledge requires {{c1::understanding}} of key concepts.",
+                    "tags": ["general"],
+                }
+            )
 
         return cards[:count]
 
@@ -176,19 +191,21 @@ class MockLLMClient:
         count: int = 1,
     ) -> list[dict[str, Any]]:
         """Generate vignette cards from text."""
-        return [{
-            "stem": "A 55-year-old male presents with chest pain and shortness of breath.",
-            "question": "What is the most likely diagnosis?",
-            "options": [
-                {"letter": "A", "text": "Myocardial infarction"},
-                {"letter": "B", "text": "Pulmonary embolism"},
-                {"letter": "C", "text": "Pneumonia"},
-                {"letter": "D", "text": "Aortic dissection"},
-                {"letter": "E", "text": "Pericarditis"},
-            ],
-            "answer": "A",
-            "explanation": "ST elevation and troponin elevation suggest MI."
-        }]
+        return [
+            {
+                "stem": "A 55-year-old male presents with chest pain and shortness of breath.",
+                "question": "What is the most likely diagnosis?",
+                "options": [
+                    {"letter": "A", "text": "Myocardial infarction"},
+                    {"letter": "B", "text": "Pulmonary embolism"},
+                    {"letter": "C", "text": "Pneumonia"},
+                    {"letter": "D", "text": "Aortic dissection"},
+                    {"letter": "E", "text": "Pericarditis"},
+                ],
+                "answer": "A",
+                "explanation": "ST elevation and troponin elevation suggest MI.",
+            }
+        ]
 
     async def check_accuracy(self, claim: str) -> dict[str, Any]:
         """Check accuracy of a medical claim."""
@@ -275,11 +292,13 @@ class MockVectorStore:
             score = min(1.0, words_matched / max(1, len(query_lower.split())))
 
             if score > 0.1:
-                results.append({
-                    "topic_id": chunk_id,
-                    "score": score,
-                    "chunk": chunk,
-                })
+                results.append(
+                    {
+                        "topic_id": chunk_id,
+                        "score": score,
+                        "chunk": chunk,
+                    }
+                )
 
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:limit]
@@ -295,18 +314,30 @@ class MockTaxonomyService:
             return {
                 "exam_type": "mcat",
                 "topics": [
-                    {"id": "FC4", "name": "Cardiovascular System", "path": "Foundational Concept 4"},
-                    {"id": "FC4A", "name": "Heart Anatomy", "path": "Foundational Concept 4 > Heart"},
+                    {
+                        "id": "FC4",
+                        "name": "Cardiovascular System",
+                        "path": "Foundational Concept 4",
+                    },
+                    {
+                        "id": "FC4A",
+                        "name": "Heart Anatomy",
+                        "path": "Foundational Concept 4 > Heart",
+                    },
                     {"id": "FC2", "name": "Biochemistry", "path": "Foundational Concept 2"},
-                    {"id": "FC2C", "name": "Pharmacology", "path": "Foundational Concept 2 > Pharmacology"},
-                ]
+                    {
+                        "id": "FC2C",
+                        "name": "Pharmacology",
+                        "path": "Foundational Concept 2 > Pharmacology",
+                    },
+                ],
             }
         return {
             "exam_type": "usmle",
             "topics": [
                 {"id": "CVS", "name": "Cardiovascular", "path": "Organ Systems > Cardiovascular"},
                 {"id": "PHARM", "name": "Pharmacology", "path": "Pharmacology"},
-            ]
+            ],
         }
 
     def get_topics(self) -> list[dict[str, Any]]:
@@ -324,6 +355,7 @@ class MockTaxonomyService:
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def test_data_dir() -> Path:
@@ -441,6 +473,7 @@ def sample_test_directory(
 @pytest.fixture
 def sample_chunk_with_cardiology():
     """Create a sample chunk with cardiology content."""
+
     @dataclass
     class SampleChunk:
         id: str = "chunk_cardio_001"
@@ -462,11 +495,14 @@ def sample_chunk_with_cardiology():
 @pytest.fixture
 def sample_chunk_with_pharmacology():
     """Create a sample chunk with pharmacology content."""
+
     @dataclass
     class SampleChunk:
         id: str = "chunk_pharm_001"
         document_id: str = "doc_002"
-        text: str = "Lisinopril is an ACE inhibitor. Metoprolol is a beta-blocker used for hypertension."
+        text: str = (
+            "Lisinopril is an ACE inhibitor. Metoprolol is a beta-blocker used for hypertension."
+        )
         content: str = ""
         start_char: int = 0
         end_char: int = 90
@@ -483,11 +519,14 @@ def sample_chunk_with_pharmacology():
 @pytest.fixture
 def sample_chunk_with_chf():
     """Create a sample chunk with CHF abbreviation."""
+
     @dataclass
     class SampleChunk:
         id: str = "chunk_chf_001"
         document_id: str = "doc_003"
-        text: str = "CHF (congestive heart failure) occurs when the heart cannot pump blood effectively."
+        text: str = (
+            "CHF (congestive heart failure) occurs when the heart cannot pump blood effectively."
+        )
         content: str = ""
         start_char: int = 0
         end_char: int = 80
@@ -504,6 +543,7 @@ def sample_chunk_with_chf():
 # ============================================================================
 # API client fixture for HTTP testing
 # ============================================================================
+
 
 @pytest.fixture
 async def api_client():
@@ -526,6 +566,7 @@ async def api_client():
 # ============================================================================
 # VCR fixtures for LLM call recording
 # ============================================================================
+
 
 @pytest.fixture
 def vcr_cassette_dir() -> Path:

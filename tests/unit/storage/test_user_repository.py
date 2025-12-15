@@ -7,7 +7,7 @@ from datetime import datetime
 import pytest
 
 from medanki.storage.sqlite import SQLiteStore
-from medanki.storage.user_repository import UserRepository, User, SavedCard
+from medanki.storage.user_repository import User, UserRepository
 
 
 @pytest.fixture
@@ -102,9 +102,7 @@ class TestCreateUser:
 class TestGetUser:
     """Tests for retrieving users."""
 
-    async def test_get_user_by_google_id(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_get_user_by_google_id(self, repo: UserRepository, sample_google_profile: dict):
         """Should retrieve user by Google ID."""
         created = await repo.create_user_from_google_profile(sample_google_profile)
         found = await repo.get_user_by_google_id(sample_google_profile["sub"])
@@ -118,9 +116,7 @@ class TestGetUser:
         found = await repo.get_user_by_google_id("nonexistent_google_id")
         assert found is None
 
-    async def test_get_user_by_id(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_get_user_by_id(self, repo: UserRepository, sample_google_profile: dict):
         """Should retrieve user by internal ID."""
         created = await repo.create_user_from_google_profile(sample_google_profile)
         found = await repo.get_user_by_id(created.id)
@@ -137,14 +133,13 @@ class TestGetUser:
 class TestUpdateUser:
     """Tests for updating users."""
 
-    async def test_update_user_last_login(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_update_user_last_login(self, repo: UserRepository, sample_google_profile: dict):
         """Should update the last login timestamp."""
         user = await repo.create_user_from_google_profile(sample_google_profile)
         original_login = user.last_login
 
         import asyncio
+
         await asyncio.sleep(0.01)
 
         updated = await repo.update_last_login(user.id)
@@ -156,9 +151,7 @@ class TestUpdateUser:
 class TestSavedCards:
     """Tests for saved cards functionality."""
 
-    async def test_save_card_for_user(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_save_card_for_user(self, repo: UserRepository, sample_google_profile: dict):
         """Should save a card for a user."""
         user = await repo.create_user_from_google_profile(sample_google_profile)
 
@@ -204,9 +197,7 @@ class TestSavedCards:
         assert len(page1) == 2
         assert len(page2) == 2
 
-    async def test_remove_saved_card(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_remove_saved_card(self, repo: UserRepository, sample_google_profile: dict):
         """Should remove a saved card."""
         user = await repo.create_user_from_google_profile(sample_google_profile)
 
@@ -219,9 +210,7 @@ class TestSavedCards:
         assert len(cards) == 1
         assert cards[0].card_id == "card2"
 
-    async def test_bulk_save_cards(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_bulk_save_cards(self, repo: UserRepository, sample_google_profile: dict):
         """Should save multiple cards at once."""
         user = await repo.create_user_from_google_profile(sample_google_profile)
 
@@ -247,9 +236,7 @@ class TestSavedCards:
         with pytest.raises(Exception):
             await repo.save_card(user_id=user.id, job_id="job1", card_id="card1")
 
-    async def test_get_saved_cards_count(
-        self, repo: UserRepository, sample_google_profile: dict
-    ):
+    async def test_get_saved_cards_count(self, repo: UserRepository, sample_google_profile: dict):
         """Should return total count of saved cards."""
         user = await repo.create_user_from_google_profile(sample_google_profile)
 

@@ -72,11 +72,27 @@ class TestLLMTopicGeneration:
         """generate_cards_from_topic returns list of card dicts."""
         mock_response = AsyncMock()
         mock_response.cards = [
-            type("Card", (), {"text": "The SA node is the {{c1::pacemaker}} of the heart.", "tags": ["cardiology"]})(),
-            type("Card", (), {"text": "Atrial fibrillation is characterized by {{c1::irregular rhythm}}.", "tags": ["cardiology"]})(),
+            type(
+                "Card",
+                (),
+                {
+                    "text": "The SA node is the {{c1::pacemaker}} of the heart.",
+                    "tags": ["cardiology"],
+                },
+            )(),
+            type(
+                "Card",
+                (),
+                {
+                    "text": "Atrial fibrillation is characterized by {{c1::irregular rhythm}}.",
+                    "tags": ["cardiology"],
+                },
+            )(),
         ]
 
-        with patch("medanki.services.llm.ClaudeClient.generate_structured", return_value=mock_response):
+        with patch(
+            "medanki.services.llm.ClaudeClient.generate_structured", return_value=mock_response
+        ):
             from medanki.services.llm import ClaudeClient
 
             client = ClaudeClient(api_key="test-key")
@@ -101,7 +117,10 @@ class TestLLMTopicGeneration:
             mock_response = type("Response", (), {"cards": []})()
             return mock_response
 
-        with patch("medanki.services.llm.ClaudeClient.generate_structured", side_effect=capture_generate_structured):
+        with patch(
+            "medanki.services.llm.ClaudeClient.generate_structured",
+            side_effect=capture_generate_structured,
+        ):
             from medanki.services.llm import ClaudeClient
 
             client = ClaudeClient(api_key="test-key")

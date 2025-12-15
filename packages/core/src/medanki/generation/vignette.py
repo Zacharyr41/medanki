@@ -25,17 +25,13 @@ class VignetteOptionResponse(BaseModel):
 class VignetteCardResponse(BaseModel):
     stem: str = Field(description="Clinical vignette stem with patient presentation")
     question: str = Field(description="Question being asked")
-    options: list[VignetteOptionResponse] = Field(
-        description="Five answer options A through E"
-    )
+    options: list[VignetteOptionResponse] = Field(description="Five answer options A through E")
     answer: str = Field(description="Correct answer letter (A, B, C, D, or E)")
     explanation: str = Field(description="Explanation of the correct answer")
 
 
 class VignetteGenerationResponse(BaseModel):
-    cards: list[VignetteCardResponse] = Field(
-        description="List of generated vignette cards"
-    )
+    cards: list[VignetteCardResponse] = Field(description="List of generated vignette cards")
 
 
 QuestionType = Literal["diagnosis", "next_step", "mechanism"]
@@ -68,10 +64,7 @@ class VignetteGenerator:
             VignetteCard(
                 stem=card.stem,
                 question=card.question,
-                options=[
-                    VignetteOption(letter=opt.letter, text=opt.text)
-                    for opt in card.options
-                ],
+                options=[VignetteOption(letter=opt.letter, text=opt.text) for opt in card.options],
                 answer=card.answer,
                 explanation=card.explanation,
                 source_chunk_id=source_chunk_id,
@@ -96,7 +89,7 @@ class VignetteGenerator:
         if question_type:
             question_template = QUESTION_TYPE_TEMPLATES.get(question_type, "")
             parts.append(f"Question type: {question_type}")
-            parts.append(f"Use this question format: \"{question_template}\"")
+            parts.append(f'Use this question format: "{question_template}"')
 
         parts.extend(
             [

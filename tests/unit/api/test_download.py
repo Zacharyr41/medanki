@@ -37,7 +37,7 @@ def sample_job():
         "status": "completed",
         "progress": 100,
         "created_at": "2024-01-01T00:00:00",
-        "updated_at": "2024-01-01T00:05:00"
+        "updated_at": "2024-01-01T00:05:00",
     }
 
 
@@ -49,43 +49,49 @@ def sample_cards():
             "document_id": "doc_001",
             "chunk_id": "chunk_001",
             "card_type": "cloze",
-            "content": json.dumps({
-                "text": "The heart has {{c1::four}} chambers.",
-                "extra": "Basic cardiac anatomy",
-                "source": "Chapter 1"
-            }),
+            "content": json.dumps(
+                {
+                    "text": "The heart has {{c1::four}} chambers.",
+                    "extra": "Basic cardiac anatomy",
+                    "source": "Chapter 1",
+                }
+            ),
             "tags": json.dumps(["cardiology", "anatomy", "1A"]),
             "status": "valid",
-            "created_at": "2024-01-01T00:00:00"
+            "created_at": "2024-01-01T00:00:00",
         },
         {
             "id": "card_002",
             "document_id": "doc_001",
             "chunk_id": "chunk_001",
             "card_type": "vignette",
-            "content": json.dumps({
-                "front": "A 45-year-old patient...",
-                "answer": "Myocardial infarction",
-                "explanation": "Classic presentation",
-                "distinguishing_feature": "ST elevation"
-            }),
+            "content": json.dumps(
+                {
+                    "front": "A 45-year-old patient...",
+                    "answer": "Myocardial infarction",
+                    "explanation": "Classic presentation",
+                    "distinguishing_feature": "ST elevation",
+                }
+            ),
             "tags": json.dumps(["cardiology", "emergency", "2B"]),
             "status": "valid",
-            "created_at": "2024-01-01T00:00:00"
+            "created_at": "2024-01-01T00:00:00",
         },
         {
             "id": "card_003",
             "document_id": "doc_001",
             "chunk_id": "chunk_002",
             "card_type": "cloze",
-            "content": json.dumps({
-                "text": "The {{c1::left}} ventricle pumps to systemic circulation.",
-                "extra": "",
-                "source": "Chapter 1"
-            }),
+            "content": json.dumps(
+                {
+                    "text": "The {{c1::left}} ventricle pumps to systemic circulation.",
+                    "extra": "",
+                    "source": "Chapter 1",
+                }
+            ),
             "tags": json.dumps(["cardiology", "physiology", "1A"]),
             "status": "valid",
-            "created_at": "2024-01-01T00:00:00"
+            "created_at": "2024-01-01T00:00:00",
         },
     ]
 
@@ -110,7 +116,7 @@ class TestDownload:
             "id": "job_001",
             "document_id": "doc_001",
             "status": "processing",
-            "progress": 50
+            "progress": 50,
         }
 
         response = client.get("/api/jobs/job_001/download")
@@ -171,7 +177,7 @@ class TestRegeneration:
             mock_create.return_value = "new_job_002"
             response = client.post(
                 "/api/jobs/job_001/regenerate",
-                json={"deck_name": "Custom Deck", "include_tags": ["cardiology"]}
+                json={"deck_name": "Custom Deck", "include_tags": ["cardiology"]},
             )
 
         assert response.status_code == 200

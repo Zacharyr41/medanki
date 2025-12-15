@@ -64,9 +64,7 @@ The heart is a muscular organ that pumps blood.
 class TestUploadPdfSuccess:
     """Test successful PDF upload."""
 
-    async def test_upload_pdf_success(
-        self, client: AsyncClient, sample_pdf_content: bytes
-    ) -> None:
+    async def test_upload_pdf_success(self, client: AsyncClient, sample_pdf_content: bytes) -> None:
         """POST /api/upload with PDF returns job_id."""
         files = {"file": ("lecture.pdf", io.BytesIO(sample_pdf_content), "application/pdf")}
 

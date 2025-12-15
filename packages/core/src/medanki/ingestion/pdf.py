@@ -36,7 +36,6 @@ class PDFExtractor:
         raise IngestionError(f"Failed to extract PDF: {last_error}") from last_error
 
     def _parse_markdown_result(self, md_text: list | str, path: Path) -> Document:
-
         full_content = ""
         sections: list[Section] = []
         page_count = len(md_text) if isinstance(md_text, list) else 1

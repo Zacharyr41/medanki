@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pytest
 
 from medanki.services.jwt_service import (
-    JWTService,
-    JWTError,
-    TokenExpiredError,
     InvalidTokenError,
+    JWTError,
+    JWTService,
+    TokenExpiredError,
 )
 
 

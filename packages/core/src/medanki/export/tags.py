@@ -3,12 +3,12 @@ import re
 
 class TagBuilder:
     def sanitize(self, text: str) -> str:
-        result = re.sub(r'[\'\":]', '', text)
-        result = re.sub(r'\s+', '_', result)
+        result = re.sub(r"[\'\":]", "", text)
+        result = re.sub(r"\s+", "_", result)
         return result
 
     def build_mcat_tag(self, path: str) -> str:
-        parts = [p.strip() for p in path.split('>')]
+        parts = [p.strip() for p in path.split(">")]
         sanitized = [self.sanitize(p) for p in parts]
         return "#MCAT::" + "::".join(sanitized)
 

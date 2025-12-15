@@ -187,9 +187,7 @@ class TestDirectoryProcessing:
         """Recursively finds supported files."""
         documents = await ingestion_service.ingest_directory(temp_directory)
 
-        total_calls = (
-            mock_pdf_extractor.extract.call_count + mock_text_loader.load.call_count
-        )
+        total_calls = mock_pdf_extractor.extract.call_count + mock_text_loader.load.call_count
         assert total_calls == 5
         assert len(documents) == 5
 
@@ -243,9 +241,7 @@ class TestDirectoryProcessing:
         temp_directory: Path,
     ) -> None:
         """Non-recursive mode only processes top-level files."""
-        documents = await ingestion_service.ingest_directory(
-            temp_directory, recursive=False
-        )
+        documents = await ingestion_service.ingest_directory(temp_directory, recursive=False)
 
         assert len(documents) == 3
 
@@ -368,7 +364,10 @@ class TestErrorHandling:
         with pytest.raises(IngestionError) as exc_info:
             await ingestion_service.ingest_file(missing_file)
 
-        assert "not found" in str(exc_info.value).lower() or "does not exist" in str(exc_info.value).lower()
+        assert (
+            "not found" in str(exc_info.value).lower()
+            or "does not exist" in str(exc_info.value).lower()
+        )
 
     @pytest.mark.asyncio
     async def test_partial_failure_continues(
@@ -409,4 +408,7 @@ class TestErrorHandling:
         with pytest.raises(IngestionError) as exc_info:
             await ingestion_service.ingest_directory(missing_dir)
 
-        assert "not found" in str(exc_info.value).lower() or "does not exist" in str(exc_info.value).lower()
+        assert (
+            "not found" in str(exc_info.value).lower()
+            or "does not exist" in str(exc_info.value).lower()
+        )

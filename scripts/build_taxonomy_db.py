@@ -47,12 +47,14 @@ class TaxonomyDatabaseBuilder:
         """Load MCAT taxonomy from JSON, returns node count."""
         data = json.loads(json_path.read_text())
 
-        await self._repo.insert_exam({
-            "id": "MCAT",
-            "name": "Medical College Admission Test",
-            "version": data.get("version", "2024"),
-            "source_url": "https://aamc.org",
-        })
+        await self._repo.insert_exam(
+            {
+                "id": "MCAT",
+                "name": "Medical College Admission Test",
+                "version": data.get("version", "2024"),
+                "source_url": "https://aamc.org",
+            }
+        )
 
         node_count = 0
         nodes = []
@@ -60,44 +62,52 @@ class TaxonomyDatabaseBuilder:
 
         for fc in data.get("foundational_concepts", []):
             fc_id = f"MCAT_{fc['id']}"
-            nodes.append({
-                "id": fc_id,
-                "exam_id": "MCAT",
-                "node_type": "foundational_concept",
-                "code": fc["id"],
-                "title": fc["title"],
-                "sort_order": node_count,
-            })
+            nodes.append(
+                {
+                    "id": fc_id,
+                    "exam_id": "MCAT",
+                    "node_type": "foundational_concept",
+                    "code": fc["id"],
+                    "title": fc["title"],
+                    "sort_order": node_count,
+                }
+            )
 
             for kw in fc.get("keywords", []):
-                keywords.append({
-                    "node_id": fc_id,
-                    "keyword": kw,
-                    "keyword_type": "general",
-                    "source": "mcat_taxonomy",
-                })
+                keywords.append(
+                    {
+                        "node_id": fc_id,
+                        "keyword": kw,
+                        "keyword_type": "general",
+                        "source": "mcat_taxonomy",
+                    }
+                )
 
             node_count += 1
 
             for cat in fc.get("categories", []):
                 cat_id = f"MCAT_{cat['id']}"
-                nodes.append({
-                    "id": cat_id,
-                    "exam_id": "MCAT",
-                    "node_type": "content_category",
-                    "code": cat["id"],
-                    "title": cat["title"],
-                    "parent_id": fc_id,
-                    "sort_order": node_count,
-                })
+                nodes.append(
+                    {
+                        "id": cat_id,
+                        "exam_id": "MCAT",
+                        "node_type": "content_category",
+                        "code": cat["id"],
+                        "title": cat["title"],
+                        "parent_id": fc_id,
+                        "sort_order": node_count,
+                    }
+                )
 
                 for kw in cat.get("keywords", []):
-                    keywords.append({
-                        "node_id": cat_id,
-                        "keyword": kw,
-                        "keyword_type": "general",
-                        "source": "mcat_taxonomy",
-                    })
+                    keywords.append(
+                        {
+                            "node_id": cat_id,
+                            "keyword": kw,
+                            "keyword_type": "general",
+                            "source": "mcat_taxonomy",
+                        }
+                    )
 
                 node_count += 1
 
@@ -111,12 +121,14 @@ class TaxonomyDatabaseBuilder:
         """Load USMLE taxonomy from JSON, returns node count."""
         data = json.loads(json_path.read_text())
 
-        await self._repo.insert_exam({
-            "id": "USMLE_STEP1",
-            "name": "USMLE Step 1",
-            "version": data.get("version", "2024"),
-            "source_url": "https://usmle.org",
-        })
+        await self._repo.insert_exam(
+            {
+                "id": "USMLE_STEP1",
+                "name": "USMLE Step 1",
+                "version": data.get("version", "2024"),
+                "source_url": "https://usmle.org",
+            }
+        )
 
         node_count = 0
         nodes = []
@@ -124,44 +136,52 @@ class TaxonomyDatabaseBuilder:
 
         for system in data.get("systems", []):
             system_id = f"USMLE_{system['id']}"
-            nodes.append({
-                "id": system_id,
-                "exam_id": "USMLE_STEP1",
-                "node_type": "organ_system",
-                "code": system["id"],
-                "title": system["title"],
-                "sort_order": node_count,
-            })
+            nodes.append(
+                {
+                    "id": system_id,
+                    "exam_id": "USMLE_STEP1",
+                    "node_type": "organ_system",
+                    "code": system["id"],
+                    "title": system["title"],
+                    "sort_order": node_count,
+                }
+            )
 
             for kw in system.get("keywords", []):
-                keywords.append({
-                    "node_id": system_id,
-                    "keyword": kw,
-                    "keyword_type": "general",
-                    "source": "usmle_taxonomy",
-                })
+                keywords.append(
+                    {
+                        "node_id": system_id,
+                        "keyword": kw,
+                        "keyword_type": "general",
+                        "source": "usmle_taxonomy",
+                    }
+                )
 
             node_count += 1
 
             for topic in system.get("topics", []):
                 topic_id = f"USMLE_{topic['id']}"
-                nodes.append({
-                    "id": topic_id,
-                    "exam_id": "USMLE_STEP1",
-                    "node_type": "topic",
-                    "code": topic["id"],
-                    "title": topic["title"],
-                    "parent_id": system_id,
-                    "sort_order": node_count,
-                })
+                nodes.append(
+                    {
+                        "id": topic_id,
+                        "exam_id": "USMLE_STEP1",
+                        "node_type": "topic",
+                        "code": topic["id"],
+                        "title": topic["title"],
+                        "parent_id": system_id,
+                        "sort_order": node_count,
+                    }
+                )
 
                 for kw in topic.get("keywords", []):
-                    keywords.append({
-                        "node_id": topic_id,
-                        "keyword": kw,
-                        "keyword_type": "general",
-                        "source": "usmle_taxonomy",
-                    })
+                    keywords.append(
+                        {
+                            "node_id": topic_id,
+                            "keyword": kw,
+                            "keyword_type": "general",
+                            "source": "usmle_taxonomy",
+                        }
+                    )
 
                 node_count += 1
 
@@ -188,12 +208,14 @@ class TaxonomyDatabaseBuilder:
                 nodes = await self._repo.search_nodes_by_keyword(kw)
                 for node in nodes:
                     try:
-                        await self._repo.insert_keyword({
-                            "node_id": node["id"],
-                            "keyword": f"medmcqa:{topic['name']}",
-                            "keyword_type": "medmcqa",
-                            "source": "medmcqa",
-                        })
+                        await self._repo.insert_keyword(
+                            {
+                                "node_id": node["id"],
+                                "keyword": f"medmcqa:{topic['name']}",
+                                "keyword_type": "medmcqa",
+                                "source": "medmcqa",
+                            }
+                        )
                         count += 1
                     except Exception:
                         pass

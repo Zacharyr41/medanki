@@ -80,14 +80,16 @@ async def _process_topic_job(websocket: WebSocket, job: dict[str, Any]) -> None:
                 await _send_progress(websocket, job, 60, "generating")
 
                 for card_data in topic_cards:
-                    cards.append({
-                        "id": str(uuid4()),
-                        "type": "cloze",
-                        "text": card_data.get("text", ""),
-                        "topic_id": exam,
-                        "topic_title": card_data.get("topic", topic_text[:50]),
-                        "source_chunk": f"Generated from topic: {topic_text[:200]}",
-                    })
+                    cards.append(
+                        {
+                            "id": str(uuid4()),
+                            "type": "cloze",
+                            "text": card_data.get("text", ""),
+                            "topic_id": exam,
+                            "topic_title": card_data.get("topic", topic_text[:50]),
+                            "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                        }
+                    )
             except Exception as e:
                 print(f"Topic cloze generation error: {e}")
 
@@ -104,34 +106,36 @@ async def _process_topic_job(websocket: WebSocket, job: dict[str, Any]) -> None:
                     num_cards=vignette_count,
                 )
                 for vcard in vignettes:
-                    options_text = " | ".join(
-                        f"{opt.letter}. {opt.text}" for opt in vcard.options
+                    options_text = " | ".join(f"{opt.letter}. {opt.text}" for opt in vcard.options)
+                    cards.append(
+                        {
+                            "id": str(vcard.id),
+                            "type": "vignette",
+                            "text": f"{vcard.stem}\n\n{vcard.question}",
+                            "front": f"{vcard.stem}\n\n{vcard.question}\n\n{options_text}",
+                            "answer": vcard.answer,
+                            "explanation": vcard.explanation,
+                            "topic_id": exam,
+                            "topic_title": topic_text[:50],
+                            "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                        }
                     )
-                    cards.append({
-                        "id": str(vcard.id),
-                        "type": "vignette",
-                        "text": f"{vcard.stem}\n\n{vcard.question}",
-                        "front": f"{vcard.stem}\n\n{vcard.question}\n\n{options_text}",
-                        "answer": vcard.answer,
-                        "explanation": vcard.explanation,
-                        "topic_id": exam,
-                        "topic_title": topic_text[:50],
-                        "source_chunk": f"Generated from topic: {topic_text[:200]}",
-                    })
             except Exception as e:
                 print(f"Topic vignette generation error: {e}")
     else:
         from uuid import uuid4
 
         for _ in range(min(max_cards, 5)):
-            cards.append({
-                "id": str(uuid4()),
-                "type": "cloze",
-                "text": f"{{{{c1::Sample concept}}}} related to {topic_text[:30]}...",
-                "topic_id": exam,
-                "topic_title": topic_text[:50],
-                "source_chunk": f"Generated from topic: {topic_text[:200]}",
-            })
+            cards.append(
+                {
+                    "id": str(uuid4()),
+                    "type": "cloze",
+                    "text": f"{{{{c1::Sample concept}}}} related to {topic_text[:30]}...",
+                    "topic_id": exam,
+                    "topic_title": topic_text[:50],
+                    "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                }
+            )
 
     await _send_progress(websocket, job, 90, "exporting")
 

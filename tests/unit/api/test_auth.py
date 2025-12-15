@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from medanki_api.routes.auth import router, get_google_auth_service, get_jwt_service
 from medanki.services.google_auth import GoogleAuthService, InvalidTokenError
 from medanki.services.jwt_service import JWTService
+from medanki_api.routes.auth import get_google_auth_service, get_jwt_service, router
 
 
 @pytest.fixture
@@ -77,12 +77,8 @@ def app_with_mocks(mock_google_auth, mock_jwt_service):
 
     app.state.job_storage = {}
     app.state.user_repository = MagicMock()
-    app.state.user_repository.get_or_create_user = AsyncMock(
-        return_value=(MockUser(), True)
-    )
-    app.state.user_repository.get_user_by_id = AsyncMock(
-        return_value=MockUser()
-    )
+    app.state.user_repository.get_or_create_user = AsyncMock(return_value=(MockUser(), True))
+    app.state.user_repository.get_user_by_id = AsyncMock(return_value=MockUser())
 
     return app
 
@@ -138,9 +134,7 @@ class TestGoogleLogin:
 
     def test_google_login_invalid_token(self, client, mock_google_auth):
         """Should return 401 for invalid Google token."""
-        mock_google_auth.verify_token = AsyncMock(
-            side_effect=InvalidTokenError("Invalid token")
-        )
+        mock_google_auth.verify_token = AsyncMock(side_effect=InvalidTokenError("Invalid token"))
 
         response = client.post(
             "/api/auth/google",
@@ -194,9 +188,7 @@ class TestGetCurrentUser:
 
     def test_get_current_user_user_not_found(self, client, app_with_mocks):
         """Should return 404 if user not found in database."""
-        app_with_mocks.state.user_repository.get_user_by_id = AsyncMock(
-            return_value=None
-        )
+        app_with_mocks.state.user_repository.get_user_by_id = AsyncMock(return_value=None)
 
         response = client.get(
             "/api/auth/me",

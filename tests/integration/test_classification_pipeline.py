@@ -15,6 +15,7 @@ from medanki.processing.classifier import ClassificationService
 # Embedding and Storage Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestEmbeddingAndStorage:
     """Test embedding generation and vector store operations."""
@@ -110,6 +111,7 @@ class TestEmbeddingAndStorage:
 # Classification Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestClassification:
     """Test chunk classification against taxonomy."""
@@ -121,6 +123,7 @@ class TestClassification:
         sample_chunk_with_cardiology,
     ) -> None:
         """Test that cardiology content is classified to FC4/4A topics."""
+
         # Set up vector store with taxonomy topics
         @dataclass
         class TopicChunk:
@@ -136,7 +139,9 @@ class TestClassification:
         # Add cardiology topics to store
         # Include exact terms from the sample chunk for better matching
         topics = [
-            TopicChunk(id="FC4", content="cardiac cycle systole diastole ventricles contract heart"),
+            TopicChunk(
+                id="FC4", content="cardiac cycle systole diastole ventricles contract heart"
+            ),
             TopicChunk(id="FC4A", content="heart anatomy atrium ventricle valve chamber"),
             TopicChunk(id="FC2", content="biochemistry metabolism enzymes"),
             TopicChunk(id="FC2C", content="pharmacology drug medication dosing"),
@@ -171,6 +176,7 @@ class TestClassification:
         sample_chunk_with_pharmacology,
     ) -> None:
         """Test that pharmacology content is classified to FC2/2C topics."""
+
         @dataclass
         class TopicChunk:
             id: str
@@ -186,7 +192,10 @@ class TestClassification:
         topics = [
             TopicChunk(id="FC4", content="cardiovascular heart cardiac"),
             TopicChunk(id="FC2", content="biochemistry metabolism"),
-            TopicChunk(id="FC2C", content="pharmacology drug medication lisinopril metoprolol ACE inhibitor beta blocker"),
+            TopicChunk(
+                id="FC2C",
+                content="pharmacology drug medication lisinopril metoprolol ACE inhibitor beta blocker",
+            ),
             TopicChunk(id="PHARM", content="pharmacology medications drugs dosing"),
         ]
 
@@ -216,6 +225,7 @@ class TestClassification:
         sample_chunk_with_chf,
     ) -> None:
         """Test that abbreviations like 'CHF' correctly find heart topics."""
+
         @dataclass
         class TopicChunk:
             id: str
@@ -230,8 +240,7 @@ class TestClassification:
         # Add topics with both abbreviation and full form
         topics = [
             TopicChunk(
-                id="CHF_TOPIC",
-                content="CHF congestive heart failure cardiac pump dysfunction"
+                id="CHF_TOPIC", content="CHF congestive heart failure cardiac pump dysfunction"
             ),
             TopicChunk(id="FC4", content="cardiovascular heart cardiac failure"),
             TopicChunk(id="RENAL", content="kidney nephrology renal"),
@@ -260,6 +269,7 @@ class TestClassification:
         mock_vector_store,
     ) -> None:
         """Test that chunks can match multiple topics."""
+
         @dataclass
         class SampleChunk:
             id: str = "chunk_multi"
@@ -303,14 +313,13 @@ class TestClassification:
 
         # Should match at least 2 relevant topics
         relevant_matches = [tid for tid in topic_ids if tid in ["PHARM", "CARDIO", "PHYSIO"]]
-        assert len(relevant_matches) >= 1, (
-            f"Expected multiple relevant matches, got {topic_ids}"
-        )
+        assert len(relevant_matches) >= 1, f"Expected multiple relevant matches, got {topic_ids}"
 
 
 # ============================================================================
 # Threshold Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestClassificationThresholds:
@@ -322,6 +331,7 @@ class TestClassificationThresholds:
         mock_vector_store,
     ) -> None:
         """Test that low-confidence matches are filtered by base threshold."""
+
         @dataclass
         class SampleChunk:
             id: str = "chunk_threshold"
@@ -368,6 +378,7 @@ class TestClassificationThresholds:
         mock_vector_store,
     ) -> None:
         """Test that empty chunks return no classifications."""
+
         @dataclass
         class EmptyChunk:
             id: str = "chunk_empty"
@@ -389,6 +400,7 @@ class TestClassificationThresholds:
 # Primary Exam Detection Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestPrimaryExamDetection:
     """Test primary exam type detection."""
@@ -400,6 +412,7 @@ class TestPrimaryExamDetection:
         sample_chunk_with_cardiology,
     ) -> None:
         """Test detection of primary exam type for a chunk."""
+
         @dataclass
         class TopicChunk:
             id: str
@@ -433,6 +446,7 @@ class TestPrimaryExamDetection:
 # Vector Store Integration Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestVectorStoreOperations:
     """Test vector store operations for classification."""
@@ -448,6 +462,7 @@ class TestVectorStoreOperations:
         sample_chunk_with_cardiology,
     ) -> None:
         """Test deleting chunks from vector store."""
+
         @dataclass
         class ChunkWithEmbedding:
             id: str
@@ -484,9 +499,7 @@ class TestVectorStoreOperations:
         # Same text should produce same embedding
         assert embedding1 == embedding2
 
-    async def test_different_texts_different_embeddings(
-        self, mock_embedding_service
-    ) -> None:
+    async def test_different_texts_different_embeddings(self, mock_embedding_service) -> None:
         """Test that different texts produce different embeddings."""
         text1 = "The cardiac cycle consists of systole and diastole."
         text2 = "Pharmacology involves the study of drug mechanisms."

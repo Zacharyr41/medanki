@@ -9,10 +9,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from medanki_api.routes.saved_cards import router
-from medanki_api.routes.auth import get_jwt_service, get_current_user_id
 from medanki.services.jwt_service import JWTService
-from medanki.storage.user_repository import SavedCard
+from medanki_api.routes.auth import get_current_user_id, get_jwt_service
+from medanki_api.routes.saved_cards import router
 
 
 class MockUser:
@@ -184,9 +183,7 @@ class TestSaveCards:
 class TestGetSavedCards:
     """Tests for GET /api/saved-cards endpoint."""
 
-    def test_get_saved_cards_paginated(
-        self, client, auth_headers, mock_user_repository
-    ):
+    def test_get_saved_cards_paginated(self, client, auth_headers, mock_user_repository):
         """Should return paginated saved cards."""
         response = client.get(
             "/api/saved-cards?limit=10&offset=0",
@@ -248,9 +245,7 @@ class TestExportSavedCards:
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/octet-stream"
 
-    def test_export_empty_saved_cards(
-        self, client, auth_headers, mock_user_repository
-    ):
+    def test_export_empty_saved_cards(self, client, auth_headers, mock_user_repository):
         """Should return 400 when no cards to export."""
         mock_user_repository.get_saved_cards = AsyncMock(return_value=[])
         mock_user_repository.get_saved_cards_count = AsyncMock(return_value=0)

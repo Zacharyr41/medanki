@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from medanki.services.google_auth import (
-    GoogleAuthService,
-    GoogleAuthError,
-    InvalidTokenError,
     ExpiredTokenError,
+    GoogleAuthError,
+    GoogleAuthService,
+    InvalidTokenError,
 )
 
 
@@ -52,9 +52,7 @@ class TestVerifyGoogleToken:
         self, auth_service: GoogleAuthService, valid_google_payload: dict
     ):
         """Should return payload for valid token."""
-        with patch.object(
-            auth_service, "_verify_token", return_value=valid_google_payload
-        ):
+        with patch.object(auth_service, "_verify_token", return_value=valid_google_payload):
             result = await auth_service.verify_token("valid_token")
 
         assert result == valid_google_payload
@@ -81,9 +79,7 @@ class TestVerifyGoogleToken:
             with pytest.raises(ExpiredTokenError):
                 await auth_service.verify_token("expired_token")
 
-    async def test_verify_token_wrong_audience(
-        self, valid_google_payload: dict
-    ):
+    async def test_verify_token_wrong_audience(self, valid_google_payload: dict):
         """Should reject token with wrong audience."""
         service = GoogleAuthService(client_id="different-client-id")
         payload = valid_google_payload.copy()
@@ -152,9 +148,7 @@ class TestGoogleAuthServiceInit:
 class TestVerifyEmailVerified:
     """Tests for email verification check."""
 
-    def test_email_verified_true(
-        self, auth_service: GoogleAuthService, valid_google_payload: dict
-    ):
+    def test_email_verified_true(self, auth_service: GoogleAuthService, valid_google_payload: dict):
         """Should pass when email is verified."""
         assert auth_service.is_email_verified(valid_google_payload) is True
 

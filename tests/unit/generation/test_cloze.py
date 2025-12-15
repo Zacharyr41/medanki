@@ -113,7 +113,11 @@ def sample_biochemistry_chunk() -> MockClassifiedChunk:
         catalyzes the phosphorylation of fructose-6-phosphate to fructose-1,6-bisphosphate.
         This enzyme is allosterically activated by AMP and inhibited by ATP and citrate.""",
         topics=[
-            {"id": "BIOCHEM1", "path": "Biochemistry > Carbohydrate Metabolism", "confidence": 0.88},
+            {
+                "id": "BIOCHEM1",
+                "path": "Biochemistry > Carbohydrate Metabolism",
+                "confidence": 0.88,
+            },
         ],
         tags=["biochemistry", "metabolism", "glycolysis"],
     )
@@ -230,8 +234,7 @@ class TestClozeContentQuality:
         # Check that key medical concepts are included in the cards
         all_text = " ".join(card.text for card in cards)
         assert any(
-            concept in all_text.lower()
-            for concept in ["mitochondria", "atp", "krebs", "oxidative"]
+            concept in all_text.lower() for concept in ["mitochondria", "atp", "krebs", "oxidative"]
         )
 
     @pytest.mark.asyncio
@@ -252,7 +255,21 @@ class TestClozeContentQuality:
         cards = await generate_from_chunk(cloze_generator, sample_classified_chunk)
 
         cloze_pattern = re.compile(r"\{\{c\d+::([^}]+)\}\}")
-        trivial_words = {"the", "a", "an", "is", "are", "was", "were", "be", "been", "of", "to", "and", "or"}
+        trivial_words = {
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "of",
+            "to",
+            "and",
+            "or",
+        }
 
         for card in cards:
             answers = cloze_pattern.findall(card.text)

@@ -103,9 +103,7 @@ class TaxonomyRepository:
 
     async def get_node(self, node_id: str) -> dict[str, Any] | None:
         conn = await self._get_connection()
-        cursor = await conn.execute(
-            "SELECT * FROM taxonomy_nodes WHERE id = ?", (node_id,)
-        )
+        cursor = await conn.execute("SELECT * FROM taxonomy_nodes WHERE id = ?", (node_id,))
         row = await cursor.fetchone()
         if row is None:
             return None
@@ -142,17 +140,13 @@ class TaxonomyRepository:
         values.append(datetime.utcnow().isoformat())
         values.append(node_id)
 
-        await conn.execute(
-            f"UPDATE taxonomy_nodes SET {', '.join(fields)} WHERE id = ?", values
-        )
+        await conn.execute(f"UPDATE taxonomy_nodes SET {', '.join(fields)} WHERE id = ?", values)
         await conn.commit()
         return True
 
     async def delete_node(self, node_id: str) -> bool:
         conn = await self._get_connection()
-        cursor = await conn.execute(
-            "DELETE FROM taxonomy_nodes WHERE id = ?", (node_id,)
-        )
+        cursor = await conn.execute("DELETE FROM taxonomy_nodes WHERE id = ?", (node_id,))
         await conn.commit()
         return cursor.rowcount > 0
 
@@ -165,9 +159,7 @@ class TaxonomyRepository:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
-    async def list_nodes_by_type(
-        self, exam_id: str, node_type: str
-    ) -> list[dict[str, Any]]:
+    async def list_nodes_by_type(self, exam_id: str, node_type: str) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute(
             """SELECT * FROM taxonomy_nodes

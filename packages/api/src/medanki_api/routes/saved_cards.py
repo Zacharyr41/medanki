@@ -224,7 +224,5 @@ async def export_saved_cards(
     return StreamingResponse(
         io.BytesIO(apkg_bytes),
         media_type="application/octet-stream",
-        headers={
-            "Content-Disposition": f"attachment; filename=saved_cards_{user_id}.apkg"
-        },
+        headers={"Content-Disposition": f"attachment; filename=saved_cards_{user_id}.apkg"},
     )

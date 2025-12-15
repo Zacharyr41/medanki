@@ -91,9 +91,7 @@ class UserRepository:
             User if found, None otherwise
         """
         conn = await self._store._get_connection()
-        cursor = await conn.execute(
-            "SELECT * FROM users WHERE google_id = ?", (google_id,)
-        )
+        cursor = await conn.execute("SELECT * FROM users WHERE google_id = ?", (google_id,))
         row = await cursor.fetchone()
 
         if row is None:
@@ -156,9 +154,7 @@ class UserRepository:
         user = await self.create_user_from_google_profile(profile)
         return user, True
 
-    async def save_card(
-        self, user_id: str, job_id: str, card_id: str
-    ) -> SavedCard:
+    async def save_card(self, user_id: str, job_id: str, card_id: str) -> SavedCard:
         """Save a card for a user.
 
         Args:

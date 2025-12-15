@@ -1,6 +1,5 @@
 """Tests for domain enumerations."""
 
-
 from tests.conftest import CardType, ContentType, ExamType, ValidationStatus
 
 
@@ -38,7 +37,14 @@ class TestContentType:
         assert ContentType.PLAIN_TEXT.value == "plain_text"
 
     def test_all_content_types_exist(self):
-        expected = {"PDF_TEXTBOOK", "PDF_SLIDES", "PDF_NOTES", "AUDIO_LECTURE", "MARKDOWN", "PLAIN_TEXT"}
+        expected = {
+            "PDF_TEXTBOOK",
+            "PDF_SLIDES",
+            "PDF_NOTES",
+            "AUDIO_LECTURE",
+            "MARKDOWN",
+            "PLAIN_TEXT",
+        }
         actual = {c.name for c in ContentType}
         assert actual == expected
 
@@ -76,6 +82,12 @@ class TestValidationStatus:
         assert ValidationStatus.DUPLICATE.value == "duplicate"
 
     def test_all_validation_statuses_exist(self):
-        expected = {"VALID", "INVALID_SCHEMA", "INVALID_MEDICAL", "HALLUCINATION_DETECTED", "DUPLICATE"}
+        expected = {
+            "VALID",
+            "INVALID_SCHEMA",
+            "INVALID_MEDICAL",
+            "HALLUCINATION_DETECTED",
+            "DUPLICATE",
+        }
         actual = {v.name for v in ValidationStatus}
         assert actual == expected

@@ -37,16 +37,11 @@ class TokenCounter:
 
 
 class MedicalTermProtector:
-    LAB_VALUE_PATTERN = re.compile(
-        r"\d+\.?\d*\s*(mg|mcg|g|mL|L|mEq|U|x10\^\d+)/?[A-Za-z]*"
-    )
-    DRUG_DOSE_PATTERN = re.compile(
-        r"[A-Za-z]+\s+\d+\.?\d*\s*(mg|mcg|g|mL)",
-        re.IGNORECASE
-    )
+    LAB_VALUE_PATTERN = re.compile(r"\d+\.?\d*\s*(mg|mcg|g|mL|L|mEq|U|x10\^\d+)/?[A-Za-z]*")
+    DRUG_DOSE_PATTERN = re.compile(r"[A-Za-z]+\s+\d+\.?\d*\s*(mg|mcg|g|mL)", re.IGNORECASE)
     ANATOMICAL_PATTERN = re.compile(
         r"(left|right)\s+(anterior|posterior|lateral|medial|main|circumflex|coronary|ventricular|descending)(\s+\w+)?",
-        re.IGNORECASE
+        re.IGNORECASE,
     )
 
     def __init__(self):
@@ -71,7 +66,9 @@ class MedicalTermProtector:
                 merged.append((start, end))
         return merged
 
-    def is_safe_split_point(self, text: str, position: int, protected_ranges: list[tuple[int, int]]) -> bool:
+    def is_safe_split_point(
+        self, text: str, position: int, protected_ranges: list[tuple[int, int]]
+    ) -> bool:
         return all(not start < position < end for start, end in protected_ranges)
 
 
@@ -89,7 +86,7 @@ class SectionAwareChunker:
     def get_section_path(self, text: str, position: int, sections: list) -> list[str]:
         path = []
         for section in sections:
-            if hasattr(section, 'start_char') and hasattr(section, 'end_char'):
+            if hasattr(section, "start_char") and hasattr(section, "end_char"):
                 if section.start_char <= position <= section.end_char:
                     path.append(section.title)
         return path
@@ -99,11 +96,7 @@ class ChunkingService:
     DEFAULT_CHUNK_SIZE = 512
     DEFAULT_OVERLAP = 75
 
-    def __init__(
-        self,
-        chunk_size: int = DEFAULT_CHUNK_SIZE,
-        overlap: int = DEFAULT_OVERLAP
-    ):
+    def __init__(self, chunk_size: int = DEFAULT_CHUNK_SIZE, overlap: int = DEFAULT_OVERLAP):
         self._chunk_size = chunk_size
         self._overlap = overlap
         self._token_counter = TokenCounter()
@@ -165,7 +158,7 @@ class ChunkingService:
         start: int,
         target_end: int,
         protected_ranges: list[tuple[int, int]],
-        section_boundaries: list[int]
+        section_boundaries: list[int],
     ) -> int:
         if target_end >= len(text):
             return len(text)
@@ -188,12 +181,12 @@ class ChunkingService:
             best = min(sentence_ends, key=lambda x: abs(x - target_end))
             return best
 
-        for match in re.finditer(r'\n\n+', text[search_start:search_end]):
+        for match in re.finditer(r"\n\n+", text[search_start:search_end]):
             pos = search_start + match.end()
             if self._term_protector.is_safe_split_point(text, pos, protected_ranges):
                 return pos
 
-        for match in re.finditer(r'\n', text[search_start:search_end]):
+        for match in re.finditer(r"\n", text[search_start:search_end]):
             pos = search_start + match.end()
             if self._term_protector.is_safe_split_point(text, pos, protected_ranges):
                 return pos
@@ -209,19 +202,13 @@ class ChunkingService:
             overlap_tokens += self._token_counter.count(segment)
             pos = prev_pos
 
-        sentence_start = text.rfind('. ', pos, split_point)
+        sentence_start = text.rfind(". ", pos, split_point)
         if sentence_start != -1:
             return sentence_start + 2
 
         return pos
 
-    def _create_chunk(
-        self,
-        document: Document,
-        text: str,
-        start: int,
-        end: int
-    ) -> Chunk:
+    def _create_chunk(self, document: Document, text: str, start: int, end: int) -> Chunk:
         return Chunk(
             id=f"chunk_{uuid.uuid4().hex[:8]}",
             document_id=document.id,
@@ -229,5 +216,5 @@ class ChunkingService:
             start_char=start,
             end_char=end,
             token_count=self._token_counter.count(text),
-            section_path=[]
+            section_path=[],
         )

@@ -224,6 +224,7 @@ def generate(
             console.print(f"[red]Error during processing: {e}[/red]")
             if verbose:
                 import traceback
+
                 console.print(traceback.format_exc())
             raise typer.Exit(code=1) from None
 

@@ -98,7 +98,9 @@ class CardValidator:
         for match in matches:
             word_count = len(match.split())
             if word_count > self.MAX_ANSWER_WORDS:
-                issues.append(f"Cloze answer too long: {word_count} words (max {self.MAX_ANSWER_WORDS})")
+                issues.append(
+                    f"Cloze answer too long: {word_count} words (max {self.MAX_ANSWER_WORDS})"
+                )
                 return ValidationResult(status=ValidationStatus.INVALID, issues=issues)
 
         return ValidationResult(status=ValidationStatus.VALID)
@@ -120,7 +122,7 @@ class CardValidator:
         if not self.llm_client:
             return ValidationResult(
                 status=ValidationStatus.NEEDS_REVIEW,
-                issues=["No LLM client configured for accuracy validation"]
+                issues=["No LLM client configured for accuracy validation"],
             )
 
         text = card.text if isinstance(card, ClozeCardInput) else card.stem
@@ -133,23 +135,25 @@ class CardValidator:
             return ValidationResult(
                 status=ValidationStatus.INVALID,
                 issues=["Medical claim is inaccurate or incorrect"],
-                confidence=confidence
+                confidence=confidence,
             )
 
         if confidence < self.CONFIDENCE_THRESHOLD:
             return ValidationResult(
                 status=ValidationStatus.NEEDS_REVIEW,
                 issues=["Low confidence in accuracy assessment"],
-                confidence=confidence
+                confidence=confidence,
             )
 
         return ValidationResult(status=ValidationStatus.VALID, confidence=confidence)
 
-    async def validate_grounding(self, card: ClozeCardInput | VignetteCardInput) -> ValidationResult:
+    async def validate_grounding(
+        self, card: ClozeCardInput | VignetteCardInput
+    ) -> ValidationResult:
         if not self.llm_client:
             return ValidationResult(
                 status=ValidationStatus.NEEDS_REVIEW,
-                issues=["No LLM client configured for grounding validation"]
+                issues=["No LLM client configured for grounding validation"],
             )
 
         text = card.text if isinstance(card, ClozeCardInput) else card.stem
@@ -164,9 +168,6 @@ class CardValidator:
             issue = "Claim not grounded in source"
             if "mismatch" in explanation.lower():
                 issue = "Entity mismatch between card and source"
-            return ValidationResult(
-                status=ValidationStatus.INVALID,
-                issues=[issue]
-            )
+            return ValidationResult(status=ValidationStatus.INVALID, issues=[issue])
 
         return ValidationResult(status=ValidationStatus.VALID)

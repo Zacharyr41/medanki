@@ -32,9 +32,7 @@ class TestBasicEmbedding:
             await mock_embedder.embed("")
 
     @pytest.mark.asyncio
-    async def test_embedding_is_deterministic(
-        self, mock_embedder: EmbeddingService
-    ) -> None:
+    async def test_embedding_is_deterministic(self, mock_embedder: EmbeddingService) -> None:
         text = "deterministic test"
         result1 = await mock_embedder.embed(text)
         result2 = await mock_embedder.embed(text)
@@ -43,18 +41,14 @@ class TestBasicEmbedding:
 
 class TestMedicalDomain:
     @pytest.mark.asyncio
-    async def test_medical_terms_similar(
-        self, real_embedder: EmbeddingService
-    ) -> None:
+    async def test_medical_terms_similar(self, real_embedder: EmbeddingService) -> None:
         chf_embedding = await real_embedder.embed("CHF")
         heart_failure_embedding = await real_embedder.embed("heart failure")
         similarity = np.dot(chf_embedding, heart_failure_embedding)
         assert similarity > 0.7
 
     @pytest.mark.asyncio
-    async def test_unrelated_terms_distant(
-        self, real_embedder: EmbeddingService
-    ) -> None:
+    async def test_unrelated_terms_distant(self, real_embedder: EmbeddingService) -> None:
         chf_embedding = await real_embedder.embed("CHF")
         fracture_embedding = await real_embedder.embed("tibial fracture")
         similarity = np.dot(chf_embedding, fracture_embedding)

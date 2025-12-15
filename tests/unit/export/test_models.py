@@ -1,6 +1,5 @@
 """Tests for Anki model definitions."""
 
-
 from packages.core.src.medanki.export.models import (
     CLOZE_MODEL_ID,
     VIGNETTE_MODEL_ID,

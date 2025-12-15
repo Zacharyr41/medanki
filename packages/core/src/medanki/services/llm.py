@@ -161,7 +161,9 @@ class ClaudeClient:
         tags: list[str] | None = None,
         topic_context: str | None = None,
     ) -> list[dict[str, Any]]:
-        prompt = f"Generate {count} cloze deletion flashcards from the following medical text:\n\n{text}"
+        prompt = (
+            f"Generate {count} cloze deletion flashcards from the following medical text:\n\n{text}"
+        )
         if topic_context:
             prompt += f"\n\n{topic_context}\nFocus on concepts relevant to this topic area."
         if tags:
