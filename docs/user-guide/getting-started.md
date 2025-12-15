@@ -35,6 +35,28 @@ Click "Generate Flashcards" and wait for processing. You'll see:
 
 Once complete, preview your cards and download the .apkg file.
 
+## Card Preview Features
+
+After generation completes, you can preview and filter your cards:
+
+### Filtering Cards
+
+Use the **Type Filter** dropdown to view specific card types:
+- **All Types:** Shows all generated cards
+- **Cloze:** Fill-in-the-blank style cards
+- **Vignette:** Clinical case-based questions
+- **Basic Q&A:** Simple question and answer format
+
+The filter dropdown remains visible even when no cards match your selection, allowing you to easily switch between filters.
+
+### Understanding Card Tags
+
+Each card displays taxonomy tags showing which topic it covers:
+- **MCAT cards:** Show the foundational concept and content category (e.g., "Structure and function of proteins")
+- **USMLE cards:** Show the organ system and topic (e.g., "Biochemistry and Molecular Biology")
+
+Tags help you identify which exam topics each card addresses, making it easier to organize your study.
+
 ### 5. Import to Anki
 
 1. Open Anki
