@@ -10,21 +10,24 @@ MedAnki converts your medical study materials into high-quality Anki flashcards,
 
 **CLI:** Install with `pip install medanki-cli`
 
-### 2. Upload Your First File
+### 2. Choose Your Input Method
 
-Supported formats:
-- **PDF:** Textbooks, lecture slides, study guides
-- **Markdown:** Notes, summaries
-- **TXT:** Plain text files
-- **DOCX:** Word documents
+MedAnki offers two ways to generate flashcards:
 
-Simply drag and drop your file onto the upload area, or click to browse.
+**Option A: Upload a File**
+- Drag and drop or click to browse
+- Supported formats: PDF, Markdown, TXT, DOCX
+
+**Option B: Describe Topics**
+- Click "Describe Topics" tab
+- Enter what you want to study (e.g., "cardiac electrophysiology")
+- Great for learning new topics without existing materials
 
 ### 3. Configure Options
 
 - **Target Exam:** Choose MCAT or USMLE Step 1
 - **Card Types:** Cloze deletions, clinical vignettes, or both
-- **Max Cards per Chunk:** How many cards to generate per content section (1-50)
+- **Total Cards:** How many cards to generate (1-100, default 20)
 
 ### 4. Generate and Download
 
@@ -66,6 +69,7 @@ Tags help you identify which exam topics each card addresses, making it easier t
 
 ## What's Next?
 
+- [Topic-Based Generation](./topic-input.md)
 - [Supported File Formats](./file-formats.md)
 - [Understanding Card Types](./card-types.md)
 - [Customizing Generation](./customization.md)

@@ -31,7 +31,7 @@ export function OptionsPanel({ options, onChange }: OptionsPanelProps) {
 
   const handleMaxCardsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10)
-    if (!isNaN(value) && value > 0) {
+    if (!isNaN(value) && value >= 1 && value <= 100) {
       onChange({ ...options, maxCards: value })
     }
   }
@@ -76,12 +76,12 @@ export function OptionsPanel({ options, onChange }: OptionsPanelProps) {
       </div>
 
       <div className="option-group">
-        <label htmlFor="max-cards">Max Cards per Chunk</label>
+        <label htmlFor="max-cards">Total Cards</label>
         <input
           id="max-cards"
           type="number"
           min={1}
-          max={50}
+          max={100}
           value={options.maxCards}
           onChange={handleMaxCardsChange}
         />
