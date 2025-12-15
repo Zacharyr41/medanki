@@ -35,13 +35,20 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push API image
-        run: |
-          docker build -t ${{ env.REGISTRY }}/api:${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/api:latest \
-            -f docker/Dockerfile.api .
-          docker push ${{ env.REGISTRY }}/api:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/api:latest
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/api:${{ github.sha }}
+            ${{ env.REGISTRY }}/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy API to Cloud Run
         id: deploy-api
@@ -66,13 +73,18 @@ jobs:
             MEDANKI_ENABLE_VIGNETTES=true
 
       - name: Build and push Web image
-        run: |
-          docker build -t ${{ env.REGISTRY }}/web:${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/web:latest \
-            --build-arg VITE_API_URL=${{ steps.deploy-api.outputs.url }} \
-            -f docker/Dockerfile.web .
-          docker push ${{ env.REGISTRY }}/web:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/web:latest
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.web
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/web:${{ github.sha }}
+            ${{ env.REGISTRY }}/web:latest
+          build-args: |
+            VITE_API_URL=${{ steps.deploy-api.outputs.url }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy Web to Cloud Run
         id: deploy-web
