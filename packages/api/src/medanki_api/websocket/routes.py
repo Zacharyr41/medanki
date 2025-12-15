@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import os
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -8,11 +10,220 @@ from starlette.websockets import WebSocketState
 
 from medanki_api.websocket.manager import ConnectionManager
 
+BASE_THRESHOLD = 0.65
+TAXONOMY_DIR = Path(__file__).parent.parent.parent.parent.parent.parent / "data" / "taxonomies"
+
 router = APIRouter()
 
 _manager = ConnectionManager()
 
 STAGES = ["ingesting", "chunking", "classifying", "generating", "exporting"]
+
+
+async def _send_progress(
+    websocket: WebSocket,
+    job: dict[str, Any],
+    progress: float,
+    stage: str,
+) -> None:
+    if websocket.client_state != WebSocketState.CONNECTED:
+        return
+    job["progress"] = progress
+    job["stage"] = stage
+    await websocket.send_json({
+        "type": "progress",
+        "progress": progress,
+        "stage": stage,
+    })
+
+
+async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
+    file_path = job.get("file_path")
+    if not file_path or not Path(file_path).exists():
+        raise ValueError(f"File not found: {file_path}")
+
+    path = Path(file_path)
+
+    # Stage 1: Ingestion (0-20%)
+    await _send_progress(websocket, job, 5, "ingesting")
+
+    from medanki.ingestion.pdf import PDFExtractor
+    from medanki.ingestion.text import TextLoader
+
+    if path.suffix.lower() == ".pdf":
+        extractor = PDFExtractor()
+        document = await asyncio.to_thread(extractor.extract, path)
+    else:
+        loader = TextLoader()
+        document = await asyncio.to_thread(loader.load, path)
+
+    await _send_progress(websocket, job, 20, "ingesting")
+
+    # Stage 2: Chunking (20-40%)
+    await _send_progress(websocket, job, 25, "chunking")
+
+    from dataclasses import dataclass
+
+    from medanki.processing.chunker import ChunkingService
+
+    @dataclass
+    class ChunkableDoc:
+        id: str
+        raw_text: str
+        sections: list
+
+    chunkable = ChunkableDoc(
+        id=str(job.get("id", "doc")),
+        raw_text=document.content,
+        sections=document.sections,
+    )
+
+    chunker = ChunkingService()
+    chunks = chunker.chunk(chunkable)
+
+    await _send_progress(websocket, job, 40, "chunking")
+
+    if not chunks:
+        job["cards"] = []
+        job["cards_generated"] = 0
+        return
+
+    # Stage 3: Classification (40-60%)
+    await _send_progress(websocket, job, 45, "classifying")
+    exam = job.get("exam", "USMLE_STEP1")
+
+    classified_chunks = []
+    indexer = None
+
+    try:
+        import weaviate
+        weaviate_client = weaviate.connect_to_local(port=8080)
+
+        from medanki.services.taxonomy_indexer import TaxonomyIndexer
+        indexer = TaxonomyIndexer(weaviate_client, TAXONOMY_DIR)
+
+        collection = weaviate_client.collections.get("TaxonomyTopic")
+        count_result = collection.aggregate.over_all(total_count=True)
+        if count_result.total_count == 0:
+            indexer.index_exam("USMLE_STEP1")
+            indexer.index_exam("MCAT")
+
+        await _send_progress(websocket, job, 50, "classifying")
+
+        for i, chunk in enumerate(chunks):
+            progress = 50 + (i / len(chunks)) * 10
+            await _send_progress(websocket, job, progress, "classifying")
+
+            results = indexer.search(chunk.text, exam_type=exam, limit=3)
+
+            if results and results[0]["score"] >= BASE_THRESHOLD:
+                classified_chunks.append({
+                    "chunk": chunk,
+                    "topic_id": results[0]["topic_id"],
+                    "topic_title": results[0]["title"],
+                    "topic_path": results[0]["path"],
+                    "score": results[0]["score"],
+                })
+            else:
+                classified_chunks.append({
+                    "chunk": chunk,
+                    "topic_id": None,
+                    "topic_title": None,
+                    "topic_path": None,
+                    "score": results[0]["score"] if results else 0.0,
+                })
+
+        weaviate_client.close()
+    except Exception as e:
+        print(f"Classification error (falling back to unclassified): {e}")
+        for chunk in chunks:
+            classified_chunks.append({
+                "chunk": chunk,
+                "topic_id": exam,
+                "topic_title": None,
+                "topic_path": None,
+                "score": 0.0,
+            })
+
+    relevant_chunks = [c for c in classified_chunks if c["topic_id"] is not None]
+    if not relevant_chunks:
+        relevant_chunks = classified_chunks
+
+    await _send_progress(websocket, job, 60, "classifying")
+
+    # Stage 4: Generation (60-90%)
+    await _send_progress(websocket, job, 65, "generating")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    cards: list[dict[str, Any]] = []
+
+    if api_key:
+        from uuid import uuid4
+
+        from medanki.generation.cloze import ClozeGenerator
+        from medanki.services.llm import ClaudeClient
+
+        client = ClaudeClient(api_key=api_key)
+        generator = ClozeGenerator(llm_client=client)
+
+        max_cards = job.get("max_cards", 10) or 10
+        cards_per_chunk = min(3, max(1, max_cards // len(relevant_chunks))) if relevant_chunks else 1
+
+        for i, classified in enumerate(relevant_chunks):
+            chunk = classified["chunk"]
+            topic_id = classified["topic_id"]
+            topic_title = classified["topic_title"]
+            topic_path = classified["topic_path"]
+            if len(cards) >= max_cards:
+                break
+
+            progress = 65 + (i / len(relevant_chunks)) * 25
+            await _send_progress(websocket, job, progress, "generating")
+
+            topic_context = f"Topic: {topic_path}" if topic_path else None
+
+            try:
+                chunk_id = uuid4()
+                generated = await generator.generate(
+                    content=chunk.text,
+                    source_chunk_id=chunk_id,
+                    topic_id=topic_id or exam,
+                    topic_context=topic_context,
+                    num_cards=cards_per_chunk,
+                )
+                for card in generated:
+                    cards.append({
+                        "id": str(card.id),
+                        "type": "cloze",
+                        "text": card.text,
+                        "topic_id": topic_id or exam,
+                        "topic_title": topic_title,
+                        "source_chunk": chunk.text[:200],
+                    })
+            except Exception as e:
+                print(f"Generation error for chunk {i}: {e}")
+                continue
+    else:
+        for i, classified in enumerate(relevant_chunks[:5]):
+            chunk = classified["chunk"]
+            cards.append({
+                "id": f"card_{i}",
+                "type": "cloze",
+                "text": f"{{{{c1::{chunk.text[:50]}}}}} is important medical content.",
+                "topic_id": classified["topic_id"] or exam,
+                "topic_title": classified["topic_title"],
+                "source_chunk": chunk.text[:200],
+            })
+
+    await _send_progress(websocket, job, 90, "generating")
+
+    # Stage 5: Export (90-100%)
+    await _send_progress(websocket, job, 95, "exporting")
+
+    job["cards"] = cards
+    job["cards_generated"] = len(cards)
+
+    await _send_progress(websocket, job, 100, "exporting")
 
 
 @router.websocket("/api/ws/{job_id}")
@@ -35,6 +246,7 @@ async def websocket_endpoint(
             await websocket.send_json({
                 "type": "complete",
                 "progress": 100,
+                "cards_generated": job.get("cards_generated", 0),
             })
             return
 
@@ -42,36 +254,21 @@ async def websocket_endpoint(
         job["stage"] = "ingesting"
         job["progress"] = 0
 
-        for stage_idx, stage in enumerate(STAGES):
-            job["stage"] = stage
-            base_progress = (stage_idx / len(STAGES)) * 100
-
-            for step in range(10):
-                if websocket.client_state != WebSocketState.CONNECTED:
-                    return
-
-                step_progress = (step + 1) / 10
-                job["progress"] = base_progress + (step_progress * (100 / len(STAGES)))
-
-                await websocket.send_json({
-                    "type": "progress",
-                    "progress": job["progress"],
-                    "stage": stage,
-                })
-
-                await asyncio.sleep(0.3)
+        await _process_job(websocket, job)
 
         job["status"] = "completed"
-        job["progress"] = 100
 
         await websocket.send_json({
             "type": "complete",
             "progress": 100,
+            "cards_generated": job.get("cards_generated", 0),
         })
 
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        job["status"] = "failed"
+        job["error_message"] = str(e)
         if websocket.client_state == WebSocketState.CONNECTED:
             await websocket.send_json({
                 "type": "error",

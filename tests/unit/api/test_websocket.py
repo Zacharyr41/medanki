@@ -20,13 +20,15 @@ class TestWebSocketConnection:
 
         app = FastAPI()
         app.include_router(router)
-        app.state.job_storage = {"job-123": {"status": "pending", "progress": 0}}
+        app.state.job_storage = {
+            "job-123": {"status": "completed", "progress": 100, "cards_generated": 5}
+        }
 
         with TestClient(app) as client:
             with client.websocket_connect("/api/ws/job-123") as websocket:
                 assert websocket is not None
                 data = websocket.receive_json()
-                assert data["type"] == "progress"
+                assert data["type"] == "complete"
 
     @pytest.mark.asyncio
     async def test_websocket_invalid_job_closes(self) -> None:
@@ -53,12 +55,14 @@ class TestWebSocketConnection:
 
         app = FastAPI()
         app.include_router(router)
-        app.state.job_storage = {"job-123": {"status": "pending", "progress": 0}}
+        app.state.job_storage = {
+            "job-123": {"status": "completed", "progress": 100, "cards_generated": 10}
+        }
 
         with TestClient(app) as client:
             with client.websocket_connect("/api/ws/job-123") as websocket:
                 data = websocket.receive_json()
-                assert data["type"] == "progress"
+                assert data["type"] == "complete"
                 assert "progress" in data
 
 

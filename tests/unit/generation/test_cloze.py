@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from medanki.generation.cloze import ClozeGenerator
 
 
-async def generate_from_chunk(generator: "ClozeGenerator", chunk, count: int = 3):
+async def generate_from_chunk(generator: ClozeGenerator, chunk, count: int = 3):
     """Helper to call generator with new signature using chunk data."""
     return await generator.generate(
         content=chunk.text,

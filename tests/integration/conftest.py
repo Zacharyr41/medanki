@@ -165,6 +165,7 @@ class MockLLMClient:
         text: str,
         count: int = 3,
         tags: list[str] | None = None,
+        topic_context: str | None = None,
     ) -> list[dict[str, Any]]:
         """Generate cloze cards from text."""
         return self._generate_cloze_from_text(text, count)

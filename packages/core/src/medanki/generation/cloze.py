@@ -26,6 +26,7 @@ class ILLMClient(Protocol):
         text: str,
         count: int = 3,
         tags: list[str] | None = None,
+        topic_context: str | None = None,
     ) -> list[dict[str, Any]]:
         """Generate cloze cards from text.
 
@@ -86,6 +87,18 @@ TRIVIAL_WORDS = frozenset({
     "it", "its", "this", "that", "these", "those",
 })
 
+# Research trivia patterns that should not be cloze deletions
+TRIVIA_PATTERNS = [
+    re.compile(r"\b[A-Z]{2,}(?:-[A-Z]+)*\s+(?:trial|study|cohort)\b", re.IGNORECASE),
+    re.compile(r"\bHR\s*[=:]\s*\d+\.?\d*"),
+    re.compile(r"\bp\s*[<>=]\s*0?\.\d+"),
+    re.compile(r"\b(?:19|20)\d{2}\s+(?:guidelines?|recommendations?)\b", re.IGNORECASE),
+    re.compile(r"\b\d+%?\s*CI\b|\bconfidence interval\b", re.IGNORECASE),
+    re.compile(r"\bRR\s*[=:]\s*\d+\.?\d*"),
+    re.compile(r"\bOR\s*[=:]\s*\d+\.?\d*"),
+    re.compile(r"\b\d{1,2}(?:\.\d+)?%"),
+]
+
 
 class ClozeGenerator:
     """Service for generating cloze deletion flashcards from classified chunks.
@@ -108,6 +121,7 @@ class ClozeGenerator:
         content: str,
         source_chunk_id: UUID,
         topic_id: str | None = None,
+        topic_context: str | None = None,
         num_cards: int = 3,
     ) -> list[ClozeCard]:
         """Generate cloze cards from content.
@@ -116,6 +130,7 @@ class ClozeGenerator:
             content: Text content to generate cards from.
             source_chunk_id: UUID of the source chunk.
             topic_id: Optional topic ID for tagging.
+            topic_context: Optional topic path for LLM context.
             num_cards: Maximum number of cards to generate.
 
         Returns:
@@ -130,6 +145,7 @@ class ClozeGenerator:
             text=content,
             count=num_cards,
             tags=tags,
+            topic_context=topic_context,
         )
 
         valid_cards: list[ClozeCard] = []
@@ -144,6 +160,9 @@ class ClozeGenerator:
                 continue
 
             if self._has_long_answer(card_text):
+                continue
+
+            if self._has_trivia_deletion(card_text):
                 continue
 
             generated = GeneratedClozeCard(
@@ -185,4 +204,13 @@ class ClozeGenerator:
             word_count = len(answer.strip().split())
             if word_count > GeneratedClozeCard.MAX_ANSWER_WORDS:
                 return True
+        return False
+
+    def _has_trivia_deletion(self, text: str) -> bool:
+        """Check if any cloze deletion contains research trivia."""
+        matches = self._cloze_pattern.findall(text)
+        for _, answer in matches:
+            for pattern in TRIVIA_PATTERNS:
+                if pattern.search(answer):
+                    return True
         return False

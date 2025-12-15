@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from medanki.generation.vignette import VignetteGenerator
     from medanki.ingestion.service import IngestionService
     from medanki.processing.chunker import ChunkingService
-    from medanki.processing.classifier import ClassificationService
     from medanki.processing.embedder import EmbeddingService
     from medanki.services.llm import ClaudeClient
     from medanki.services.taxonomy import TaxonomyService

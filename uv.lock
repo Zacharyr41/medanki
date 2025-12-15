@@ -1800,6 +1800,7 @@ dependencies = [
     { name = "tiktoken" },
     { name = "typer" },
     { name = "uvicorn" },
+    { name = "weaviate-client" },
     { name = "websockets" },
 ]
 
@@ -1853,6 +1854,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.9.0" },
     { name = "types-aiofiles", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "uvicorn", specifier = ">=0.27.0" },
+    { name = "weaviate-client", specifier = ">=4.18.3" },
     { name = "websockets", specifier = ">=12.0" },
 ]
 provides-extras = ["dev"]

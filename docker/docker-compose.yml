@@ -1,6 +1,6 @@
 services:
   weaviate:
-    image: semitechnologies/weaviate:1.24.1
+    image: semitechnologies/weaviate:1.28.0
     ports:
       - "8080:8080"
       - "50051:50051"

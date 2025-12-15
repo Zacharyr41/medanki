@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import tempfile
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, status
@@ -115,6 +117,7 @@ def _create_job(
     exam: ExamType | None,
     card_types: str | None,
     max_cards: int | None,
+    file_path: str | None = None,
 ) -> dict:
     """Create a new job and store it in app state.
 
@@ -143,6 +146,8 @@ def _create_job(
         "error_message": None,
         "created_at": now.isoformat(),
         "updated_at": now.isoformat(),
+        "file_path": file_path,
+        "cards": [],
     }
 
     # Store in app state
@@ -229,7 +234,14 @@ async def upload_file(
         )
 
     _validate_file_type(file)
-    await _validate_file_size(file)
+    content = await _validate_file_size(file)
+
+    # Save file to temp location
+    suffix = Path(file.filename).suffix
+    temp_dir = Path(tempfile.gettempdir()) / "medanki_uploads"
+    temp_dir.mkdir(exist_ok=True)
+    temp_file = temp_dir / f"{uuid.uuid4()}{suffix}"
+    temp_file.write_bytes(content)
 
     job = _create_job(
         request,
@@ -237,6 +249,7 @@ async def upload_file(
         validated_exam,
         card_types,
         max_cards,
+        file_path=str(temp_file),
     )
 
     return UploadResponse(

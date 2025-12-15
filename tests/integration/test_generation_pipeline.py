@@ -5,7 +5,6 @@ Tests card generation from chunks using LLM, validation, and deduplication.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from uuid import uuid4
 
 import pytest

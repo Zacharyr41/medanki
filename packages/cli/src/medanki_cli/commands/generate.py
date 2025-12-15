@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import typer
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 app = typer.Typer(help="Generate Anki flashcards from medical documents")
