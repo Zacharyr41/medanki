@@ -65,9 +65,7 @@ class ClaudeClient:
         return self._total_usage
 
     async def generate(self, prompt: str, system: str | None = None) -> str:
-        messages: list[anthropic.types.MessageParam] = [
-            {"role": "user", "content": prompt}
-        ]
+        messages: list[anthropic.types.MessageParam] = [{"role": "user", "content": prompt}]
 
         @retry(
             retry=retry_if_exception_type(anthropic.RateLimitError),

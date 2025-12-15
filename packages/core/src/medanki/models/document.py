@@ -42,9 +42,7 @@ class Section(BaseModel):
     title: str = Field(..., min_length=1, description="Section heading text")
     content: str = Field(default="", description="Section body content")
     level: int = Field(..., ge=1, le=6, description="Heading level (1-6)")
-    page_numbers: list[int] = Field(
-        default_factory=list, description="Pages where section appears"
-    )
+    page_numbers: list[int] = Field(default_factory=list, description="Pages where section appears")
 
     @field_validator("page_numbers")
     @classmethod

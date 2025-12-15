@@ -79,16 +79,14 @@ class ExportResult:
 
 @runtime_checkable
 class IIngestionService(Protocol):
-    async def ingest_file(self, path: Path) -> Document:
-        ...
+    async def ingest_file(self, path: Path) -> Document: ...
 
     async def ingest_directory(
         self,
         path: Path,
         recursive: bool = True,
         extensions: Sequence[str] | None = None,
-    ) -> list[Document]:
-        ...
+    ) -> list[Document]: ...
 
 
 @runtime_checkable
@@ -98,31 +96,25 @@ class IChunkingService(Protocol):
         document: Document,
         max_chunk_size: int = 1000,
         overlap: int = 100,
-    ) -> list[Chunk]:
-        ...
+    ) -> list[Chunk]: ...
 
 
 @runtime_checkable
 class IEmbeddingService(Protocol):
     @property
-    def model_name(self) -> str:
-        ...
+    def model_name(self) -> str: ...
 
     @property
-    def embedding_dimension(self) -> int:
-        ...
+    def embedding_dimension(self) -> int: ...
 
-    async def embed(self, text: str) -> list[float]:
-        ...
+    async def embed(self, text: str) -> list[float]: ...
 
-    async def embed_batch(self, texts: Sequence[str]) -> list[list[float]]:
-        ...
+    async def embed_batch(self, texts: Sequence[str]) -> list[list[float]]: ...
 
 
 @runtime_checkable
 class IClassificationService(Protocol):
-    async def classify_chunk(self, chunk: Chunk) -> ChunkType:
-        ...
+    async def classify_chunk(self, chunk: Chunk) -> ChunkType: ...
 
 
 @runtime_checkable
@@ -132,15 +124,13 @@ class IGenerationService(Protocol):
         chunk: Chunk,
         topic_id: str | None = None,
         max_cards: int = 3,
-    ) -> list[ClozeCard]:
-        ...
+    ) -> list[ClozeCard]: ...
 
     async def generate_vignette(
         self,
         chunk: Chunk,
         topic_id: str | None = None,
-    ) -> VignetteCard | None:
-        ...
+    ) -> VignetteCard | None: ...
 
 
 @runtime_checkable
@@ -148,8 +138,7 @@ class IValidationService(Protocol):
     async def validate_card(
         self,
         card: ClozeCard | VignetteCard,
-    ) -> tuple[bool, list[str]]:
-        ...
+    ) -> tuple[bool, list[str]]: ...
 
 
 @runtime_checkable
@@ -160,8 +149,7 @@ class IExportService(Protocol):
         output_path: Path,
         deck_name: str,
         format: str = "apkg",
-    ) -> ExportResult:
-        ...
+    ) -> ExportResult: ...
 
 
 @runtime_checkable
@@ -170,16 +158,14 @@ class IVectorStore(Protocol):
         self,
         embeddings: Sequence[Embedding],
         chunks: Sequence[Chunk],
-    ) -> int:
-        ...
+    ) -> int: ...
 
     async def search(
         self,
         query_vector: list[float],
         top_k: int = 10,
         filter_metadata: dict[str, str | int | float | bool] | None = None,
-    ) -> list[SearchResult]:
-        ...
+    ) -> list[SearchResult]: ...
 
     async def hybrid_search(
         self,
@@ -188,8 +174,7 @@ class IVectorStore(Protocol):
         top_k: int = 10,
         alpha: float = 0.5,
         filter_metadata: dict[str, str | int | float | bool] | None = None,
-    ) -> list[SearchResult]:
-        ...
+    ) -> list[SearchResult]: ...
 
 
 @runtime_checkable
@@ -198,18 +183,14 @@ class ITaxonomyService(Protocol):
         self,
         parent_id: str | None = None,
         level: int | None = None,
-    ) -> list[Topic]:
-        ...
+    ) -> list[Topic]: ...
 
     async def search_topics(
         self,
         query: str,
         limit: int = 10,
-    ) -> list[Topic]:
-        ...
+    ) -> list[Topic]: ...
 
-    async def get_topic_by_id(self, topic_id: str) -> Topic | None:
-        ...
+    async def get_topic_by_id(self, topic_id: str) -> Topic | None: ...
 
-    async def get_topic_ancestors(self, topic_id: str) -> list[Topic]:
-        ...
+    async def get_topic_ancestors(self, topic_id: str) -> list[Topic]: ...

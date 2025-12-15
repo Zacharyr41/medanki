@@ -125,9 +125,7 @@ class TaxonomyService:
             return [t for t in self._mcat_topics.values() if t.parent_id is not None]
         return []
 
-    def get_topic_by_id(
-        self, topic_id: str, exam_type: ExamType
-    ) -> TaxonomyTopic | None:
+    def get_topic_by_id(self, topic_id: str, exam_type: ExamType) -> TaxonomyTopic | None:
         if exam_type == ExamType.MCAT:
             return self._mcat_topics.get(topic_id)
         elif exam_type == ExamType.USMLE_STEP1:
@@ -141,9 +139,7 @@ class TaxonomyService:
             return list(self._usmle_topics.values())
         return []
 
-    def search_topics_by_keyword(
-        self, keyword: str, exam_type: ExamType
-    ) -> list[TaxonomyTopic]:
+    def search_topics_by_keyword(self, keyword: str, exam_type: ExamType) -> list[TaxonomyTopic]:
         keyword_lower = keyword.lower()
         topics = self.get_topics_by_exam(exam_type)
         results = []

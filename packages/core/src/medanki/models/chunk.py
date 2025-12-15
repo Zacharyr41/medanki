@@ -84,9 +84,7 @@ class ClassifiedChunk(BaseModel):
     """
 
     chunk: Chunk = Field(..., description="The source chunk")
-    topics: list[TopicMatch] = Field(
-        default_factory=list, description="Matched taxonomy topics"
-    )
+    topics: list[TopicMatch] = Field(default_factory=list, description="Matched taxonomy topics")
     primary_exam: ExamType | None = Field(
         default=None, description="Primary exam this chunk is relevant to"
     )

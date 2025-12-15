@@ -33,7 +33,9 @@ class ClozeCard:
     def validate(self) -> None:
         cloze_matches = list(self.CLOZE_PATTERN.finditer(self.text))
         if not cloze_matches:
-            raise ValidationError("Cloze card must contain at least one cloze deletion in {{c1::answer}} format")
+            raise ValidationError(
+                "Cloze card must contain at least one cloze deletion in {{c1::answer}} format"
+            )
 
         indices: list[int] = []
         for match in cloze_matches:
