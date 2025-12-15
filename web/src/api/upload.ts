@@ -1,4 +1,5 @@
 import type { GenerationOptions } from '../components/OptionsPanel'
+import { API_BASE_URL } from './client'
 
 interface UploadResponse {
   jobId: string
@@ -24,7 +25,7 @@ export async function uploadFile(
   formData.append('card_types', cardTypes.join(','))
   formData.append('max_cards', String(options.maxCards))
 
-  const response = await fetch('/api/upload', {
+  const response = await fetch(`${API_BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   })
