@@ -87,7 +87,7 @@ uv run uvicorn medanki_api.main:app --reload --port 8000  # API
 cd web && npm run dev  # Frontend (port 5173)
 
 # Docker services
-docker-compose -f docker/docker-compose.yml up -d  # Weaviate on :8080
+docker compose -f docker/docker-compose.yml up -d  # Weaviate on :8080
 ```
 
 ## Code Standards

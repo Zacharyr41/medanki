@@ -76,7 +76,7 @@ volumes:
 
 Start services:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Cloud Run Deployment

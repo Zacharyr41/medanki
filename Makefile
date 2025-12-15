@@ -57,13 +57,13 @@ dev-web:
 
 # Docker
 docker-up:
-	docker-compose -f docker/docker-compose.yml up -d
+	docker compose -f docker/docker-compose.yml up -d
 
 docker-down:
-	docker-compose -f docker/docker-compose.yml down
+	docker compose -f docker/docker-compose.yml down
 
 docker-logs:
-	docker-compose -f docker/docker-compose.yml logs -f
+	docker compose -f docker/docker-compose.yml logs -f
 
 docker-build:
 	docker build -f docker/Dockerfile.api -t medanki-api:latest .
