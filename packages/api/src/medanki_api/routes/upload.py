@@ -27,10 +27,12 @@ ALLOWED_MIME_TYPES = {
     "text/x-markdown",
     "application/octet-stream",  # Sometimes used for .md files
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # .docx
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",  # .pptx
+    "application/vnd.ms-powerpoint",  # .ppt (will error with helpful message)
 }
 
 # Allowed file extensions
-ALLOWED_EXTENSIONS = {".pdf", ".md", ".txt", ".docx"}
+ALLOWED_EXTENSIONS = {".pdf", ".md", ".txt", ".docx", ".pptx", ".ppt"}
 
 # Maximum file size (50MB)
 MAX_FILE_SIZE = 50 * 1024 * 1024

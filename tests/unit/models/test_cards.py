@@ -126,6 +126,79 @@ class TestClozeCardValidation:
         assert card.difficulty == "hard"
 
 
+class TestDocumentPosition:
+    """Tests for document_position field on cards."""
+
+    def test_cloze_card_default_position(self):
+        """ClozeCard has default document_position of 0."""
+        card = ClozeCard(
+            id="test_pos_001",
+            text="{{c1::Test}} content",
+            source_chunk_id="chunk_001",
+        )
+        assert card.document_position == 0
+
+    def test_cloze_card_custom_position(self):
+        """ClozeCard accepts custom document_position."""
+        card = ClozeCard(
+            id="test_pos_002",
+            text="{{c1::Test}} content",
+            source_chunk_id="chunk_001",
+            document_position=1500,
+        )
+        assert card.document_position == 1500
+
+    def test_vignette_card_default_position(self):
+        """VignetteCard has default document_position of 0."""
+        card = VignetteCard(
+            id="vignette_pos_001",
+            front="What is the diagnosis?",
+            answer="Test answer",
+            explanation="Test explanation",
+            source_chunk_id="chunk_001",
+        )
+        assert card.document_position == 0
+
+    def test_vignette_card_custom_position(self):
+        """VignetteCard accepts custom document_position."""
+        card = VignetteCard(
+            id="vignette_pos_002",
+            front="What is the diagnosis?",
+            answer="Test answer",
+            explanation="Test explanation",
+            source_chunk_id="chunk_001",
+            document_position=3200,
+        )
+        assert card.document_position == 3200
+
+    def test_cards_sortable_by_position(self):
+        """Cards can be sorted by document_position."""
+        cards = [
+            ClozeCard(
+                id="c1",
+                text="{{c1::Third}} item",
+                source_chunk_id="chunk_003",
+                document_position=3000,
+            ),
+            ClozeCard(
+                id="c2",
+                text="{{c1::First}} item",
+                source_chunk_id="chunk_001",
+                document_position=500,
+            ),
+            ClozeCard(
+                id="c3",
+                text="{{c1::Second}} item",
+                source_chunk_id="chunk_002",
+                document_position=1500,
+            ),
+        ]
+        sorted_cards = sorted(cards, key=lambda c: c.document_position)
+        assert sorted_cards[0].id == "c2"
+        assert sorted_cards[1].id == "c3"
+        assert sorted_cards[2].id == "c1"
+
+
 class TestVignetteCard:
     def test_vignette_creation(self):
         card = VignetteCard(

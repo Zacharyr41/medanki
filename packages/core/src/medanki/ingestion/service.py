@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-SUPPORTED_EXTENSIONS = {".pdf", ".md", ".txt"}
+SUPPORTED_EXTENSIONS = {".pdf", ".md", ".txt", ".pptx"}
 
 HEADER_FOOTER_PATTERNS = [
     re.compile(r"^Page\s+\d+\s+of\s+\d+\s*$", re.MULTILINE | re.IGNORECASE),
@@ -26,6 +26,7 @@ EXTENSION_TO_CONTENT_TYPE = {
     ".pdf": ContentType.PDF_TEXTBOOK,
     ".md": ContentType.MARKDOWN,
     ".txt": ContentType.PLAIN_TEXT,
+    ".pptx": ContentType.POWERPOINT_SLIDES,
 }
 
 
@@ -47,6 +48,15 @@ class ITextLoader(Protocol):
         ...
 
 
+@runtime_checkable
+class IPowerPointExtractor(Protocol):
+    """Protocol for PowerPoint extraction."""
+
+    async def extract(self, path: Path) -> Document:
+        """Extract content from a PowerPoint file."""
+        ...
+
+
 class IngestionService:
     """Service facade for ingesting documents from various formats.
 
@@ -58,15 +68,18 @@ class IngestionService:
         self,
         pdf_extractor: IPDFExtractor,
         text_loader: ITextLoader,
+        powerpoint_extractor: IPowerPointExtractor | None = None,
     ) -> None:
         """Initialize the ingestion service.
 
         Args:
             pdf_extractor: Extractor for PDF files.
             text_loader: Loader for text and markdown files.
+            powerpoint_extractor: Extractor for PowerPoint files (optional).
         """
         self._pdf_extractor = pdf_extractor
         self._text_loader = text_loader
+        self._powerpoint_extractor = powerpoint_extractor
 
     async def ingest_file(self, path: Path) -> Document:
         """Ingest a single file and return a normalized Document.
@@ -190,11 +203,20 @@ class IngestionService:
 
         Returns:
             Extracted document.
+
+        Raises:
+            IngestionError: If no extractor is available for the file type.
         """
         suffix = path.suffix.lower()
 
         if suffix == ".pdf":
             return await self._pdf_extractor.extract(path)
+        elif suffix == ".pptx":
+            if self._powerpoint_extractor is None:
+                from medanki.ingestion.powerpoint import PowerPointExtractor
+
+                self._powerpoint_extractor = PowerPointExtractor()
+            return await self._powerpoint_extractor.extract(path)
         else:
             return await self._text_loader.load(path)
 

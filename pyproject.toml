@@ -20,6 +20,7 @@ dependencies = [
     "pyarrow>=18.0.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.0.0",
+    "python-pptx>=0.6.21",
     "python-multipart>=0.0.6",
     "pymupdf4llm>=0.2.7",
     "pytest>=8.0.0",

@@ -15,6 +15,7 @@ export interface CardPreview {
   answer?: string
   explanation?: string
   distinguishing_feature?: string
+  document_position: number
 }
 
 export interface PreviewResponse {
