@@ -76,7 +76,7 @@ export function OptionsPanel({ options, onChange }: OptionsPanelProps) {
       </div>
 
       <div className="option-group">
-        <label htmlFor="max-cards">Total Cards</label>
+        <label htmlFor="max-cards">Max Cards</label>
         <input
           id="max-cards"
           type="number"
