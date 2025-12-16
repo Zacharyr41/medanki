@@ -15,6 +15,7 @@ class ContentType(str, Enum):
 
     PDF_TEXTBOOK = "pdf_textbook"
     PDF_SLIDES = "pdf_slides"
+    POWERPOINT_SLIDES = "powerpoint_slides"
     AUDIO_LECTURE = "audio_lecture"
     MARKDOWN = "markdown"
     PLAIN_TEXT = "plain_text"

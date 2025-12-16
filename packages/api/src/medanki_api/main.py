@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 
 from medanki.storage.sqlite import SQLiteStore
 from medanki.storage.user_repository import UserRepository
-from medanki_api.routes import jobs_router, taxonomy_router, upload_router
+from medanki_api.routes import feedback_router, jobs_router, taxonomy_router, upload_router
 from medanki_api.routes.auth import router as auth_router
 from medanki_api.routes.download import router as download_router
 from medanki_api.routes.preview import router as preview_router
@@ -81,6 +81,10 @@ MedAnki transforms medical documents into Anki-compatible flashcards with AI-pow
             "description": "Deck download, regeneration, and statistics",
         },
         {
+            "name": "feedback",
+            "description": "Card quality feedback and taxonomy corrections",
+        },
+        {
             "name": "health",
             "description": "API health and status checks",
         },
@@ -103,6 +107,7 @@ app.include_router(saved_cards_router, prefix="/api/saved-cards", tags=["saved_c
 app.include_router(preview_router, prefix="/api", tags=["preview"])
 app.include_router(download_router, prefix="/api", tags=["download"])
 app.include_router(taxonomy_router, prefix="/api", tags=["taxonomy"])
+app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(websocket_router)
 
 

@@ -98,6 +98,7 @@ class ClozeCard:
     source_chunk_id: str = ""
     tags: list[str] = field(default_factory=list)
     difficulty: str = "medium"
+    document_position: int = 0
 
     CLOZE_PATTERN = re.compile(r"\{\{c\d+::([^}]+)\}\}")
     MAX_ANSWER_WORDS = 4
@@ -122,6 +123,7 @@ class VignetteCard:
     distinguishing_feature: str | None = None
     source_chunk_id: str = ""
     tags: list[str] = field(default_factory=list)
+    document_position: int = 0
 
 
 @dataclass

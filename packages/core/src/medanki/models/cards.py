@@ -22,6 +22,7 @@ class ClozeCard:
     source_chunk_id: UUID
     topic_id: str | None = None
     id: UUID = field(default_factory=uuid4)
+    document_position: int = 0
     card_type: ClassVar[CardType] = CardType.CLOZE
 
     CLOZE_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\{\{c(\d+)::([^}]+)\}\}")
@@ -83,6 +84,7 @@ class VignetteCard:
     source_chunk_id: UUID
     topic_id: str | None = None
     id: UUID = field(default_factory=uuid4)
+    document_position: int = 0
     card_type: ClassVar[CardType] = CardType.VIGNETTE
 
     VALID_ANSWER_LETTERS: ClassVar[set[str]] = {"A", "B", "C", "D", "E"}

@@ -20,6 +20,7 @@ class CardPreview(BaseModel):
     answer: str | None = None
     explanation: str | None = None
     distinguishing_feature: str | None = None
+    document_position: int = 0
 
 
 class PreviewResponse(BaseModel):

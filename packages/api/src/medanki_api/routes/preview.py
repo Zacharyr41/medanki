@@ -69,6 +69,7 @@ def _card_to_preview(card: dict, topic_lookup: dict[str, str]) -> CardPreview:
         answer=card.get("answer"),
         explanation=card.get("explanation"),
         distinguishing_feature=card.get("distinguishing_feature"),
+        document_position=card.get("document_position", 0),
     )
 
 
@@ -102,6 +103,8 @@ async def get_job_preview(
 
     if status:
         cards = [c for c in cards if c.get("status") == status]
+
+    cards = sorted(cards, key=lambda c: c.get("document_position", 0))
 
     total = len(cards)
     paginated_cards = cards[offset : offset + limit]

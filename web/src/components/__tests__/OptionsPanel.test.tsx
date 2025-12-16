@@ -32,10 +32,10 @@ describe('OptionsPanel', () => {
     expect(screen.getByLabelText(/vignette/i)).toBeInTheDocument()
   })
 
-  it('renders total cards input', () => {
+  it('renders max cards input', () => {
     render(<OptionsPanel options={defaultOptions} onChange={vi.fn()} />)
 
-    const input = screen.getByLabelText(/total.*cards/i)
+    const input = screen.getByLabelText(/max.*cards/i)
     expect(input).toBeInTheDocument()
     expect(input).toHaveAttribute('type', 'number')
   })

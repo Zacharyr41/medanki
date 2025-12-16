@@ -15,6 +15,7 @@ export interface CardPreview {
   answer?: string
   explanation?: string
   distinguishing_feature?: string
+  document_position: number
 }
 
 export interface PreviewResponse {
@@ -98,4 +99,63 @@ export interface TaxonomySearchResult {
   title: string
   path: string[]
   type: 'foundational_concept' | 'content_category' | 'topic' | 'system'
+}
+
+export type FeedbackType = 'thumbs_up' | 'thumbs_down'
+
+export type FeedbackCategory =
+  | 'inaccurate'
+  | 'unclear'
+  | 'wrong_answer'
+  | 'wrong_topic'
+  | 'too_complex'
+  | 'too_simple'
+  | 'duplicate'
+
+export interface FeedbackRequest {
+  card_id: string
+  feedback_type: FeedbackType
+  categories?: FeedbackCategory[]
+  comment?: string
+  card_text?: string
+  topic_id?: string
+}
+
+export interface CorrectionRequest {
+  card_id: string
+  original_topic_id: string
+  corrected_topic_id: string
+  confidence?: number
+  comment?: string
+}
+
+export interface ImplicitSignalRequest {
+  card_id: string
+  view_time_ms: number
+  flip_count: number
+  scroll_depth: number
+  edit_attempted: boolean
+  copy_attempted: boolean
+  skipped: boolean
+}
+
+export interface FeedbackResponse {
+  id: string
+  card_id: string
+  user_id: string
+  feedback_type: FeedbackType
+  categories: FeedbackCategory[]
+  comment: string | null
+  created_at: string
+}
+
+export interface FeedbackAggregate {
+  card_id: string
+  total_thumbs_up: number
+  total_thumbs_down: number
+  approval_rate: number
+  avg_view_time_ms: number
+  correction_count: number
+  most_common_categories: FeedbackCategory[]
+  needs_review: boolean
 }
