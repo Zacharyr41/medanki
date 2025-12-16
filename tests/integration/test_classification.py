@@ -76,6 +76,7 @@ class TestClassificationWithTaxonomy:
             assert top_score < 0.65, f"Expected low score for irrelevant content, got {top_score}"
 
     @pytest.mark.integration
+    @pytest.mark.skip(reason="Requires Weaviate with vectorizer module for semantic search")
     def test_classify_cardiovascular_drug_content(self, indexed_taxonomy):
         """CVD drug content should classify to cardiovascular or pharmacology topics."""
         chunk = MockChunk(

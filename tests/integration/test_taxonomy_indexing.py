@@ -67,6 +67,7 @@ class TestTaxonomyIndexing:
         )
 
     @pytest.mark.integration
+    @pytest.mark.skip(reason="Requires Weaviate with vectorizer module for semantic search")
     def test_hybrid_search_balances_keyword_and_semantic(self, taxonomy_dir, weaviate_client):
         """Hybrid search should find topics by keywords AND semantic meaning."""
         from medanki.services.taxonomy_indexer import TaxonomyIndexer
