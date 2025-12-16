@@ -195,7 +195,7 @@ class TaxonomyMigrator:
             display_name=display_name,
             dimensions=dimensions,
             approximate_neighbors_count=150,
-            distance_measure_type="DOT_PRODUCT_DISTANCE",
+            distance_measure_type="DOT_PRODUCT_DISTANCE",  # type: ignore[arg-type]
             index_update_method="STREAM_UPDATE",
             shard_size="SHARD_SIZE_SMALL",
         )

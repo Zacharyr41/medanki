@@ -295,22 +295,22 @@ class FeedbackRepository:
             (str(card_id),),
         )
         row = await cursor.fetchone()
-        thumbs_up = row["up"] or 0
-        thumbs_down = row["down"] or 0
+        thumbs_up = row["up"] or 0 if row else 0
+        thumbs_down = row["down"] or 0 if row else 0
 
         cursor = await conn.execute(
             "SELECT AVG(view_time_ms) as avg_time FROM implicit_signals WHERE card_id = ?",
             (str(card_id),),
         )
         row = await cursor.fetchone()
-        avg_view_time = row["avg_time"] or 0.0
+        avg_view_time = row["avg_time"] or 0.0 if row else 0.0
 
         cursor = await conn.execute(
             "SELECT COUNT(*) as count FROM taxonomy_corrections WHERE card_id = ?",
             (str(card_id),),
         )
         row = await cursor.fetchone()
-        correction_count = row["count"] or 0
+        correction_count = row["count"] or 0 if row else 0
 
         cursor = await conn.execute(
             """SELECT fc.category, COUNT(*) as count

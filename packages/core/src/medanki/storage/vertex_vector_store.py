@@ -66,7 +66,7 @@ class VertexVectorStore:
             display_name=display_name,
             dimensions=dimensions,
             approximate_neighbors_count=approximate_neighbors_count,
-            distance_measure_type=distance_measure_type,
+            distance_measure_type=distance_measure_type,  # type: ignore[arg-type]
             index_update_method="STREAM_UPDATE" if streaming else "BATCH_UPDATE",
             shard_size=shard_size,
         )
@@ -203,7 +203,8 @@ class VertexVectorStore:
                     embedding=[],
                     document_id="",
                 )
-                score = 1.0 - neighbor.distance if hasattr(neighbor, "distance") else 0.0
+                dist = getattr(neighbor, "distance", None)
+                score = 1.0 - dist if dist is not None else 0.0
                 results.append(SearchResult(chunk=chunk, score=score))
 
         return results
@@ -239,7 +240,8 @@ class VertexVectorStore:
                     embedding=[],
                     document_id="",
                 )
-                score = 1.0 - neighbor.distance if hasattr(neighbor, "distance") else 0.0
+                dist = getattr(neighbor, "distance", None)
+                score = 1.0 - dist if dist is not None else 0.0
                 results.append(SearchResult(chunk=chunk, score=score))
 
         return results

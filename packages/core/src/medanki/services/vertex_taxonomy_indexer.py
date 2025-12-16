@@ -256,6 +256,9 @@ class VertexTaxonomyIndexer:
         from google.cloud.aiplatform.matching_engine import (
             MatchingEngineIndexEndpoint,
         )
+        from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import (
+            Namespace,
+        )
 
         query_embedding = self._embed_text(query)
 
@@ -263,9 +266,9 @@ class VertexTaxonomyIndexer:
             index_endpoint_name=self._endpoint_id
         )
 
-        restricts = None
+        restricts: list[Namespace] | None = None
         if exam_type:
-            restricts = [{"namespace": "exam_type", "allow_list": [exam_type]}]
+            restricts = [Namespace("exam_type", [exam_type], [])]
 
         response = endpoint.find_neighbors(
             deployed_index_id=self._deployed_index_id,
@@ -277,7 +280,8 @@ class VertexTaxonomyIndexer:
         results = []
         for match in response[0]:
             topic_id = match.id
-            score = 1.0 - match.distance
+            dist = getattr(match, "distance", None)
+            score = 1.0 - dist if dist is not None else 0.0
 
             topic = self._topics_cache.get(topic_id)
             if topic:
