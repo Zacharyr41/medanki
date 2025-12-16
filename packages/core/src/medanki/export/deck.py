@@ -20,10 +20,10 @@ class DeckBuilder:
 
     def _generate_deck_id(self, name: str) -> int:
         hash_bytes = hashlib.sha256(name.encode()).digest()
-        return int.from_bytes(hash_bytes[:8], byteorder='big') % (2**31)
+        return int.from_bytes(hash_bytes[:8], byteorder="big") % (2**31)
 
     def generate_guid(self, card) -> str:
-        content = card.text if hasattr(card, 'text') else card.front
+        content = card.text if hasattr(card, "text") else card.front
         hash_bytes = hashlib.sha256(content.encode()).hexdigest()[:20]
         return hash_bytes
 
@@ -33,7 +33,7 @@ class DeckBuilder:
             model=self._cloze_model,
             fields=[card.text, card.extra, card.source_chunk_id],
             guid=guid,
-            tags=card.tags if hasattr(card, 'tags') else [],
+            tags=card.tags if hasattr(card, "tags") else [],
         )
         self._notes.append(note)
 
@@ -49,7 +49,7 @@ class DeckBuilder:
                 card.source_chunk_id,
             ],
             guid=guid,
-            tags=card.tags if hasattr(card, 'tags') else [],
+            tags=card.tags if hasattr(card, "tags") else [],
         )
         self._notes.append(note)
 

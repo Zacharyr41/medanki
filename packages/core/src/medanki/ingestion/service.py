@@ -137,9 +137,7 @@ class IngestionService:
                 path=str(path),
             )
 
-        allowed_extensions = (
-            set(extensions) if extensions else SUPPORTED_EXTENSIONS
-        )
+        allowed_extensions = set(extensions) if extensions else SUPPORTED_EXTENSIONS
 
         files = self._collect_files(path, recursive, allowed_extensions)
         documents: list[Document] = []
@@ -218,9 +216,7 @@ class IngestionService:
         content_type = getattr(document, "content_type", None)
         if content_type is None:
             suffix = path.suffix.lower()
-            content_type = EXTENSION_TO_CONTENT_TYPE.get(
-                suffix, ContentType.PLAIN_TEXT
-            )
+            content_type = EXTENSION_TO_CONTENT_TYPE.get(suffix, ContentType.PLAIN_TEXT)
 
         return Document(
             source_path=path,

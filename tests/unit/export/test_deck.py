@@ -33,7 +33,7 @@ class TestDeckBuilder:
             text="The {{c1::heart}} pumps blood",
             extra="Additional info",
             source_chunk_id="chunk_001",
-            tags=["cardiology"]
+            tags=["cardiology"],
         )
         builder.add_cloze_card(card)
         deck = builder.build()
@@ -49,7 +49,7 @@ class TestDeckBuilder:
             explanation="Classic presentation of MI",
             distinguishing_feature="ST elevation",
             source_chunk_id="chunk_002",
-            tags=["cardiology"]
+            tags=["cardiology"],
         )
         builder.add_vignette_card(card)
         deck = builder.build()
@@ -59,14 +59,10 @@ class TestDeckBuilder:
         """Stable GUID for updates - same content = same GUID."""
         builder = DeckBuilder("Test Deck")
         card1 = ClozeCard(
-            id="test_001",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_001", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         card2 = ClozeCard(
-            id="test_002",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_002", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         guid1 = builder.generate_guid(card1)
         guid2 = builder.generate_guid(card2)
@@ -75,14 +71,10 @@ class TestDeckBuilder:
     def test_different_content_different_guid(self):
         builder = DeckBuilder("Test Deck")
         card1 = ClozeCard(
-            id="test_001",
-            text="The {{c1::heart}} pumps blood",
-            source_chunk_id="chunk_001"
+            id="test_001", text="The {{c1::heart}} pumps blood", source_chunk_id="chunk_001"
         )
         card2 = ClozeCard(
-            id="test_002",
-            text="The {{c1::brain}} controls the body",
-            source_chunk_id="chunk_001"
+            id="test_002", text="The {{c1::brain}} controls the body", source_chunk_id="chunk_001"
         )
         guid1 = builder.generate_guid(card1)
         guid2 = builder.generate_guid(card2)
@@ -99,7 +91,7 @@ class TestDeckBuilder:
             card = ClozeCard(
                 id=f"test_{i:03d}",
                 text=f"The {{{{c1::term{i}}}}} is important",
-                source_chunk_id=f"chunk_{i:03d}"
+                source_chunk_id=f"chunk_{i:03d}",
             )
             builder.add_cloze_card(card)
         deck = builder.build()

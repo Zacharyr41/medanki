@@ -83,16 +83,10 @@ class AnKingParser:
                 "name": node.name,
                 "full_path": node.full_path,
                 "note_count": node.note_count,
-                "children": {
-                    name: node_to_dict(child) for name, child in node.children.items()
-                },
+                "children": {name: node_to_dict(child) for name, child in node.children.items()},
             }
 
-        return {
-            "children": {
-                name: node_to_dict(node) for name, node in self.tag_tree.items()
-            }
-        }
+        return {"children": {name: node_to_dict(node) for name, node in self.tag_tree.items()}}
 
     def export_flat_list(self) -> list[dict[str, Any]]:
         result = []

@@ -37,6 +37,7 @@ class AsyncPDFExtractorAdapter:
 
     def __init__(self):
         from medanki.ingestion.pdf import PDFExtractor
+
         self._extractor = PDFExtractor()
 
     async def extract(self, path: Path):
@@ -58,6 +59,7 @@ class AsyncTextLoaderAdapter:
 
     def __init__(self):
         from medanki.ingestion.text import MarkdownLoader, TextLoader
+
         self._markdown_loader = MarkdownLoader()
         self._text_loader = TextLoader()
 
@@ -121,9 +123,7 @@ class ServiceFactory:
         if self._embedding_service is None:
             from medanki.processing.embedder import EmbeddingService
 
-            self._embedding_service = EmbeddingService(
-                model_name=self._config.embedding_model
-            )
+            self._embedding_service = EmbeddingService(model_name=self._config.embedding_model)
         return self._embedding_service
 
     def get_chunking_service(self) -> ChunkingService:

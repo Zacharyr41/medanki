@@ -41,16 +41,9 @@ export function CardList({ jobId }: CardListProps) {
     )
   }
 
-  if (!data || data.cards.length === 0) {
-    return (
-      <div data-testid="empty-state" className="text-center py-8 text-gray-500">
-        No cards found
-      </div>
-    )
-  }
-
-  const totalPages = Math.ceil(data.total / limit)
+  const totalPages = data ? Math.ceil(data.total / limit) : 0
   const currentPage = Math.floor(offset / limit) + 1
+  const hasCards = data && data.cards.length > 0
 
   return (
     <div data-testid="card-list">
@@ -71,18 +64,24 @@ export function CardList({ jobId }: CardListProps) {
         </select>
       </div>
 
-      <div className="space-y-4">
-        {data.cards.map((card) => (
-          <CardPreview
-            key={card.id}
-            card={card}
-            expanded={expandedCard === card.id}
-            onToggle={handleToggle}
-          />
-        ))}
-      </div>
+      {!hasCards ? (
+        <div data-testid="empty-state" className="text-center py-8 text-gray-500">
+          No cards found
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {data.cards.map((card) => (
+            <CardPreview
+              key={card.id}
+              card={card}
+              expanded={expandedCard === card.id}
+              onToggle={handleToggle}
+            />
+          ))}
+        </div>
+      )}
 
-      {totalPages > 1 && (
+      {hasCards && totalPages > 1 && (
         <div data-testid="pagination" className="mt-6 flex items-center justify-center gap-4">
           <button
             data-testid="prev-page"
@@ -98,7 +97,7 @@ export function CardList({ jobId }: CardListProps) {
           <button
             data-testid="next-page"
             onClick={() => setOffset(offset + limit)}
-            disabled={offset + limit >= data.total}
+            disabled={offset + limit >= data!.total}
             className="px-4 py-2 border rounded disabled:opacity-50"
           >
             Next

@@ -17,6 +17,7 @@ from medanki.processing.chunker import ChunkingService
 # PDF Ingestion Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestPDFIngestion:
     """Test PDF ingestion end-to-end."""
@@ -85,6 +86,7 @@ class TestPDFIngestion:
 # ============================================================================
 # Markdown Ingestion Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestMarkdownIngestion:
@@ -169,6 +171,7 @@ Check potassium levels: normal 3.5-5.0 mEq/L
 # Plain Text Ingestion Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestTextIngestion:
     """Test plain text file ingestion."""
@@ -190,6 +193,7 @@ class TestTextIngestion:
 # ============================================================================
 # Directory Ingestion Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestDirectoryIngestion:
@@ -213,9 +217,7 @@ class TestDirectoryIngestion:
             assert doc.content is not None
             assert len(doc.content) > 0
 
-    def test_ingest_directory_filters_by_extension(
-        self, sample_test_directory: Path
-    ) -> None:
+    def test_ingest_directory_filters_by_extension(self, sample_test_directory: Path) -> None:
         """Test that directory ingestion respects file extension filters."""
         # Count markdown files
         md_files = list(sample_test_directory.rglob("*.md"))
@@ -232,13 +234,12 @@ class TestDirectoryIngestion:
 # Chunking Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestChunkingPipeline:
     """Test document chunking."""
 
-    def test_chunk_real_document(
-        self, temp_directory: Path, cardiology_content: str
-    ) -> None:
+    def test_chunk_real_document(self, temp_directory: Path, cardiology_content: str) -> None:
         """Test chunking a real document into chunks with entities."""
         # Create document
         md_path = temp_directory / "cardiology.md"
@@ -320,9 +321,7 @@ The right coronary artery is patent with good flow.
         assert "25mg" in all_text or "25 mg" in all_text
         assert "10mg" in all_text or "10 mg" in all_text
 
-    def test_chunking_respects_section_boundaries(
-        self, temp_directory: Path
-    ) -> None:
+    def test_chunking_respects_section_boundaries(self, temp_directory: Path) -> None:
         """Test that chunking respects document section boundaries when possible."""
         content = """
 # Section One
@@ -366,6 +365,7 @@ that is distinct from the previous sections.
 # ============================================================================
 # Edge Cases
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestIngestionEdgeCases:

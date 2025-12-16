@@ -141,9 +141,7 @@ async def download_deck(request: Request, job_id: str):
     return Response(
         content=apkg_content,
         media_type="application/octet-stream",
-        headers={
-            "Content-Disposition": f'attachment; filename="medanki_{job_id}.apkg"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="medanki_{job_id}.apkg"'},
     )
 
 

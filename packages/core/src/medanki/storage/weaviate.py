@@ -25,18 +25,11 @@ class IVectorStore(Protocol):
     def get_by_id(self, chunk_id: str) -> MedicalChunk | None: ...
     def delete(self, chunk_id: str) -> None: ...
     def vector_search(
-        self,
-        embedding: list[float],
-        limit: int = 10,
-        filters: dict[str, Any] | None = None
+        self, embedding: list[float], limit: int = 10, filters: dict[str, Any] | None = None
     ) -> list[SearchResult]: ...
     def keyword_search(self, query: str, limit: int = 10) -> list[SearchResult]: ...
     def hybrid_search(
-        self,
-        query: str,
-        embedding: list[float],
-        alpha: float = 0.5,
-        limit: int = 10
+        self, query: str, embedding: list[float], alpha: float = 0.5, limit: int = 10
     ) -> list[SearchResult]: ...
     def health_check(self) -> bool: ...
 
@@ -95,16 +88,18 @@ class WeaviateStore:
         for chunk in chunks:
             chunk_id = chunk.id or str(uuid4())
             chunk_ids.append(chunk_id)
-            objects.append({
-                "properties": {
-                    "content": chunk.content,
-                    "document_id": chunk.document_id,
-                    "exam_type": chunk.exam_type,
-                    "metadata": chunk.metadata,
-                },
-                "vector": chunk.embedding,
-                "uuid": chunk_id,
-            })
+            objects.append(
+                {
+                    "properties": {
+                        "content": chunk.content,
+                        "document_id": chunk.document_id,
+                        "exam_type": chunk.exam_type,
+                        "metadata": chunk.metadata,
+                    },
+                    "vector": chunk.embedding,
+                    "uuid": chunk_id,
+                }
+            )
 
         collection.data.insert_many(objects)
         return chunk_ids
@@ -151,10 +146,7 @@ class WeaviateStore:
             return filters
 
     def vector_search(
-        self,
-        embedding: list[float],
-        limit: int = 10,
-        filters: dict[str, Any] | None = None
+        self, embedding: list[float], limit: int = 10, filters: dict[str, Any] | None = None
     ) -> list[SearchResult]:
         collection = self._get_collection()
 
@@ -212,11 +204,7 @@ class WeaviateStore:
         return search_results
 
     def hybrid_search(
-        self,
-        query: str,
-        embedding: list[float],
-        alpha: float = 0.5,
-        limit: int = 10
+        self, query: str, embedding: list[float], alpha: float = 0.5, limit: int = 10
     ) -> list[SearchResult]:
         collection = self._get_collection()
 

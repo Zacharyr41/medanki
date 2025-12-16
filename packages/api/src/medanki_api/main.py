@@ -9,9 +9,13 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from medanki.storage.sqlite import SQLiteStore
+from medanki.storage.user_repository import UserRepository
 from medanki_api.routes import jobs_router, taxonomy_router, upload_router
+from medanki_api.routes.auth import router as auth_router
 from medanki_api.routes.download import router as download_router
 from medanki_api.routes.preview import router as preview_router
+from medanki_api.routes.saved_cards import router as saved_cards_router
 from medanki_api.schemas.responses import ErrorResponse
 from medanki_api.websocket.routes import router as websocket_router
 
@@ -29,8 +33,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         None during the application's active lifetime.
     """
     app.state.job_storage = {}
+    sqlite_store = SQLiteStore("medanki.db")
+    await sqlite_store.initialize()
+    app.state.sqlite_store = sqlite_store
+    app.state.user_repository = UserRepository(sqlite_store)
     yield
     app.state.job_storage.clear()
+    await sqlite_store.close()
 
 
 app = FastAPI(
@@ -89,6 +98,8 @@ app.add_middleware(
 
 app.include_router(upload_router)
 app.include_router(jobs_router)
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(saved_cards_router, prefix="/api/saved-cards", tags=["saved_cards"])
 app.include_router(preview_router, prefix="/api", tags=["preview"])
 app.include_router(download_router, prefix="/api", tags=["download"])
 app.include_router(taxonomy_router, prefix="/api", tags=["taxonomy"])

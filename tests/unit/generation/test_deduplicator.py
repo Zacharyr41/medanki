@@ -15,11 +15,11 @@ class TestExactDuplicateDetection:
         deduplicator = Deduplicator()
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="The mitochondria is the powerhouse of the cell."
+            source_chunk_id="The mitochondria is the powerhouse of the cell.",
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="The mitochondria is the powerhouse of the cell."
+            source_chunk_id="The mitochondria is the powerhouse of the cell.",
         )
 
         result = deduplicator.check_duplicate(card1, [card2])
@@ -31,11 +31,11 @@ class TestExactDuplicateDetection:
         deduplicator = Deduplicator()
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source B"
+            source_chunk_id="Source B",
         )
 
         hash1 = deduplicator.compute_content_hash(card1)
@@ -61,11 +61,11 @@ class TestSemanticDuplicateDetection:
         deduplicator = Deduplicator(embedding_client=mock_embedding_client)
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         card2 = ClozeCard(
             text="The {{c1::mitochondrion}} is the cell's power generator.",
-            source_chunk_id="Source B"
+            source_chunk_id="Source B",
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -81,16 +81,14 @@ class TestSemanticDuplicateDetection:
         ]
 
         deduplicator = Deduplicator(
-            embedding_client=mock_embedding_client,
-            similarity_threshold=0.9
+            embedding_client=mock_embedding_client, similarity_threshold=0.9
         )
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         card2 = ClozeCard(
-            text="The {{c1::mitochondria}} produces ATP for the cell.",
-            source_chunk_id="Source B"
+            text="The {{c1::mitochondria}} produces ATP for the cell.", source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -106,16 +104,14 @@ class TestSemanticDuplicateDetection:
         ]
 
         deduplicator = Deduplicator(
-            embedding_client=mock_embedding_client,
-            similarity_threshold=0.9
+            embedding_client=mock_embedding_client, similarity_threshold=0.9
         )
         card1 = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         card2 = ClozeCard(
-            text="{{c1::Hypertension}} is defined as BP > 130/80.",
-            source_chunk_id="Source B"
+            text="{{c1::Hypertension}} is defined as BP > 130/80.", source_chunk_id="Source B"
         )
 
         result = await deduplicator.check_semantic_duplicate(card1, [card2])
@@ -141,17 +137,14 @@ class TestCrossSessionDeduplication:
     async def test_checks_existing_cards(self, mock_db, mock_embedding_client):
         existing_card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         mock_db.get_existing_cards.return_value = [existing_card]
 
-        deduplicator = Deduplicator(
-            embedding_client=mock_embedding_client,
-            database=mock_db
-        )
+        deduplicator = Deduplicator(embedding_client=mock_embedding_client, database=mock_db)
         new_card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source B"
+            source_chunk_id="Source B",
         )
 
         result = await deduplicator.check_against_existing(new_card)
@@ -160,18 +153,13 @@ class TestCrossSessionDeduplication:
         mock_db.get_existing_cards.assert_called_once()
 
     def test_marks_vs_removes(self, mock_db, mock_embedding_client):
-        deduplicator = Deduplicator(
-            embedding_client=mock_embedding_client,
-            database=mock_db
-        )
+        deduplicator = Deduplicator(embedding_client=mock_embedding_client, database=mock_db)
         card = ClozeCard(
             text="The {{c1::mitochondria}} is the powerhouse of the cell.",
-            source_chunk_id="Source A"
+            source_chunk_id="Source A",
         )
         duplicate_result = DeduplicationResult(
-            is_duplicate=True,
-            status=DuplicateStatus.EXACT,
-            similarity_score=1.0
+            is_duplicate=True, status=DuplicateStatus.EXACT, similarity_score=1.0
         )
 
         marked = deduplicator.handle_duplicate(card, duplicate_result, action="mark")

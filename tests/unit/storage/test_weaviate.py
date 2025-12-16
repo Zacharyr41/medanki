@@ -38,7 +38,7 @@ class TestWeaviateCRUD:
             embedding=[0.1] * 384,
             document_id="doc_001",
             exam_type="USMLE",
-            metadata={"page": 1}
+            metadata={"page": 1},
         )
 
     def test_upsert_single_chunk(self, mock_weaviate_client, medical_chunk):
@@ -77,7 +77,9 @@ class TestWeaviateCRUD:
 
         assert result is not None
         assert result.content == medical_chunk.content
-        collection.query.fetch_object_by_id.assert_called_once_with(medical_chunk.id, include_vector=True)
+        collection.query.fetch_object_by_id.assert_called_once_with(
+            medical_chunk.id, include_vector=True
+        )
 
     def test_delete_by_id(self, mock_weaviate_client, sample_chunk):
         store = WeaviateStore(client=mock_weaviate_client)
@@ -96,10 +98,14 @@ class TestWeaviateSearch:
         mock_results = Mock()
         mock_results.objects = [
             Mock(
-                properties={"content": c.content, "document_id": c.document_id, "exam_type": c.exam_type},
+                properties={
+                    "content": c.content,
+                    "document_id": c.document_id,
+                    "exam_type": c.exam_type,
+                },
                 vector={"default": c.embedding},
                 uuid=c.id,
-                metadata=Mock(distance=0.1 * i)
+                metadata=Mock(distance=0.1 * i),
             )
             for i, c in enumerate(sample_chunks_with_embeddings[:3])
         ]
@@ -118,10 +124,14 @@ class TestWeaviateSearch:
         mock_results = Mock()
         mock_results.objects = [
             Mock(
-                properties={"content": "CHF treatment guidelines", "document_id": "doc1", "exam_type": "USMLE"},
+                properties={
+                    "content": "CHF treatment guidelines",
+                    "document_id": "doc1",
+                    "exam_type": "USMLE",
+                },
                 vector={"default": [0.1] * 384},
                 uuid=str(uuid4()),
-                metadata=Mock(score=0.9)
+                metadata=Mock(score=0.9),
             )
         ]
         collection.query.bm25.return_value = mock_results
@@ -139,10 +149,14 @@ class TestWeaviateSearch:
         mock_results = Mock()
         mock_results.objects = [
             Mock(
-                properties={"content": c.content, "document_id": c.document_id, "exam_type": c.exam_type},
+                properties={
+                    "content": c.content,
+                    "document_id": c.document_id,
+                    "exam_type": c.exam_type,
+                },
                 vector={"default": c.embedding},
                 uuid=c.id,
-                metadata=Mock(score=0.8)
+                metadata=Mock(score=0.8),
             )
             for c in sample_chunks_with_embeddings[:2]
         ]
@@ -162,19 +176,21 @@ class TestWeaviateSearch:
         mock_results = Mock()
         mock_results.objects = [
             Mock(
-                properties={"content": "Filtered content", "document_id": "doc123", "exam_type": "USMLE"},
+                properties={
+                    "content": "Filtered content",
+                    "document_id": "doc123",
+                    "exam_type": "USMLE",
+                },
                 vector={"default": [0.1] * 384},
                 uuid=str(uuid4()),
-                metadata=Mock(distance=0.1)
+                metadata=Mock(distance=0.1),
             )
         ]
         collection.query.near_vector.return_value = mock_results
 
         query_embedding = [0.1] * 384
         results = store.vector_search(
-            query_embedding,
-            limit=5,
-            filters={"exam_type": "USMLE", "document_id": "doc123"}
+            query_embedding, limit=5, filters={"exam_type": "USMLE", "document_id": "doc123"}
         )
 
         assert len(results) >= 1
@@ -188,10 +204,14 @@ class TestWeaviateSearch:
         mock_results = Mock()
         mock_results.objects = [
             Mock(
-                properties={"content": c.content, "document_id": c.document_id, "exam_type": c.exam_type},
+                properties={
+                    "content": c.content,
+                    "document_id": c.document_id,
+                    "exam_type": c.exam_type,
+                },
                 vector={"default": c.embedding},
                 uuid=c.id,
-                metadata=Mock(distance=0.1, score=0.9)
+                metadata=Mock(distance=0.1, score=0.9),
             )
             for c in sample_chunks_with_embeddings[:2]
         ]
@@ -201,5 +221,5 @@ class TestWeaviateSearch:
         results = store.vector_search(query_embedding, limit=5)
 
         for result in results:
-            assert hasattr(result, 'score')
+            assert hasattr(result, "score")
             assert result.score is not None

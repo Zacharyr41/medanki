@@ -26,6 +26,7 @@ from medanki.processing.chunker import ChunkingService
 # Mock Document for Chunking
 # ============================================================================
 
+
 @dataclass
 class MockDocument:
     """Mock document that matches the chunker's protocol."""
@@ -38,6 +39,7 @@ class MockDocument:
 # ============================================================================
 # Mock Card for Deck Building
 # ============================================================================
+
 
 class MockClozeCard:
     """Mock cloze card for deck building."""
@@ -58,6 +60,7 @@ class MockClozeCard:
 # ============================================================================
 # Full Pipeline Tests: PDF to APKG
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestPDFToAPKGPipeline:
@@ -104,6 +107,7 @@ class TestPDFToAPKGPipeline:
 
         async def generate_cards():
             for chunk in chunks[:3]:  # Limit to first 3 chunks for test speed
+
                 @dataclass
                 class ChunkWrapper:
                     id: str
@@ -133,6 +137,7 @@ class TestPDFToAPKGPipeline:
                     pass
 
         import asyncio
+
         asyncio.get_event_loop().run_until_complete(generate_cards())
 
         # Step 5: Deduplicate
@@ -166,6 +171,7 @@ class TestPDFToAPKGPipeline:
 # ============================================================================
 # Full Pipeline Tests: Markdown to APKG
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestMarkdownToAPKGPipeline:
@@ -210,6 +216,7 @@ class TestMarkdownToAPKGPipeline:
 
         async def generate_cards():
             for chunk in chunks[:3]:
+
                 @dataclass
                 class ChunkWrapper:
                     id: str
@@ -238,6 +245,7 @@ class TestMarkdownToAPKGPipeline:
                     pass
 
         import asyncio
+
         asyncio.get_event_loop().run_until_complete(generate_cards())
 
         # Step 5: Deduplicate
@@ -314,6 +322,7 @@ class TestMarkdownToAPKGPipeline:
             return all_card_texts
 
         import asyncio
+
         card_texts = asyncio.get_event_loop().run_until_complete(generate())
 
         # Cards should reference medical concepts from the content
@@ -325,14 +334,13 @@ class TestMarkdownToAPKGPipeline:
             for term in ["systole", "diastole", "lisinopril", "metoprolol", "furosemide", "cardiac"]
         )
 
-        assert medical_terms_found or len(card_texts) > 0, (
-            "Expected cards with medical content"
-        )
+        assert medical_terms_found or len(card_texts) > 0, "Expected cards with medical content"
 
 
 # ============================================================================
 # Full Pipeline Tests: Directory to APKG
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestDirectoryToAPKGPipeline:
@@ -374,6 +382,7 @@ class TestDirectoryToAPKGPipeline:
                 chunks = chunker.chunk(mock_doc)
 
                 for chunk in chunks[:2]:  # Limit chunks per doc
+
                     @dataclass
                     class ChunkWrapper:
                         id: str
@@ -402,6 +411,7 @@ class TestDirectoryToAPKGPipeline:
                         pass
 
         import asyncio
+
         asyncio.get_event_loop().run_until_complete(process_all())
 
         # Deduplicate cards (ignoring source for dedup)
@@ -445,6 +455,7 @@ class TestDirectoryToAPKGPipeline:
 # ============================================================================
 # Pipeline Error Handling Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestPipelineErrorHandling:
@@ -543,6 +554,7 @@ Code block with no language
 # Pipeline Statistics Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestPipelineStatistics:
     """Test pipeline statistics and metrics."""
@@ -587,6 +599,7 @@ class TestPipelineStatistics:
                     pass
 
         import asyncio
+
         asyncio.get_event_loop().run_until_complete(count_cards())
 
         # Should generate at least some cards from medical content

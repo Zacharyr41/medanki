@@ -58,9 +58,7 @@ async def created_job_id(client: AsyncClient, sample_pdf_content: bytes) -> str:
 class TestGetJobSuccess:
     """Test successful job retrieval."""
 
-    async def test_get_job_success(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_get_job_success(self, client: AsyncClient, created_job_id: str) -> None:
         """GET /api/jobs/{id} returns job details."""
         response = await client.get(f"/api/jobs/{created_job_id}")
 
@@ -84,9 +82,7 @@ class TestGetJobNotFound:
 class TestJobHasStatus:
     """Test job status field."""
 
-    async def test_job_has_status(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_job_has_status(self, client: AsyncClient, created_job_id: str) -> None:
         """Response includes status field."""
         response = await client.get(f"/api/jobs/{created_job_id}")
 
@@ -99,9 +95,7 @@ class TestJobHasStatus:
 class TestJobHasProgress:
     """Test job progress field."""
 
-    async def test_job_has_progress(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_job_has_progress(self, client: AsyncClient, created_job_id: str) -> None:
         """Response includes progress 0-100."""
         response = await client.get(f"/api/jobs/{created_job_id}")
 
@@ -115,9 +109,7 @@ class TestJobHasProgress:
 class TestJobHasTimestamps:
     """Test job timestamp fields."""
 
-    async def test_job_has_timestamps(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_job_has_timestamps(self, client: AsyncClient, created_job_id: str) -> None:
         """Response includes created_at and updated_at fields."""
         response = await client.get(f"/api/jobs/{created_job_id}")
 
@@ -135,9 +127,7 @@ class TestJobHasTimestamps:
 class TestListJobs:
     """Test job listing endpoint."""
 
-    async def test_list_jobs(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_list_jobs(self, client: AsyncClient, created_job_id: str) -> None:
         """GET /api/jobs returns list of jobs."""
         response = await client.get("/api/jobs")
 
@@ -159,9 +149,7 @@ class TestListJobsPaginated:
         """Limit and offset parameters work for pagination."""
         # Create multiple jobs
         for i in range(3):
-            files = {
-                "file": (f"lecture{i}.pdf", io.BytesIO(sample_pdf_content), "application/pdf")
-            }
+            files = {"file": (f"lecture{i}.pdf", io.BytesIO(sample_pdf_content), "application/pdf")}
             await client.post("/api/upload", files=files)
 
         # Test pagination
@@ -178,9 +166,7 @@ class TestListJobsPaginated:
 class TestListJobsFiltered:
     """Test job listing filtering."""
 
-    async def test_list_jobs_filtered(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_list_jobs_filtered(self, client: AsyncClient, created_job_id: str) -> None:
         """Filter by status works."""
         response = await client.get("/api/jobs", params={"status": "pending"})
 
@@ -195,9 +181,7 @@ class TestListJobsFiltered:
 class TestCancelJob:
     """Test job cancellation."""
 
-    async def test_cancel_job(
-        self, client: AsyncClient, created_job_id: str
-    ) -> None:
+    async def test_cancel_job(self, client: AsyncClient, created_job_id: str) -> None:
         """DELETE /api/jobs/{id} cancels the job."""
         response = await client.delete(f"/api/jobs/{created_job_id}")
 

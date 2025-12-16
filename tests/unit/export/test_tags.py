@@ -1,6 +1,5 @@
 """Tests for Anki tag building."""
 
-
 from packages.core.src.medanki.export.tags import TagBuilder
 
 
@@ -32,7 +31,7 @@ class TestTagBuilder:
     def test_sanitizes_special_chars(self):
         """Removes spaces, quotes"""
         builder = TagBuilder()
-        result = builder.sanitize("Heart's \"Anatomy\" Test")
+        result = builder.sanitize('Heart\'s "Anatomy" Test')
         assert result == "Hearts_Anatomy_Test"
 
     def test_sanitizes_multiple_spaces(self):

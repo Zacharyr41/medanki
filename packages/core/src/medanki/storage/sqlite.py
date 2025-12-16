@@ -70,11 +70,33 @@ class SQLiteStore:
                 FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
             );
 
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                google_id TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                picture_url TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                last_login TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS saved_cards (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                job_id TEXT NOT NULL,
+                card_id TEXT NOT NULL,
+                saved_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE (user_id, card_id)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_chunks_document ON chunks(document_id);
             CREATE INDEX IF NOT EXISTS idx_cards_document ON cards(document_id);
             CREATE INDEX IF NOT EXISTS idx_cards_content_hash ON cards(content_hash);
             CREATE INDEX IF NOT EXISTS idx_jobs_document ON jobs(document_id);
             CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+            CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+            CREATE INDEX IF NOT EXISTS idx_saved_cards_user ON saved_cards(user_id);
 
             PRAGMA foreign_keys = ON;
         """)
@@ -100,12 +122,7 @@ class SQLiteStore:
         return [row[1] for row in rows]
 
     async def insert_document(
-        self,
-        id: str,
-        source_path: str,
-        content_type: str,
-        raw_text: str,
-        metadata: dict[str, Any]
+        self, id: str, source_path: str, content_type: str, raw_text: str, metadata: dict[str, Any]
     ) -> str:
         conn = await self._get_connection()
         await conn.execute(
@@ -113,7 +130,14 @@ class SQLiteStore:
             INSERT INTO documents (id, source_path, content_type, raw_text, metadata, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (id, source_path, content_type, raw_text, json.dumps(metadata), datetime.utcnow().isoformat())
+            (
+                id,
+                source_path,
+                content_type,
+                raw_text,
+                json.dumps(metadata),
+                datetime.utcnow().isoformat(),
+            ),
         )
         await conn.commit()
         return id
@@ -165,7 +189,7 @@ class SQLiteStore:
         start_char: int,
         end_char: int,
         token_count: int,
-        section_path: list[str]
+        section_path: list[str],
     ) -> str:
         conn = await self._get_connection()
         await conn.execute(
@@ -173,7 +197,7 @@ class SQLiteStore:
             INSERT INTO chunks (id, document_id, text, start_char, end_char, token_count, section_path)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (id, document_id, text, start_char, end_char, token_count, json.dumps(section_path))
+            (id, document_id, text, start_char, end_char, token_count, json.dumps(section_path)),
         )
         await conn.commit()
         return id
@@ -203,7 +227,7 @@ class SQLiteStore:
         card_type: str,
         content: str,
         tags: list[str],
-        status: str = "pending"
+        status: str = "pending",
     ) -> str:
         conn = await self._get_connection()
         content_hash = hashlib.sha256(content.encode()).hexdigest()
@@ -212,7 +236,17 @@ class SQLiteStore:
             INSERT INTO cards (id, document_id, chunk_id, card_type, content, content_hash, tags, status, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (id, document_id, chunk_id, card_type, content, content_hash, json.dumps(tags), status, datetime.utcnow().isoformat())
+            (
+                id,
+                document_id,
+                chunk_id,
+                card_type,
+                content,
+                content_hash,
+                json.dumps(tags),
+                status,
+                datetime.utcnow().isoformat(),
+            ),
         )
         await conn.commit()
         return id
@@ -244,17 +278,19 @@ class SQLiteStore:
         for row in rows:
             tags = json.loads(row["tags"])
             if topic in tags:
-                result.append({
-                    "id": row["id"],
-                    "document_id": row["document_id"],
-                    "chunk_id": row["chunk_id"],
-                    "card_type": row["card_type"],
-                    "content": row["content"],
-                    "content_hash": row["content_hash"],
-                    "tags": tags,
-                    "status": row["status"],
-                    "created_at": row["created_at"],
-                })
+                result.append(
+                    {
+                        "id": row["id"],
+                        "document_id": row["document_id"],
+                        "chunk_id": row["chunk_id"],
+                        "card_type": row["card_type"],
+                        "content": row["content"],
+                        "content_hash": row["content_hash"],
+                        "tags": tags,
+                        "status": row["status"],
+                        "created_at": row["created_at"],
+                    }
+                )
         return result
 
     async def update_card_status(self, card_id: str, status: str) -> None:
@@ -270,7 +306,7 @@ class SQLiteStore:
             INSERT INTO jobs (id, document_id, status, progress, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (id, document_id, JobStatus.PENDING.value, 0, now, now)
+            (id, document_id, JobStatus.PENDING.value, 0, now, now),
         )
         await conn.commit()
         return id
@@ -295,8 +331,7 @@ class SQLiteStore:
         conn = await self._get_connection()
         now = datetime.utcnow().isoformat()
         await conn.execute(
-            "UPDATE jobs SET status = ?, updated_at = ? WHERE id = ?",
-            (status.value, now, job_id)
+            "UPDATE jobs SET status = ?, updated_at = ? WHERE id = ?", (status.value, now, job_id)
         )
         await conn.commit()
 
@@ -304,8 +339,7 @@ class SQLiteStore:
         conn = await self._get_connection()
         now = datetime.utcnow().isoformat()
         await conn.execute(
-            "UPDATE jobs SET progress = ?, updated_at = ? WHERE id = ?",
-            (progress, now, job_id)
+            "UPDATE jobs SET progress = ?, updated_at = ? WHERE id = ?", (progress, now, job_id)
         )
         await conn.commit()
 
@@ -314,15 +348,14 @@ class SQLiteStore:
         now = datetime.utcnow().isoformat()
         await conn.execute(
             "UPDATE jobs SET error = ?, status = ?, updated_at = ? WHERE id = ?",
-            (error, JobStatus.FAILED.value, now, job_id)
+            (error, JobStatus.FAILED.value, now, job_id),
         )
         await conn.commit()
 
     async def list_recent_jobs(self, limit: int = 10, offset: int = 0) -> list[dict[str, Any]]:
         conn = await self._get_connection()
         cursor = await conn.execute(
-            "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ? OFFSET ?",
-            (limit, offset)
+            "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ? OFFSET ?", (limit, offset)
         )
         rows = await cursor.fetchall()
         return [

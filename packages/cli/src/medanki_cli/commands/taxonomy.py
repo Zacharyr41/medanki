@@ -402,9 +402,7 @@ def tree(
                 root_nodes = [n for n in nodes if not n.get("parent_id")]
 
                 for root in root_nodes[:10]:
-                    root_branch = exam_branch.add(
-                        f"[green]{root['title']}[/green] ({root['id']})"
-                    )
+                    root_branch = exam_branch.add(f"[green]{root['title']}[/green] ({root['id']})")
                     children = await repo.get_descendants(root["id"], max_depth=depth - 1)
                     for child in children[:5]:
                         root_branch.add(f"{child['title']} ({child['id']})")

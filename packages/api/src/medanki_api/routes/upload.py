@@ -119,6 +119,8 @@ def _create_job(
     card_types: str | None,
     max_cards: int | None,
     file_path: str | None = None,
+    topic_text: str | None = None,
+    input_type: str = "file",
 ) -> dict:
     """Create a new job and store it in app state.
 
@@ -148,6 +150,8 @@ def _create_job(
         "created_at": now.isoformat(),
         "updated_at": now.isoformat(),
         "file_path": file_path,
+        "topic_text": topic_text,
+        "input_type": input_type,
         "cards": [],
     }
 
@@ -163,7 +167,7 @@ def _create_job(
     "/upload",
     response_model=UploadResponse | MultiUploadResponse,
     responses={
-        400: {"description": "Bad request - no file provided"},
+        400: {"description": "Bad request - no file or topic provided"},
         413: {"description": "File too large"},
         415: {"description": "Unsupported file type"},
         422: {"description": "Validation error"},
@@ -173,6 +177,7 @@ async def upload_file(
     request: Request,
     file: Annotated[UploadFile | None, File()] = None,
     files: Annotated[list[UploadFile] | None, File()] = None,
+    topic_text: Annotated[str | None, Form()] = None,
     exam: Annotated[str | None, Form()] = None,
     card_types: Annotated[str | None, Form()] = None,
     max_cards: Annotated[int | None, Form()] = None,
@@ -227,11 +232,28 @@ async def upload_file(
             created_at=now,
         )
 
+    # Handle topic text input (no file)
+    if topic_text and topic_text.strip():
+        job = _create_job(
+            request,
+            "topic_generation",
+            validated_exam,
+            card_types,
+            max_cards,
+            topic_text=topic_text.strip(),
+            input_type="topic",
+        )
+        return UploadResponse(
+            job_id=job["id"],
+            status=JobStatus.PENDING,
+            created_at=datetime.fromisoformat(job["created_at"]),
+        )
+
     # Handle single file
     if file is None or not file.filename:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No file provided",
+            detail="No file or topic text provided",
         )
 
     _validate_file_type(file)
@@ -251,6 +273,7 @@ async def upload_file(
         card_types,
         max_cards,
         file_path=str(temp_file),
+        input_type="file",
     )
 
     return UploadResponse(

@@ -406,10 +406,12 @@ class TestBatchProcessing:
             if "Chunk 1" in str(content):
                 raise Exception("Generation failed for chunk 1")
             chunk_id = kwargs.get("source_chunk_id", uuid4())
-            return [ClozeCard(
-                text="The {{c1::answer}} is correct.",
-                source_chunk_id=chunk_id,
-            )]
+            return [
+                ClozeCard(
+                    text="The {{c1::answer}} is correct.",
+                    source_chunk_id=chunk_id,
+                )
+            ]
 
         mock_cloze_generator.generate.side_effect = generate_with_failure
 

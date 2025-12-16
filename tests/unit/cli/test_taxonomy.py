@@ -19,35 +19,70 @@ def mock_repo():
     mock = MagicMock()
     mock.initialize = AsyncMock()
     mock.close = AsyncMock()
-    mock.list_exams = AsyncMock(return_value=[
-        {"id": "MCAT", "name": "MCAT", "version": "2024"},
-        {"id": "USMLE_STEP1", "name": "USMLE Step 1", "version": "2024"},
-    ])
-    mock.list_nodes_by_exam = AsyncMock(return_value=[
-        {"id": "MCAT_FC1", "title": "Biomolecules", "node_type": "foundational_concept", "exam_id": "MCAT"},
-        {"id": "MCAT_1A", "title": "Proteins", "node_type": "content_category", "exam_id": "MCAT", "parent_id": "MCAT_FC1"},
-    ])
-    mock.list_nodes_by_type = AsyncMock(return_value=[
-        {"id": "MCAT_FC1", "title": "Biomolecules", "node_type": "foundational_concept", "exam_id": "MCAT"},
-    ])
-    mock.search_nodes_by_keyword = AsyncMock(return_value=[
-        {"id": "MCAT_FC1", "title": "Biomolecules", "node_type": "foundational_concept", "exam_id": "MCAT"},
-    ])
-    mock.get_node = AsyncMock(return_value={
-        "id": "MCAT_FC1",
-        "title": "Biomolecules",
-        "node_type": "foundational_concept",
-        "exam_id": "MCAT",
-        "code": "FC1",
-    })
+    mock.list_exams = AsyncMock(
+        return_value=[
+            {"id": "MCAT", "name": "MCAT", "version": "2024"},
+            {"id": "USMLE_STEP1", "name": "USMLE Step 1", "version": "2024"},
+        ]
+    )
+    mock.list_nodes_by_exam = AsyncMock(
+        return_value=[
+            {
+                "id": "MCAT_FC1",
+                "title": "Biomolecules",
+                "node_type": "foundational_concept",
+                "exam_id": "MCAT",
+            },
+            {
+                "id": "MCAT_1A",
+                "title": "Proteins",
+                "node_type": "content_category",
+                "exam_id": "MCAT",
+                "parent_id": "MCAT_FC1",
+            },
+        ]
+    )
+    mock.list_nodes_by_type = AsyncMock(
+        return_value=[
+            {
+                "id": "MCAT_FC1",
+                "title": "Biomolecules",
+                "node_type": "foundational_concept",
+                "exam_id": "MCAT",
+            },
+        ]
+    )
+    mock.search_nodes_by_keyword = AsyncMock(
+        return_value=[
+            {
+                "id": "MCAT_FC1",
+                "title": "Biomolecules",
+                "node_type": "foundational_concept",
+                "exam_id": "MCAT",
+            },
+        ]
+    )
+    mock.get_node = AsyncMock(
+        return_value={
+            "id": "MCAT_FC1",
+            "title": "Biomolecules",
+            "node_type": "foundational_concept",
+            "exam_id": "MCAT",
+            "code": "FC1",
+        }
+    )
     mock.get_path = AsyncMock(return_value=["Biomolecules"])
-    mock.get_keywords_for_node = AsyncMock(return_value=[
-        {"keyword": "protein", "keyword_type": "general"},
-        {"keyword": "enzyme", "keyword_type": "general"},
-    ])
-    mock.get_children = AsyncMock(return_value=[
-        {"id": "MCAT_1A", "title": "Proteins", "node_type": "content_category"},
-    ])
+    mock.get_keywords_for_node = AsyncMock(
+        return_value=[
+            {"keyword": "protein", "keyword_type": "general"},
+            {"keyword": "enzyme", "keyword_type": "general"},
+        ]
+    )
+    mock.get_children = AsyncMock(
+        return_value=[
+            {"id": "MCAT_1A", "title": "Proteins", "node_type": "content_category"},
+        ]
+    )
     mock.get_descendants = AsyncMock(return_value=[])
     return mock
 
@@ -67,25 +102,40 @@ class TestTaxonomyBuildCommand:
         mcat_json = tmp_path / "mcat.json"
         usmle_json = tmp_path / "usmle.json"
 
-        mcat_json.write_text(json.dumps({
-            "exam": "MCAT",
-            "version": "2024",
-            "foundational_concepts": [
-                {"id": "FC1", "title": "Test", "keywords": ["test"], "categories": []},
-            ],
-        }))
-        usmle_json.write_text(json.dumps({
-            "exam": "USMLE_STEP1",
-            "version": "2024",
-            "systems": [],
-        }))
+        mcat_json.write_text(
+            json.dumps(
+                {
+                    "exam": "MCAT",
+                    "version": "2024",
+                    "foundational_concepts": [
+                        {"id": "FC1", "title": "Test", "keywords": ["test"], "categories": []},
+                    ],
+                }
+            )
+        )
+        usmle_json.write_text(
+            json.dumps(
+                {
+                    "exam": "USMLE_STEP1",
+                    "version": "2024",
+                    "systems": [],
+                }
+            )
+        )
 
-        result = runner.invoke(app, [
-            "taxonomy", "build",
-            "--db", str(db_path),
-            "--mcat", str(mcat_json),
-            "--usmle", str(usmle_json),
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "taxonomy",
+                "build",
+                "--db",
+                str(db_path),
+                "--mcat",
+                str(mcat_json),
+                "--usmle",
+                str(usmle_json),
+            ],
+        )
 
         assert result.exit_code == 0
         assert db_path.exists()

@@ -31,8 +31,12 @@ class Job:
             status=JobStatus(row["status"]),
             progress=row["progress"],
             error=row.get("error"),
-            created_at=datetime.fromisoformat(row["created_at"]) if isinstance(row["created_at"], str) else row["created_at"],
-            updated_at=datetime.fromisoformat(row["updated_at"]) if isinstance(row["updated_at"], str) else row["updated_at"],
+            created_at=datetime.fromisoformat(row["created_at"])
+            if isinstance(row["created_at"], str)
+            else row["created_at"],
+            updated_at=datetime.fromisoformat(row["updated_at"])
+            if isinstance(row["updated_at"], str)
+            else row["updated_at"],
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -42,6 +46,10 @@ class Job:
             "status": self.status.value,
             "progress": self.progress,
             "error": self.error,
-            "created_at": self.created_at.isoformat() if isinstance(self.created_at, datetime) else self.created_at,
-            "updated_at": self.updated_at.isoformat() if isinstance(self.updated_at, datetime) else self.updated_at,
+            "created_at": self.created_at.isoformat()
+            if isinstance(self.created_at, datetime)
+            else self.created_at,
+            "updated_at": self.updated_at.isoformat()
+            if isinstance(self.updated_at, datetime)
+            else self.updated_at,
         }

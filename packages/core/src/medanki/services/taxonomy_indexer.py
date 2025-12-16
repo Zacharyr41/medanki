@@ -55,10 +55,10 @@ class TaxonomyIndexer:
         path = self._taxonomy_dir / "usmle_step1.json"
         if not path.exists():
             return []
-        
+
         with open(path) as f:
             data = json.load(f)
-        
+
         topics = []
         for system in data.get("systems", []):
             sys_topic = {
@@ -69,7 +69,7 @@ class TaxonomyIndexer:
                 "exam_type": "USMLE_STEP1",
             }
             topics.append(sys_topic)
-            
+
             for topic in system.get("topics", []):
                 sub_topic = {
                     "topic_id": topic["id"],
@@ -79,17 +79,17 @@ class TaxonomyIndexer:
                     "exam_type": "USMLE_STEP1",
                 }
                 topics.append(sub_topic)
-        
+
         return topics
 
     def _load_mcat_topics(self) -> list[dict]:
         path = self._taxonomy_dir / "mcat.json"
         if not path.exists():
             return []
-        
+
         with open(path) as f:
             data = json.load(f)
-        
+
         topics = []
         for fc in data.get("foundational_concepts", []):
             fc_topic = {
@@ -100,7 +100,7 @@ class TaxonomyIndexer:
                 "exam_type": "MCAT",
             }
             topics.append(fc_topic)
-            
+
             for cat in fc.get("categories", []):
                 cat_topic = {
                     "topic_id": cat["id"],
@@ -110,7 +110,7 @@ class TaxonomyIndexer:
                     "exam_type": "MCAT",
                 }
                 topics.append(cat_topic)
-        
+
         return topics
 
     def _create_searchable_text(self, topic: dict) -> str:
@@ -129,7 +129,7 @@ class TaxonomyIndexer:
             topics = self._load_mcat_topics()
         else:
             return 0
-        
+
         collection = self._client.collections.get(COLLECTION_NAME)
 
         objects = []
@@ -154,7 +154,7 @@ class TaxonomyIndexer:
 
         if objects:
             collection.data.insert_many(objects)
-        
+
         return len(objects)
 
     def search(
@@ -165,9 +165,9 @@ class TaxonomyIndexer:
         limit: int = 10,
     ) -> list[dict]:
         collection = self._client.collections.get(COLLECTION_NAME)
-        
+
         query_embedding = self._embed_text(query)
-        
+
         results = collection.query.hybrid(
             query=query,
             vector=query_embedding,
@@ -175,21 +175,23 @@ class TaxonomyIndexer:
             limit=limit,
             return_metadata=["score"],
         )
-        
+
         matches = []
         for obj in results.objects:
             if exam_type and obj.properties.get("exam_type") != exam_type:
                 continue
-            
-            matches.append({
-                "topic_id": obj.properties.get("topic_id"),
-                "title": obj.properties.get("title"),
-                "path": obj.properties.get("path"),
-                "keywords": obj.properties.get("keywords", []),
-                "exam_type": obj.properties.get("exam_type"),
-                "score": getattr(obj.metadata, "score", 0.0),
-            })
-        
+
+            matches.append(
+                {
+                    "topic_id": obj.properties.get("topic_id"),
+                    "title": obj.properties.get("title"),
+                    "path": obj.properties.get("path"),
+                    "keywords": obj.properties.get("keywords", []),
+                    "exam_type": obj.properties.get("exam_type"),
+                    "score": getattr(obj.metadata, "score", 0.0),
+                }
+            )
+
         return matches
 
     def clear_collection(self) -> None:

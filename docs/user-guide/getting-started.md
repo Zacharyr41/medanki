@@ -10,21 +10,24 @@ MedAnki converts your medical study materials into high-quality Anki flashcards,
 
 **CLI:** Install with `pip install medanki-cli`
 
-### 2. Upload Your First File
+### 2. Choose Your Input Method
 
-Supported formats:
-- **PDF:** Textbooks, lecture slides, study guides
-- **Markdown:** Notes, summaries
-- **TXT:** Plain text files
-- **DOCX:** Word documents
+MedAnki offers two ways to generate flashcards:
 
-Simply drag and drop your file onto the upload area, or click to browse.
+**Option A: Upload a File**
+- Drag and drop or click to browse
+- Supported formats: PDF, Markdown, TXT, DOCX
+
+**Option B: Describe Topics**
+- Click "Describe Topics" tab
+- Enter what you want to study (e.g., "cardiac electrophysiology")
+- Great for learning new topics without existing materials
 
 ### 3. Configure Options
 
 - **Target Exam:** Choose MCAT or USMLE Step 1
 - **Card Types:** Cloze deletions, clinical vignettes, or both
-- **Max Cards per Chunk:** How many cards to generate per content section (1-50)
+- **Total Cards:** How many cards to generate (1-100, default 20)
 
 ### 4. Generate and Download
 
@@ -35,6 +38,28 @@ Click "Generate Flashcards" and wait for processing. You'll see:
 
 Once complete, preview your cards and download the .apkg file.
 
+## Card Preview Features
+
+After generation completes, you can preview and filter your cards:
+
+### Filtering Cards
+
+Use the **Type Filter** dropdown to view specific card types:
+- **All Types:** Shows all generated cards
+- **Cloze:** Fill-in-the-blank style cards
+- **Vignette:** Clinical case-based questions
+- **Basic Q&A:** Simple question and answer format
+
+The filter dropdown remains visible even when no cards match your selection, allowing you to easily switch between filters.
+
+### Understanding Card Tags
+
+Each card displays taxonomy tags showing which topic it covers:
+- **MCAT cards:** Show the foundational concept and content category (e.g., "Structure and function of proteins")
+- **USMLE cards:** Show the organ system and topic (e.g., "Biochemistry and Molecular Biology")
+
+Tags help you identify which exam topics each card addresses, making it easier to organize your study.
+
 ### 5. Import to Anki
 
 1. Open Anki
@@ -44,6 +69,7 @@ Once complete, preview your cards and download the .apkg file.
 
 ## What's Next?
 
+- [Topic-Based Generation](./topic-input.md)
 - [Supported File Formats](./file-formats.md)
 - [Understanding Card Types](./card-types.md)
 - [Customizing Generation](./customization.md)

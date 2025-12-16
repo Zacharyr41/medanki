@@ -310,7 +310,12 @@ class TestClinicalRealism:
         )
 
         stem = cards[0].stem.lower()
-        has_exam = "examination" in stem or "exam" in stem or "tenderness" in stem or "auscultation" in stem
+        has_exam = (
+            "examination" in stem
+            or "exam" in stem
+            or "tenderness" in stem
+            or "auscultation" in stem
+        )
         assert has_exam, "Stem should include physical examination findings when appropriate"
 
     @pytest.mark.asyncio

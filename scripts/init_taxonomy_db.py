@@ -24,12 +24,14 @@ async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
     """Load MCAT taxonomy from JSON."""
     data = load_mcat_taxonomy_sync(repo, json_path)
 
-    await repo.insert_exam({
-        "id": "MCAT",
-        "name": "Medical College Admission Test",
-        "version": data.get("version", "2024"),
-        "source_url": "https://aamc.org",
-    })
+    await repo.insert_exam(
+        {
+            "id": "MCAT",
+            "name": "Medical College Admission Test",
+            "version": data.get("version", "2024"),
+            "source_url": "https://aamc.org",
+        }
+    )
 
     nodes = []
     keywords = []
@@ -37,15 +39,17 @@ async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
 
     for fc in data.get("foundational_concepts", []):
         fc_id = f"MCAT_{fc['id']}"
-        nodes.append({
-            "id": fc_id,
-            "exam_id": "MCAT",
-            "node_type": "foundational_concept",
-            "code": fc["id"],
-            "title": fc["title"],
-            "parent_id": None,
-            "sort_order": sort_order,
-        })
+        nodes.append(
+            {
+                "id": fc_id,
+                "exam_id": "MCAT",
+                "node_type": "foundational_concept",
+                "code": fc["id"],
+                "title": fc["title"],
+                "parent_id": None,
+                "sort_order": sort_order,
+            }
+        )
         sort_order += 1
 
         for kw in fc.get("keywords", []):
@@ -53,15 +57,17 @@ async def load_mcat_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
 
         for cat in fc.get("categories", []):
             cat_id = f"MCAT_{cat['id']}"
-            nodes.append({
-                "id": cat_id,
-                "exam_id": "MCAT",
-                "node_type": "content_category",
-                "code": cat["id"],
-                "title": cat["title"],
-                "parent_id": fc_id,
-                "sort_order": sort_order,
-            })
+            nodes.append(
+                {
+                    "id": cat_id,
+                    "exam_id": "MCAT",
+                    "node_type": "content_category",
+                    "code": cat["id"],
+                    "title": cat["title"],
+                    "parent_id": fc_id,
+                    "sort_order": sort_order,
+                }
+            )
             sort_order += 1
 
             for kw in cat.get("keywords", []):
@@ -84,12 +90,14 @@ async def load_usmle_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
     """Load USMLE taxonomy from JSON."""
     data = load_usmle_taxonomy_sync(json_path)
 
-    await repo.insert_exam({
-        "id": "USMLE_STEP1",
-        "name": "United States Medical Licensing Examination Step 1",
-        "version": data.get("version", "2024"),
-        "source_url": "https://nbme.org",
-    })
+    await repo.insert_exam(
+        {
+            "id": "USMLE_STEP1",
+            "name": "United States Medical Licensing Examination Step 1",
+            "version": data.get("version", "2024"),
+            "source_url": "https://nbme.org",
+        }
+    )
 
     nodes = []
     keywords = []
@@ -97,15 +105,17 @@ async def load_usmle_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
 
     for system in data.get("systems", []):
         sys_id = f"USMLE_{system['id']}"
-        nodes.append({
-            "id": sys_id,
-            "exam_id": "USMLE_STEP1",
-            "node_type": "organ_system",
-            "code": system["id"],
-            "title": system["title"],
-            "parent_id": None,
-            "sort_order": sort_order,
-        })
+        nodes.append(
+            {
+                "id": sys_id,
+                "exam_id": "USMLE_STEP1",
+                "node_type": "organ_system",
+                "code": system["id"],
+                "title": system["title"],
+                "parent_id": None,
+                "sort_order": sort_order,
+            }
+        )
         sort_order += 1
 
         for kw in system.get("keywords", []):
@@ -113,15 +123,17 @@ async def load_usmle_taxonomy(repo: TaxonomyRepository, json_path: Path) -> int:
 
         for topic in system.get("topics", []):
             topic_id = f"USMLE_{topic['id']}"
-            nodes.append({
-                "id": topic_id,
-                "exam_id": "USMLE_STEP1",
-                "node_type": "topic",
-                "code": topic["id"],
-                "title": topic["title"],
-                "parent_id": sys_id,
-                "sort_order": sort_order,
-            })
+            nodes.append(
+                {
+                    "id": topic_id,
+                    "exam_id": "USMLE_STEP1",
+                    "node_type": "topic",
+                    "code": topic["id"],
+                    "title": topic["title"],
+                    "parent_id": sys_id,
+                    "sort_order": sort_order,
+                }
+            )
             sort_order += 1
 
             for kw in topic.get("keywords", []):

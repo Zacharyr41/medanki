@@ -73,11 +73,13 @@ async def repo(db_path: Path) -> AsyncGenerator[TaxonomyRepository, None]:
 
 
 @pytest.fixture
-def taxonomy_service(db_path: Path, repo: TaxonomyRepository):
+async def taxonomy_service(db_path: Path, repo: TaxonomyRepository) -> AsyncGenerator:
     """Create TaxonomyServiceV2 instance."""
     from medanki.services.taxonomy_v2 import TaxonomyServiceV2
 
-    return TaxonomyServiceV2(db_path)
+    service = TaxonomyServiceV2(db_path)
+    yield service
+    await service.close()
 
 
 class MockVectorStore:

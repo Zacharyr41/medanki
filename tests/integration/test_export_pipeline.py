@@ -19,6 +19,7 @@ from medanki.export.tags import TagBuilder
 # Test Data Classes
 # ============================================================================
 
+
 class MockClozeCard:
     """Mock cloze card for testing."""
 
@@ -58,6 +59,7 @@ class MockVignetteCard:
 # ============================================================================
 # Deck Building Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestDeckBuilding:
@@ -150,6 +152,7 @@ class TestDeckBuilding:
 # APKG Export Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestAPKGExport:
     """Test APKG file export."""
@@ -182,9 +185,7 @@ class TestAPKGExport:
         """Test that APKG file is a valid ZIP archive."""
         builder = DeckBuilder(name="MedAnki::Validation")
 
-        builder.add_cloze_card(
-            MockClozeCard(text="Test {{c1::card}}")
-        )
+        builder.add_cloze_card(MockClozeCard(text="Test {{c1::card}}"))
 
         deck = builder.build()
         exporter = APKGExporter()
@@ -196,22 +197,18 @@ class TestAPKGExport:
         assert zipfile.is_zipfile(output_path)
 
         # Should contain collection.anki2 database
-        with zipfile.ZipFile(output_path, 'r') as zf:
+        with zipfile.ZipFile(output_path, "r") as zf:
             names = zf.namelist()
             assert "collection.anki2" in names
 
     def test_export_multiple_decks(self, temp_output_dir: Path) -> None:
         """Test exporting multiple decks to single APKG."""
         deck1_builder = DeckBuilder(name="MedAnki::Cardiology")
-        deck1_builder.add_cloze_card(
-            MockClozeCard(text="Cardiology {{c1::card}}")
-        )
+        deck1_builder.add_cloze_card(MockClozeCard(text="Cardiology {{c1::card}}"))
         deck1 = deck1_builder.build()
 
         deck2_builder = DeckBuilder(name="MedAnki::Pharmacology")
-        deck2_builder.add_cloze_card(
-            MockClozeCard(text="Pharmacology {{c1::card}}")
-        )
+        deck2_builder.add_cloze_card(MockClozeCard(text="Pharmacology {{c1::card}}"))
         deck2 = deck2_builder.build()
 
         exporter = APKGExporter()
@@ -238,6 +235,7 @@ class TestAPKGExport:
 # ============================================================================
 # Tag Building Tests
 # ============================================================================
+
 
 @pytest.mark.integration
 class TestTagBuilding:
@@ -306,6 +304,7 @@ class TestTagBuilding:
 # Tag Correctness Tests (AnKing Format)
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestTagCorrectness:
     """Test that tags follow AnKing format conventions."""
@@ -372,6 +371,7 @@ class TestTagCorrectness:
 # Full Export Pipeline Tests
 # ============================================================================
 
+
 @pytest.mark.integration
 class TestFullExportPipeline:
     """Test the complete export pipeline."""
@@ -428,7 +428,7 @@ class TestFullExportPipeline:
         assert zipfile.is_zipfile(output_path)
 
         # Check contents
-        with zipfile.ZipFile(output_path, 'r') as zf:
+        with zipfile.ZipFile(output_path, "r") as zf:
             assert "collection.anki2" in zf.namelist()
 
     def test_export_preserves_card_content(self, temp_output_dir: Path) -> None:
@@ -437,9 +437,7 @@ class TestFullExportPipeline:
 
         original_text = "The {{c1::mitochondria}} is the powerhouse of the cell."
 
-        deck_builder.add_cloze_card(
-            MockClozeCard(text=original_text)
-        )
+        deck_builder.add_cloze_card(MockClozeCard(text=original_text))
 
         deck = deck_builder.build()
 
@@ -455,9 +453,7 @@ class TestFullExportPipeline:
         # Include various unicode characters
         unicode_text = "The patient's temperature was 38.5 degrees C."
 
-        deck_builder.add_cloze_card(
-            MockClozeCard(text=f"{{{{c1::{unicode_text}}}}}")
-        )
+        deck_builder.add_cloze_card(MockClozeCard(text=f"{{{{c1::{unicode_text}}}}}"))
 
         deck = deck_builder.build()
         exporter = APKGExporter()

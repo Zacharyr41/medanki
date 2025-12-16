@@ -40,7 +40,113 @@ async def _send_progress(
     )
 
 
-async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
+async def _process_topic_job(websocket: WebSocket, job: dict[str, Any]) -> None:
+    """Process a job that generates cards from a topic description."""
+    topic_text = job.get("topic_text", "")
+    if not topic_text:
+        raise ValueError("No topic text provided")
+
+    await _send_progress(websocket, job, 10, "generating")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    cards: list[dict[str, Any]] = []
+
+    exam = job.get("exam", "USMLE_STEP1")
+    card_types_str = job.get("card_types", "cloze,vignette") or "cloze,vignette"
+    enabled_types = {t.strip().lower() for t in card_types_str.split(",")}
+    generate_cloze = "cloze" in enabled_types
+    generate_vignette = "vignette" in enabled_types
+    max_cards = job.get("max_cards", 20) or 20
+
+    if api_key:
+        from uuid import uuid4
+
+        from medanki.services.llm import ClaudeClient
+
+        client = ClaudeClient(api_key=api_key)
+
+        await _send_progress(websocket, job, 30, "generating")
+
+        cloze_count = max_cards if generate_cloze else 0
+        vignette_count = min(max_cards // 4, 5) if generate_vignette else 0
+
+        if generate_cloze and cloze_count > 0:
+            try:
+                topic_cards = await client.generate_cards_from_topic(
+                    topic_prompt=topic_text,
+                    count=cloze_count,
+                    exam_type=exam,
+                )
+                await _send_progress(websocket, job, 60, "generating")
+
+                for card_data in topic_cards:
+                    cards.append(
+                        {
+                            "id": str(uuid4()),
+                            "type": "cloze",
+                            "text": card_data.get("text", ""),
+                            "topic_id": exam,
+                            "topic_title": card_data.get("topic", topic_text[:50]),
+                            "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                        }
+                    )
+            except Exception as e:
+                print(f"Topic cloze generation error: {e}")
+
+        if generate_vignette and vignette_count > 0:
+            await _send_progress(websocket, job, 75, "generating")
+            try:
+                from medanki.generation.vignette import VignetteGenerator
+
+                vignette_generator = VignetteGenerator(llm_client=client)
+                vignettes = await vignette_generator.generate(
+                    content=f"Create clinical vignettes about: {topic_text}",
+                    source_chunk_id=uuid4(),
+                    topic_id=exam,
+                    num_cards=vignette_count,
+                )
+                for vcard in vignettes:
+                    options_text = " | ".join(f"{opt.letter}. {opt.text}" for opt in vcard.options)
+                    cards.append(
+                        {
+                            "id": str(vcard.id),
+                            "type": "vignette",
+                            "text": f"{vcard.stem}\n\n{vcard.question}",
+                            "front": f"{vcard.stem}\n\n{vcard.question}\n\n{options_text}",
+                            "answer": vcard.answer,
+                            "explanation": vcard.explanation,
+                            "topic_id": exam,
+                            "topic_title": topic_text[:50],
+                            "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                        }
+                    )
+            except Exception as e:
+                print(f"Topic vignette generation error: {e}")
+    else:
+        from uuid import uuid4
+
+        for _ in range(min(max_cards, 5)):
+            cards.append(
+                {
+                    "id": str(uuid4()),
+                    "type": "cloze",
+                    "text": f"{{{{c1::Sample concept}}}} related to {topic_text[:30]}...",
+                    "topic_id": exam,
+                    "topic_title": topic_text[:50],
+                    "source_chunk": f"Generated from topic: {topic_text[:200]}",
+                }
+            )
+
+    await _send_progress(websocket, job, 90, "exporting")
+
+    job["cards"] = cards
+    job["cards_generated"] = len(cards)
+
+    await _send_progress(websocket, job, 100, "exporting")
+
+
+async def _process_file_job(websocket: WebSocket, job: dict[str, Any]) -> None:
+    """Process a job that generates cards from an uploaded file."""
     file_path = job.get("file_path")
     if not file_path or not Path(file_path).exists():
         raise ValueError(f"File not found: {file_path}")
@@ -287,6 +393,16 @@ async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
     await _send_progress(websocket, job, 100, "exporting")
 
 
+async def _process_job(websocket: WebSocket, job: dict[str, Any]) -> None:
+    """Dispatch job processing based on input type."""
+    input_type = job.get("input_type", "file")
+
+    if input_type == "topic":
+        await _process_topic_job(websocket, job)
+    else:
+        await _process_file_job(websocket, job)
+
+
 @router.websocket("/api/ws/{job_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -314,7 +430,7 @@ async def websocket_endpoint(
             return
 
         job["status"] = "processing"
-        job["stage"] = "ingesting"
+        job["stage"] = "generating" if job.get("input_type") == "topic" else "ingesting"
         job["progress"] = 0
 
         await _process_job(websocket, job)

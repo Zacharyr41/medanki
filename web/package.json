@@ -16,6 +16,7 @@
     "test:e2e:debug": "cd ../tests/e2e && npm run test:debug"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.2",
     "@tanstack/react-query": "^5.90.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -23,8 +24,8 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
     "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.49.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

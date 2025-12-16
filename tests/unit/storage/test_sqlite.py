@@ -90,25 +90,29 @@ class TestDocumentCRUD:
 
     def test_insert_document(self, store):
         """Creates document record."""
-        doc_id = asyncio.run(store.insert_document(
-            id="doc_001",
-            source_path="/path/to/file.pdf",
-            content_type="pdf_textbook",
-            raw_text="Sample medical content.",
-            metadata={"page_count": 10}
-        ))
+        doc_id = asyncio.run(
+            store.insert_document(
+                id="doc_001",
+                source_path="/path/to/file.pdf",
+                content_type="pdf_textbook",
+                raw_text="Sample medical content.",
+                metadata={"page_count": 10},
+            )
+        )
 
         assert doc_id == "doc_001"
 
     def test_get_document_by_id(self, store):
         """Retrieves document by ID."""
-        asyncio.run(store.insert_document(
-            id="doc_002",
-            source_path="/path/to/file.pdf",
-            content_type="pdf_textbook",
-            raw_text="Medical content here.",
-            metadata={"page_count": 5}
-        ))
+        asyncio.run(
+            store.insert_document(
+                id="doc_002",
+                source_path="/path/to/file.pdf",
+                content_type="pdf_textbook",
+                raw_text="Medical content here.",
+                metadata={"page_count": 5},
+            )
+        )
 
         doc = asyncio.run(store.get_document("doc_002"))
 
@@ -119,20 +123,24 @@ class TestDocumentCRUD:
 
     def test_list_documents(self, store):
         """Lists all documents."""
-        asyncio.run(store.insert_document(
-            id="doc_a",
-            source_path="/a.pdf",
-            content_type="pdf_textbook",
-            raw_text="Content A",
-            metadata={}
-        ))
-        asyncio.run(store.insert_document(
-            id="doc_b",
-            source_path="/b.pdf",
-            content_type="pdf_slides",
-            raw_text="Content B",
-            metadata={}
-        ))
+        asyncio.run(
+            store.insert_document(
+                id="doc_a",
+                source_path="/a.pdf",
+                content_type="pdf_textbook",
+                raw_text="Content A",
+                metadata={},
+            )
+        )
+        asyncio.run(
+            store.insert_document(
+                id="doc_b",
+                source_path="/b.pdf",
+                content_type="pdf_slides",
+                raw_text="Content B",
+                metadata={},
+            )
+        )
 
         docs = asyncio.run(store.list_documents())
 
@@ -143,30 +151,36 @@ class TestDocumentCRUD:
 
     def test_delete_document_cascades(self, store):
         """Deleting document cascades to related chunks and cards."""
-        asyncio.run(store.insert_document(
-            id="doc_cascade",
-            source_path="/cascade.pdf",
-            content_type="pdf_textbook",
-            raw_text="Cascade test content",
-            metadata={}
-        ))
-        asyncio.run(store.insert_chunk(
-            id="chunk_cascade",
-            document_id="doc_cascade",
-            text="Chunk text",
-            start_char=0,
-            end_char=10,
-            token_count=5,
-            section_path=[]
-        ))
-        asyncio.run(store.insert_card(
-            id="card_cascade",
-            document_id="doc_cascade",
-            chunk_id="chunk_cascade",
-            card_type="cloze",
-            content="{{c1::test}}",
-            tags=["test"]
-        ))
+        asyncio.run(
+            store.insert_document(
+                id="doc_cascade",
+                source_path="/cascade.pdf",
+                content_type="pdf_textbook",
+                raw_text="Cascade test content",
+                metadata={},
+            )
+        )
+        asyncio.run(
+            store.insert_chunk(
+                id="chunk_cascade",
+                document_id="doc_cascade",
+                text="Chunk text",
+                start_char=0,
+                end_char=10,
+                token_count=5,
+                section_path=[],
+            )
+        )
+        asyncio.run(
+            store.insert_card(
+                id="card_cascade",
+                document_id="doc_cascade",
+                chunk_id="chunk_cascade",
+                card_type="cloze",
+                content="{{c1::test}}",
+                tags=["test"],
+            )
+        )
 
         asyncio.run(store.delete_document("doc_cascade"))
 
@@ -187,56 +201,66 @@ class TestCardCRUD:
         db_path = tmp_path / "test.db"
         s = SQLiteStore(db_path)
         asyncio.run(s.initialize())
-        asyncio.run(s.insert_document(
-            id="doc_cards",
-            source_path="/cards.pdf",
-            content_type="pdf_textbook",
-            raw_text="Cards test content",
-            metadata={}
-        ))
-        asyncio.run(s.insert_chunk(
-            id="chunk_cards",
-            document_id="doc_cards",
-            text="Chunk for cards",
-            start_char=0,
-            end_char=15,
-            token_count=3,
-            section_path=["Section1"]
-        ))
+        asyncio.run(
+            s.insert_document(
+                id="doc_cards",
+                source_path="/cards.pdf",
+                content_type="pdf_textbook",
+                raw_text="Cards test content",
+                metadata={},
+            )
+        )
+        asyncio.run(
+            s.insert_chunk(
+                id="chunk_cards",
+                document_id="doc_cards",
+                text="Chunk for cards",
+                start_char=0,
+                end_char=15,
+                token_count=3,
+                section_path=["Section1"],
+            )
+        )
         yield s
         asyncio.run(s.close())
 
     def test_insert_card(self, store):
         """Creates card record."""
-        card_id = asyncio.run(store.insert_card(
-            id="card_001",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content="The heart has {{c1::four}} chambers.",
-            tags=["cardiology", "anatomy"]
-        ))
+        card_id = asyncio.run(
+            store.insert_card(
+                id="card_001",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="cloze",
+                content="The heart has {{c1::four}} chambers.",
+                tags=["cardiology", "anatomy"],
+            )
+        )
 
         assert card_id == "card_001"
 
     def test_get_cards_by_document(self, store):
         """Filters cards by document."""
-        asyncio.run(store.insert_card(
-            id="card_doc_1",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content="Card 1 content",
-            tags=["tag1"]
-        ))
-        asyncio.run(store.insert_card(
-            id="card_doc_2",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="vignette",
-            content="Card 2 content",
-            tags=["tag2"]
-        ))
+        asyncio.run(
+            store.insert_card(
+                id="card_doc_1",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="cloze",
+                content="Card 1 content",
+                tags=["tag1"],
+            )
+        )
+        asyncio.run(
+            store.insert_card(
+                id="card_doc_2",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="vignette",
+                content="Card 2 content",
+                tags=["tag2"],
+            )
+        )
 
         cards = asyncio.run(store.get_cards_by_document("doc_cards"))
 
@@ -244,22 +268,26 @@ class TestCardCRUD:
 
     def test_get_cards_by_topic(self, store):
         """Filters cards by topic tag."""
-        asyncio.run(store.insert_card(
-            id="card_topic_1",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content="Cardiology content",
-            tags=["cardiology", "physiology"]
-        ))
-        asyncio.run(store.insert_card(
-            id="card_topic_2",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content="Neurology content",
-            tags=["neurology"]
-        ))
+        asyncio.run(
+            store.insert_card(
+                id="card_topic_1",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="cloze",
+                content="Cardiology content",
+                tags=["cardiology", "physiology"],
+            )
+        )
+        asyncio.run(
+            store.insert_card(
+                id="card_topic_2",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="cloze",
+                content="Neurology content",
+                tags=["neurology"],
+            )
+        )
 
         cardio_cards = asyncio.run(store.get_cards_by_topic("cardiology"))
 
@@ -268,14 +296,16 @@ class TestCardCRUD:
 
     def test_update_card_status(self, store):
         """Changes validation status."""
-        asyncio.run(store.insert_card(
-            id="card_status",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content="Status test",
-            tags=[]
-        ))
+        asyncio.run(
+            store.insert_card(
+                id="card_status",
+                document_id="doc_cards",
+                chunk_id="chunk_cards",
+                card_type="cloze",
+                content="Status test",
+                tags=[],
+            )
+        )
 
         asyncio.run(store.update_card_status("card_status", "valid"))
 
@@ -287,24 +317,28 @@ class TestCardCRUD:
         """No duplicate content allowed."""
         content = "Duplicate content {{c1::test}}"
 
-        asyncio.run(store.insert_card(
-            id="card_dup_1",
-            document_id="doc_cards",
-            chunk_id="chunk_cards",
-            card_type="cloze",
-            content=content,
-            tags=[]
-        ))
-
-        with pytest.raises(Exception):
-            asyncio.run(store.insert_card(
-                id="card_dup_2",
+        asyncio.run(
+            store.insert_card(
+                id="card_dup_1",
                 document_id="doc_cards",
                 chunk_id="chunk_cards",
                 card_type="cloze",
                 content=content,
-                tags=[]
-            ))
+                tags=[],
+            )
+        )
+
+        with pytest.raises(Exception):
+            asyncio.run(
+                store.insert_card(
+                    id="card_dup_2",
+                    document_id="doc_cards",
+                    chunk_id="chunk_cards",
+                    card_type="cloze",
+                    content=content,
+                    tags=[],
+                )
+            )
 
 
 class TestJobTracking:
@@ -315,22 +349,21 @@ class TestJobTracking:
         db_path = tmp_path / "test.db"
         s = SQLiteStore(db_path)
         asyncio.run(s.initialize())
-        asyncio.run(s.insert_document(
-            id="doc_jobs",
-            source_path="/jobs.pdf",
-            content_type="pdf_textbook",
-            raw_text="Jobs test content",
-            metadata={}
-        ))
+        asyncio.run(
+            s.insert_document(
+                id="doc_jobs",
+                source_path="/jobs.pdf",
+                content_type="pdf_textbook",
+                raw_text="Jobs test content",
+                metadata={},
+            )
+        )
         yield s
         asyncio.run(s.close())
 
     def test_create_job(self, store):
         """Creates job with pending status."""
-        job_id = asyncio.run(store.create_job(
-            id="job_001",
-            document_id="doc_jobs"
-        ))
+        job_id = asyncio.run(store.create_job(id="job_001", document_id="doc_jobs"))
 
         assert job_id == "job_001"
         job = asyncio.run(store.get_job("job_001"))
@@ -407,13 +440,14 @@ class TestAsyncOperations:
 
     def test_async_insert(self, store):
         """Async insert works."""
+
         async def run_insert():
             return await store.insert_document(
                 id="doc_async",
                 source_path="/async.pdf",
                 content_type="pdf_textbook",
                 raw_text="Async content",
-                metadata={}
+                metadata={},
             )
 
         doc_id = asyncio.run(run_insert())
@@ -421,13 +455,14 @@ class TestAsyncOperations:
 
     def test_async_query(self, store):
         """Async query works."""
+
         async def run_test():
             await store.insert_document(
                 id="doc_query",
                 source_path="/query.pdf",
                 content_type="pdf_textbook",
                 raw_text="Query content",
-                metadata={}
+                metadata={},
             )
             return await store.get_document("doc_query")
 
@@ -437,16 +472,19 @@ class TestAsyncOperations:
 
     def test_connection_pool(self, store):
         """Reuses connections properly."""
+
         async def run_multiple_queries():
             tasks = []
             for i in range(10):
-                tasks.append(store.insert_document(
-                    id=f"doc_pool_{i}",
-                    source_path=f"/pool_{i}.pdf",
-                    content_type="pdf_textbook",
-                    raw_text=f"Pool content {i}",
-                    metadata={}
-                ))
+                tasks.append(
+                    store.insert_document(
+                        id=f"doc_pool_{i}",
+                        source_path=f"/pool_{i}.pdf",
+                        content_type="pdf_textbook",
+                        raw_text=f"Pool content {i}",
+                        metadata={},
+                    )
+                )
             await asyncio.gather(*tasks)
             return await store.list_documents()
 

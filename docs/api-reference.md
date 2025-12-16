@@ -4,6 +4,46 @@ Base URL: `http://localhost:8000`
 
 ## Endpoints
 
+### Upload / Create Job
+
+```
+POST /api/upload
+```
+
+Create a new card generation job from a file or topic description.
+
+**Content-Type:** `multipart/form-data`
+
+**Form Parameters**
+| Parameter   | Type    | Required | Description |
+|-------------|---------|----------|-------------|
+| file        | file    | No*      | File to process (PDF, MD, TXT, DOCX) |
+| topic_text  | string  | No*      | Topic description for AI generation |
+| exam        | string  | No       | Target exam: `USMLE Step 1`, `MCAT` |
+| card_types  | string  | No       | Comma-separated: `cloze`, `vignette` |
+| max_cards   | integer | No       | Total cards to generate (1-100, default 20) |
+
+*Either `file` or `topic_text` is required. If both provided, `file` takes precedence.
+
+**Response**
+```json
+{
+  "job_id": "abc123-def456",
+  "status": "pending",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Error Responses**
+| Code | Description |
+|------|-------------|
+| 400  | No file or topic_text provided |
+| 413  | File too large (>50MB) |
+| 415  | Unsupported file type |
+| 422  | Invalid exam value |
+
+---
+
 ### Health Check
 
 ```

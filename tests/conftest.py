@@ -146,10 +146,8 @@ def sample_document() -> Document:
         source_path="/data/lecture_01.pdf",
         content_type=ContentType.PDF_SLIDES,
         raw_text="Sample medical content about cardiovascular system.",
-        sections=[
-            Section(title="Introduction", level=1, start_char=0, end_char=50)
-        ],
-        metadata={"page_count": 10}
+        sections=[Section(title="Introduction", level=1, start_char=0, end_char=50)],
+        metadata={"page_count": 10},
     )
 
 
@@ -163,7 +161,7 @@ def sample_chunk() -> Chunk:
         end_char=57,
         token_count=12,
         page_number=1,
-        section_path=["Cardiovascular", "Physiology"]
+        section_path=["Cardiovascular", "Physiology"],
     )
 
 
@@ -448,11 +446,13 @@ reduce morbidity and mortality associated with these diseases.
             Section(title="Heart Anatomy", level=2, start_char=201, end_char=600),
             Section(title="Cardiac Cycle", level=2, start_char=601, end_char=1000),
             Section(title="Blood Pressure Regulation", level=2, start_char=1001, end_char=1400),
-            Section(title="Common Cardiovascular Conditions", level=2, start_char=1401, end_char=2500),
+            Section(
+                title="Common Cardiovascular Conditions", level=2, start_char=1401, end_char=2500
+            ),
             Section(title="Diagnostic Tests", level=2, start_char=2501, end_char=2800),
             Section(title="Pharmacological Treatments", level=2, start_char=2801, end_char=3500),
         ],
-        metadata={"page_count": 5}
+        metadata={"page_count": 5},
     )
 
 
@@ -465,7 +465,7 @@ def empty_document() -> Document:
         content_type=ContentType.PDF_TEXTBOOK,
         raw_text="",
         sections=[],
-        metadata={}
+        metadata={},
     )
 
 
@@ -515,7 +515,7 @@ Final conclusions and recommendations are presented here.
             Section(title="Discussion", level=1, start_char=381, end_char=450),
             Section(title="Conclusion", level=1, start_char=451, end_char=520),
         ],
-        metadata={}
+        metadata={},
     )
 
 
@@ -552,7 +552,7 @@ at 3.5 mg/dL. Liver function tests show AST at 25 U/L and ALT at 30 U/L.
         content_type=ContentType.PDF_NOTES,
         raw_text=text,
         sections=[],
-        metadata={}
+        metadata={},
     )
 
 
@@ -586,7 +586,7 @@ tolerated labetalol 100mg well but switched to metoprolol for convenience.
         content_type=ContentType.PDF_NOTES,
         raw_text=text,
         sections=[],
-        metadata={}
+        metadata={},
     )
 
 
@@ -620,7 +620,7 @@ no residual stenosis.
         content_type=ContentType.PDF_NOTES,
         raw_text=text,
         sections=[],
-        metadata={}
+        metadata={},
     )
 
 
@@ -633,7 +633,7 @@ def mock_taxonomy_service() -> MagicMock:
         "topics": [
             {"id": "cardio_001", "name": "Cardiovascular System"},
             {"id": "physio_001", "name": "Physiology"},
-        ]
+        ],
     }
     service.get_topics.return_value = [
         {"id": "cardio_001", "name": "Cardiovascular System"},
@@ -660,12 +660,12 @@ def sample_cardiology_chunk() -> Chunk:
         id="chunk_cardio_001",
         document_id="doc_001",
         text="The cardiac cycle consists of systole and diastole phases. During systole, "
-             "the ventricles contract and eject blood into the aorta and pulmonary artery.",
+        "the ventricles contract and eject blood into the aorta and pulmonary artery.",
         start_char=0,
         end_char=150,
         token_count=35,
         page_number=1,
-        section_path=["Cardiovascular", "Physiology"]
+        section_path=["Cardiovascular", "Physiology"],
     )
 
 
@@ -677,7 +677,7 @@ def sample_medical_chunk():
         embedding=[0.1] * 384,
         document_id="doc_001",
         exam_type="USMLE",
-        metadata={"page": 1, "source": "cardiology_textbook.pdf"}
+        metadata={"page": 1, "source": "cardiology_textbook.pdf"},
     )
 
 
@@ -688,12 +688,12 @@ def sample_biochemistry_chunk() -> Chunk:
         id="chunk_biochem_001",
         document_id="doc_002",
         text="Amino acids are the building blocks of proteins. Essential amino acids "
-             "cannot be synthesized by the body and must be obtained from diet.",
+        "cannot be synthesized by the body and must be obtained from diet.",
         start_char=0,
         end_char=140,
         token_count=30,
         page_number=1,
-        section_path=["Biochemistry", "Proteins"]
+        section_path=["Biochemistry", "Proteins"],
     )
 
 
@@ -708,7 +708,7 @@ def empty_chunk() -> Chunk:
         end_char=0,
         token_count=0,
         page_number=None,
-        section_path=[]
+        section_path=[],
     )
 
 
@@ -719,12 +719,12 @@ def sample_chf_chunk() -> Chunk:
         id="chunk_chf_001",
         document_id="doc_003",
         text="Patient presents with CHF symptoms including dyspnea on exertion, "
-             "bilateral lower extremity edema, and elevated JVP.",
+        "bilateral lower extremity edema, and elevated JVP.",
         start_char=0,
         end_char=120,
         token_count=25,
         page_number=1,
-        section_path=["Cardiology", "Heart Failure"]
+        section_path=["Cardiology", "Heart Failure"],
     )
 
 
@@ -735,12 +735,12 @@ def sample_dvt_chunk() -> Chunk:
         id="chunk_dvt_001",
         document_id="doc_004",
         text="DVT is a serious condition involving blood clot formation in deep veins. "
-             "Treatment includes anticoagulation with heparin or warfarin.",
+        "Treatment includes anticoagulation with heparin or warfarin.",
         start_char=0,
         end_char=140,
         token_count=28,
         page_number=1,
-        section_path=["Hematology", "Coagulation"]
+        section_path=["Hematology", "Coagulation"],
     )
 
 
@@ -753,7 +753,7 @@ def sample_chunks_with_embeddings():
             embedding=[0.1] * 384,
             document_id="doc_001",
             exam_type="USMLE",
-            metadata={"page": 1}
+            metadata={"page": 1},
         ),
         MedicalChunk(
             id=str(uuid4()),
@@ -761,7 +761,7 @@ def sample_chunks_with_embeddings():
             embedding=[0.2] * 384,
             document_id="doc_001",
             exam_type="USMLE",
-            metadata={"page": 2}
+            metadata={"page": 2},
         ),
         MedicalChunk(
             id=str(uuid4()),
@@ -769,7 +769,7 @@ def sample_chunks_with_embeddings():
             embedding=[0.3] * 384,
             document_id="doc_002",
             exam_type="COMLEX",
-            metadata={"page": 1}
+            metadata={"page": 1},
         ),
         MedicalChunk(
             id=str(uuid4()),
@@ -777,7 +777,7 @@ def sample_chunks_with_embeddings():
             embedding=[0.4] * 384,
             document_id="doc_003",
             exam_type="USMLE",
-            metadata={"page": 1}
+            metadata={"page": 1},
         ),
         MedicalChunk(
             id=str(uuid4()),
@@ -785,6 +785,6 @@ def sample_chunks_with_embeddings():
             embedding=[0.5] * 384,
             document_id="doc_001",
             exam_type="USMLE",
-            metadata={"page": 5}
+            metadata={"page": 5},
         ),
     ]
